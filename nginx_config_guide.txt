@@ -1,0 +1,19 @@
+# Nginx Configuration for Large Uploads
+
+Since you are using Nginx, `.htaccess` files are not supported. Use the following settings in your Nginx server block:
+
+1. Open your Nginx configuration (usually in Laragon/etc/nginx/sites-enabled/).
+2. Add or update these lines inside the 'server' block:
+
+   client_max_body_size 2048M;
+   fastcgi_read_timeout 7200;
+   proxy_read_timeout 7200;
+
+3. Ensure .user.ini exists in your project root (it already does) with these values:
+   upload_max_filesize = 2048M
+   post_max_size = 2048M
+   max_execution_time = 7200
+   max_input_time = 7200
+   memory_limit = 2048M
+
+4. Restart Nginx via Laragon.
