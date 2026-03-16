@@ -106,10 +106,45 @@ class Auth
         }
     }
 
-
-
     /**
-     * Cari istifadəçini qaytarır (Sinxronizasiya yoxlanışı ilə)
+     * Log a student in using pre-validated profile data from the TMIS SSO API.
+     * Called by sso.php after token verification.
+     */
+    public function loginViaSso(array $profileData): array
+    {
+        try {
+            $email = $profileData['ndu_mail'] ?? $profileData['email'] ?? '';
+
+            if (empty($email)) {
+                return ['success' => false, 'message' => 'SSO profili natamamdır: Email tapılmadı.'];
+            }
+
+            $userId = $profileData['id'] ?? (time() % 100000);
+
+            $localUser = [
+                'id'          => $userId,
+                'first_name'  => $profileData['first_name'] ?? '',
+                'last_name'   => $profileData['last_name']  ?? '',
+                'father_name' => $profileData['father_name'] ?? '',
+                'email'       => $email,
+                'role'        => 'student',
+                'faculty'     => $profileData['faculty']     ?? '',
+                'department'  => $profileData['department']  ?? '',
+                'specialty'   => $profileData['specialty']   ?? '',
+                'group'       => $profileData['group']       ?? '',
+                'course_year' => $profileData['course_year'] ?? '',
+                'avatar_url'  => $profileData['avatar_url']  ?? '',
+            ];
+
+            $this->createSession($localUser, ['id' => $userId], null, null);
+            $this->syncToLocalDb($localUser);
+
+            return ['success' => true, 'user' => $localUser];
+        } catch (\Exception $e) {
+            error_log('SSO Login xətası: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'SSO girişində sistem xətası baş verdi.'];
+        }
+    }
      */
     public function getCurrentUser(): ?array
     {
@@ -150,6 +185,14 @@ class Auth
 
     private function createSession(array $user, ?array $tmisData = null, ?string $username = null, ?string $password = null): void
     {
+        // If session was destroyed (e.g. by logout() inside isLoggedIn()),
+        // start a new one so the data is actually persisted after redirect.
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_name('DISTANT_STUDENT_SESSION');
+            session_start();
+        }
+        session_regenerate_id(true);
+
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['user_name'] = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '') . ' ' . ($user['father_name'] ?? ''));

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Distant Təhsil - Tələbə Giriş Səhifəsi (Ssenari 2)
  * 
@@ -11,9 +12,20 @@ require_once 'includes/helpers.php';
 
 $auth = new Auth();
 
-// Artıq daxil olubsa, dashboard-a yönləndir
+// Already logged in on Distant — go straight to dashboard.
 if ($auth->isLoggedIn()) {
     header('Location: ./');
+    exit;
+}
+
+// --- Auto-login via TMIS SSO ---
+// If no ?sso / ?error flag, redirect to TMIS student auto-login endpoint.
+// TMIS will generate a token and bounce back via sso.php (if already logged in
+// to TMIS), or show the TMIS login page first.
+$skipSso = isset($_GET['sso']) || isset($_GET['error']) || isset($_GET['no_sso']) || isset($_GET['expired']);
+if (!$skipSso) {
+    $tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
+    header('Location: ' . $tmisUrl . '/student/sso/auto');
     exit;
 }
 
@@ -434,7 +446,7 @@ if (isset($_GET['expired'])) {
         lucide.createIcons();
 
         // Form submit zamanı loading göstər
-        document.getElementById('loginForm').addEventListener('submit', function () {
+        document.getElementById('loginForm').addEventListener('submit', function() {
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"></circle><path d="M4 12a8 8 0 0 1 8-8"></path></svg> Yoxlanılır...';
