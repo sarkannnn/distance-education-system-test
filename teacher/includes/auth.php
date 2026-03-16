@@ -134,6 +134,55 @@ class Auth
     }
 
     /**
+     * Bridge token vasitəsilə giriş (bridge.php tərəfindən çağırılır).
+     * Token TMİS-in /api/sso/verify endpoint-i ilə doğrulanır.
+     */
+    public function loginViaBridge(string $token): array
+    {
+        $apiSecret = getenv('SSO_API_SECRET');
+        if (!$apiSecret) {
+            error_log('Bridge xətası: SSO_API_SECRET tapılmadı.');
+            return ['success' => false, 'message' => 'SSO konfiqurasiya xətası.'];
+        }
+
+        $thmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://thmis.ndu.edu.az', '/');
+        $url = $thmisUrl . '/api/sso/verify?token=' . urlencode($token);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => [
+                'X-SSO-Secret: ' . $apiSecret,
+                'Accept: application/json',
+            ],
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_TIMEOUT        => 15,
+        ]);
+
+        $response  = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlError) {
+            error_log('Bridge cURL xətası: ' . $curlError);
+            return ['success' => false, 'message' => 'Server əlaqə xətası.'];
+        }
+
+        $data = json_decode($response, true);
+
+        if ($httpCode === 200 && is_array($data) && !isset($data['error'])) {
+            $profileData = $data['user'] ?? $data['data'] ?? $data;
+            return $this->loginViaSso($profileData);
+        }
+
+        $errMsg = $data['error'] ?? $data['message'] ?? 'Etibarsız bridge tokeni.';
+        error_log("Bridge API xətası ({$httpCode}): {$errMsg}");
+        return ['success' => false, 'message' => $errMsg];
+    }
+
+    /**
      * TMİS-dən gələn məlumatları lokal baza ilə sinxronizasiya edir
      */
     private function syncUserWithDb(array $data): ?int

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Distant Təhsil - Müəllim SSO Handle
  */
@@ -27,10 +28,10 @@ if (!$apiSecret) {
     exit;
 }
 
-// THMIS API-yə müraciət edirik
+// TMIS API-yə müraciət edirik
 $ch = curl_init();
-$thmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
-$url = $thmisUrl . "/api/sso/verify?token=" . urlencode($ssoToken);
+$tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
+$url = $tmisUrl . "/api/sso/verify?token=" . urlencode($ssoToken);
 
 curl_setopt_array($ch, [
     CURLOPT_URL => $url,
@@ -69,20 +70,17 @@ if ($httpCode === 200 && isset($responseData) && (isset($responseData['success']
         // Dashboard-a yönləndir
         header('Location: ./');
         exit;
-    }
-    else {
+    } else {
         error_log("SSO Local Auth Xətası: " . $result['message']);
         header('Location: login.php?error=sso_local&msg=' . urlencode($result['message']));
         exit;
     }
-}
-else if ($httpCode === 401 || $httpCode === 422) {
+} else if ($httpCode === 401 || $httpCode === 422) {
     $errorMsg = $responseData['message'] ?? 'Etibarsız və ya istifadə müddəti bitmiş SSO tokeni.';
     error_log("SSO API Xətası ({$httpCode}): " . $errorMsg);
     header('Location: login.php?error=sso_invalid');
     exit;
-}
-else {
+} else {
     // Digər HTTP xətaları (500 vb.)
     error_log("SSO API Məlum Olmayan Xəta: HTTP {$httpCode} - " . $response);
     header('Location: login.php?error=sso_error');
