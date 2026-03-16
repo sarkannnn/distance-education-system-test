@@ -89,18 +89,18 @@ class Auth
             $studentId = (string) ($user['id'] ?? '');
             $existing = $db->fetch("SELECT id FROM users WHERE student_id = ?", [$studentId]);
 
-            if ($existing) {
-                $db->query(
-                    "UPDATE users SET first_name = ?, last_name = ?, email = ?, role = 'student', updated_at = NOW() WHERE student_id = ?",
-                    [$user['first_name'], $user['last_name'], $user['email'], $studentId]
-                );
-            } else {
-                $db->query(
-                    "INSERT INTO users (student_id, first_name, last_name, email, role, is_active, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, 'student', 1, NOW(), NOW())",
-                    [$studentId, $user['first_name'], $user['last_name'], $user['email']]
-                );
-            }
+            // if ($existing) {
+            //     $db->query(
+            //         "UPDATE users SET first_name = ?, last_name = ?, email = ?, role = 'student', updated_at = NOW() WHERE student_id = ?",
+            //         [$user['first_name'], $user['last_name'], $user['email'], $studentId]
+            //     );
+            // } else {
+            //     $db->query(
+            //         "INSERT INTO users (student_id, first_name, last_name, email, role, is_active, created_at, updated_at)
+            //          VALUES (?, ?, ?, ?, 'student', 1, NOW(), NOW())",
+            //         [$studentId, $user['first_name'], $user['last_name'], $user['email']]
+            //     );
+            // }
         } catch (Exception $e) {
             error_log("Auth Sync Error: " . $e->getMessage());
         }
