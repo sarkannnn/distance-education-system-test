@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->update(
                 'live_classes',
                 [
-                    'status' => 'ended',
+                    'status' => 'pending_approval',
                     'end_time' => date('Y-m-d H:i:s'),
                     'duration_minutes' => $duration
                 ],

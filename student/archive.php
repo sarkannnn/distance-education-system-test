@@ -140,7 +140,7 @@ try {
                 "SELECT lc.*, c.title as course_title_alt 
                  FROM live_classes lc
                  LEFT JOIN courses c ON lc.course_id = c.id
-                 WHERE lc.recording_path IS NOT NULL 
+                 WHERE lc.recording_path IS NOT NULL AND lc.is_approved = 1
                  AND (lc.course_id IN ($placeholders) OR lc.tmis_subject_id IN ($placeholders) OR ($findInSetSql))
                  ORDER BY lc.start_time DESC",
                 array_merge($allCourseIds, $allCourseIds, $allCourseIds)

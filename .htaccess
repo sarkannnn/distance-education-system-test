@@ -1,0 +1,17 @@
+# Increase PHP upload limits for the entire project
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 2048M
+    php_value post_max_size 2048M
+    php_value max_execution_time 7200
+    php_value max_input_time 7200
+    php_value memory_limit 2048M
+</IfModule>
+<IfModule mod_php.c>
+    php_value upload_max_filesize 2048M
+    php_value post_max_size 2048M
+    php_value max_execution_time 7200
+    php_value max_input_time 7200
+    php_value memory_limit 2048M
+</IfModule>
+
+# If using Nginx or other servers, these values might need to be set in php.ini

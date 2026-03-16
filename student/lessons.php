@@ -40,7 +40,7 @@ if ($tmisSubjects && is_array($tmisSubjects)) {
                 SUM(CASE WHEN lesson_type = 'laboratory' THEN 1 ELSE 0 END) as laboratory_done
              FROM live_classes 
              WHERE (course_id = ? OR tmis_subject_id = ? OR FIND_IN_SET(?, stream_course_ids)) 
-             AND status IN ('ended', 'completed')",
+             AND status IN ('ended', 'completed') AND is_approved = 1",
             [$cTmisId, $cTmisId, $cTmisId]
         );
         $totalDone = (int) ($onlineDone['cnt'] ?? 0);
