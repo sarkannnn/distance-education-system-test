@@ -274,6 +274,22 @@ if ($activeLesson) {
     }
 }
 
+// Təsdiq gözləyən dərsləri gətir
+$pendingApprovalClasses = [];
+if ($instructor) {
+    try {
+        $pendingApprovalClasses = $db->fetchAll(
+            "SELECT lc.*, c.title as course_title 
+             FROM live_classes lc 
+             LEFT JOIN courses c ON lc.course_id = c.id 
+             WHERE lc.instructor_id = ? AND lc.status = 'pending_approval'
+             ORDER BY lc.end_time DESC",
+            [$instructor['id']]
+        );
+    } catch (Exception $e) {
+    }
+}
+
 // Statistikalar və İştirak Məlumatları
 $participationStats = [
     'avg' => 0,
@@ -552,6 +568,54 @@ require_once 'includes/header.php';
 
             </div>
 
+            <?php if (!empty($pendingApprovalClasses)): ?>
+                <!-- Pending Approval Classes -->
+                <div class="card" style="border-left: 4px solid var(--warning); background: #fffcf0;">
+                    <div class="card-header">
+                        <i data-lucide="clock" style="color: var(--warning);"></i>
+                        <h2 style="color: #854d0e;">Təsdiq Gözləyən Dərslər</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <p style="font-size: 14px; color: #a16207; margin-bottom: 20px;">
+                            Aşağıdakı dərslər bitirilib, lakin hələ ki, tələbələrə görünmür. Tələbələrin izləyə bilməsi üçün dərsi təsdiqləyin.
+                        </p>
+                        <div class="grid-2 gap-4">
+                            <?php foreach ($pendingApprovalClasses as $pc): ?>
+                                <div class="p-4 rounded-xl border border-warning/30 bg-white shadow-sm" id="pending-class-<?php echo $pc['id']; ?>">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 style="font-weight: 700; color: var(--primary-dark);"><?php echo e($pc['title']); ?></h3>
+                                            <p style="font-size: 13px; color: var(--text-muted);"><?php echo e($pc['course_title']); ?></p>
+                                        </div>
+                                        <span class="badge badge-warning" style="font-size: 11px;">PENDING</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--text-dark); margin-bottom: 16px;">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="calendar" style="width: 14px; height: 14px; opacity: 0.6;"></i>
+                                            <span><?php echo date('d.m.Y H:i', strtotime($pc['start_time'])); ?></span>
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <i data-lucide="clock" style="width: 14px; height: 14px; opacity: 0.6;"></i>
+                                            <span>Müddət: <?php echo $pc['duration_minutes']; ?> dəqiqə</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="approveClass(<?php echo $pc['id']; ?>, 'approve')" class="btn btn-success btn-sm flex-1" style="height: 36px; border-radius: 8px;">
+                                            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                                            Təsdiqlə
+                                        </button>
+                                        <button onclick="approveClass(<?php echo $pc['id']; ?>, 'reject')" class="btn btn-outline-danger btn-sm" style="height: 36px; border-radius: 8px; border: 1px solid #fee2e2; color: #dc2626;">
+                                            <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i>
+                                            Gizlə
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="grid-3">
                 <!-- Left Content (2 columns) -->
                 <div class="col-span-2 space-y-6">
@@ -795,6 +859,54 @@ require_once 'includes/header.php';
             if (typeof closeStartLiveModal === 'function') closeStartLiveModal();
         }
     });
+
+    async function approveClass(classId, action) {
+        if (!confirm(action === 'approve' ? 'Bu dərsi təsdiqləyib tələbələrə göstərmək istəyirsiniz?' : 'Bu dərsi gizlətmək istəyirsiniz?')) {
+            return;
+        }
+
+        const btn = event.currentTarget;
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader" class="animate-spin" style="width: 16px; height: 16px;"></i>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        try {
+            const formData = new FormData();
+            formData.append('live_class_id', classId);
+            formData.append('action', action);
+
+            const response = await fetch('api/approve_class.php', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                const card = document.getElementById('pending-class-' + classId);
+                card.style.opacity = '0.5';
+                card.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    card.remove();
+                    // If no more pending classes, hide the section (optional)
+                    if (document.querySelectorAll('[id^="pending-class-"]').length === 0) {
+                        location.reload(); // Simplest way to refresh layout
+                    }
+                }, 500);
+            } else {
+                alert('Xəta: ' + result.message);
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Approval error:', error);
+            alert('Sistem xətası baş verdi.');
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }
 </script>
 
 <?php require_once 'includes/modal_start_live.php'; ?>

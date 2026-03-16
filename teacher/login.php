@@ -25,13 +25,25 @@ if ($auth->isLoggedIn()) {
 //   - show the TMIS login page and redirect back afterwards (if not logged in)
 // We add ?sso=0 on the redirect-back URL so we don't loop if TMIS has no session.
 $skipSso = isset($_GET['sso']) || isset($_GET['error']) || isset($_GET['no_sso']);
+
+// Lokal mühitdə avtomatik TMİS SSO yönləndirməsini deaktiv edirik (çünki TMİS canlı sayta qaytarır)
+$host = $_SERVER['HTTP_HOST'] ?? '';
+$isLocal = preg_match('/\.test$|\.local$|^localhost(:\d+)?$|^127\.0\.0\.1(:\d+)?$/', $host);
+if (getenv('SSO_AUTO_LOGIN') === 'false' || $isLocal) {
+    $skipSso = true;
+}
+
 if (!$skipSso) {
     $tmisUrl    = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
     $distantUrl = rtrim(getenv('DISTANT_URL') ?: 'https://distant.ndu.edu.az', '/');
+    
+    // Yönləndirmə üçün ehtimal olunan callback URL (əgər TMİS dəstəkləyirsə)
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $currentHostUrl = $protocol . '://' . $host;
+    $callbackUrl = $currentHostUrl . '/teacher/sso.php';
+    
     // After TMIS auto-generates a token it redirects to sso.php.
-    // If the TMIS session doesn't exist the user logs in at TMIS and
-    // is then bounced to /teacher/sso/auto, which sends them here via sso.php.
-    header('Location: ' . $tmisUrl . '/teacher/sso/auto');
+    header('Location: ' . $tmisUrl . '/teacher/sso/auto?redirect_uri=' . urlencode($callbackUrl) . '&return_url=' . urlencode($callbackUrl));
     exit;
 }
 // If auto-login was attempted and failed (or skipped), fall through to the

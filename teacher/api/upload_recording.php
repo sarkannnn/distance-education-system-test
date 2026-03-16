@@ -168,7 +168,7 @@ if ($noVideo || !$videoFile || $videoFile['error'] !== UPLOAD_ERR_OK) {
         file_put_contents($logFile, $logData, FILE_APPEND);
     } else {
         // Heç bir video yoxdur — sadəcə dərsi bitir
-        $db->query("UPDATE live_classes SET status = 'ended', end_time = NOW(), duration_minutes = ? WHERE id = ?", [$msgDuration, $lessonId]);
+        $db->query("UPDATE live_classes SET status = 'pending_approval', end_time = NOW(), duration_minutes = ? WHERE id = ?", [$msgDuration, $lessonId]);
         $db->query("UPDATE schedule SET status = 'completed' WHERE live_class_id = ?", [$lessonId]);
 
         $logData = date('Y-m-d H:i:s') . " - Success: Lesson " . $lessonId . " ended without video.\n";
@@ -223,7 +223,7 @@ if ($fileSaved) {
     $videoLink = '../../uploads/videos/' . $fileName;
 
     try {
-        $db->query("UPDATE live_classes SET recording_path = ?, status = 'ended', end_time = NOW(), duration_minutes = ? WHERE id = ?", [$fileName, $msgDuration, $lessonId]);
+        $db->query("UPDATE live_classes SET recording_path = ?, status = 'pending_approval', end_time = NOW(), duration_minutes = ? WHERE id = ?", [$fileName, $msgDuration, $lessonId]);
         $db->query("UPDATE schedule SET status = 'completed' WHERE live_class_id = ?", [$lessonId]);
 
         $logData = date('Y-m-d H:i:s') . " - Local Success: Lesson " . $lessonId . " saved and DB updated. Proceeding to background TMIS upload.\n";

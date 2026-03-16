@@ -426,13 +426,21 @@ require_once 'includes/header.php';
         .mobile-toggle-btn.active {
             background: #3b82f6;
             border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
         }
 
         .studio-main-grid {
             grid-template-columns: 1fr;
             grid-template-rows: 1fr;
+            height: calc(100vh - 65px); /* Header height fallback */
             overflow: hidden;
             position: relative;
+        }
+
+        @supports (height: 100dvh) {
+            .studio-main-grid {
+                height: calc(100dvh - 65px);
+            }
         }
 
         .sidebar-left,
@@ -555,18 +563,22 @@ require_once 'includes/header.php';
         }
 
         .studio-center>div:last-child {
-            height: 80px !important;
-            padding: 0 10px !important;
-            gap: 15px !important;
+            height: 85px !important;
+            padding: 0 15px !important;
+            gap: 12px !important;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .studio-center>div:last-child span {
-            font-size: 8px !important;
+            font-size: 9px !important;
+            letter-spacing: 0.5px;
         }
 
-        /* Hide the divider line in controls */
+        /* Hide the divider line in controls on mobile to save space */
         .studio-center>div:last-child>div[style*="width: 1px"] {
-            display: none;
+            display: none !important;
         }
     }
 
@@ -580,8 +592,8 @@ require_once 'includes/header.php';
         }
 
         .control-btn {
-            width: 38px !important;
-            height: 38px !important;
+            width: 44px !important;
+            height: 44px !important;
         }
 
         /* Even more compact toggle and action buttons on small phones */

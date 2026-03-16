@@ -95,21 +95,37 @@ try {
 
     // TMIS nəticələri ilə birləşdir, dublikatları yoxla
     $existingIds = array_column($liveClasses, 'id');
+    
+    // Dublikatları (köhnə amma hələ də 'live' qalan dərsləri) təmizləmək üçün course_id üzrə qruplaşdırma
+    $courseMap = [];
+    foreach ($liveClasses as $lc) {
+        $courseMap[$lc['course']] = $lc;
+    }
+
     foreach ($dbLive as $row) {
         if (!in_array($row['id'], $existingIds)) {
-            $liveClasses[] = [
-                'id' => $row['id'],
-                'title' => $row['title'],
-                'course' => $row['subject_name'] ?: 'Fənn',
-                'instructor' => trim($row['instructor_name'] ?? 'Müəllim'),
-                'startTime' => date('H:i', strtotime($row['start_time'])),
-                'duration' => ($row['duration_minutes'] ?: 90) . ' dəqiqə',
-                'participants' => 0,
-                'maxParticipants' => $row['max_participants'] ?? 100,
-                'status' => $row['status']
-            ];
+            $courseName = $row['subject_name'] ?: 'Fənn';
+            
+            // Əgər eyni fənn üçün artıq bir canlı dərs varsa və bu dərs daha yenidirsə, onu göstər
+            if (!isset($courseMap[$courseName]) || strtotime($row['start_time']) > (isset($courseMap[$courseName]['raw_start']) ? strtotime($courseMap[$courseName]['raw_start']) : 0)) {
+                $courseMap[$courseName] = [
+                    'id' => $row['id'],
+                    'title' => $row['title'],
+                    'course' => $courseName,
+                    'instructor' => trim($row['instructor_name'] ?? 'Müəllim'),
+                    'startTime' => date('H:i', strtotime($row['start_time'])),
+                    'raw_start' => $row['start_time'], // Müqayisə üçün
+                    'duration' => ($row['duration_minutes'] ?: 90) . ' dəqiqə',
+                    'participants' => 0,
+                    'maxParticipants' => $row['max_participants'] ?? 100,
+                    'status' => $row['status']
+                ];
+            }
         }
     }
+    
+    // Yenidən siyahıya çevir
+    $liveClasses = array_values($courseMap);
 } catch (Exception $e) {
     // Fail silently
 }
