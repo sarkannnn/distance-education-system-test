@@ -1,6 +1,5 @@
-# Database configs (Protect sensitive credentials)
-student/config/database.php
-teacher/config/database.php
+# Environment files
+.env
 
 # Uploaded content
 uploads/*
