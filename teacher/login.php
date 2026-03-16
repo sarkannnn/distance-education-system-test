@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Distant Təhsil - Müəllim Giriş Səhifəsi (Ssenari 2)
  * 
@@ -11,11 +12,30 @@ require_once 'includes/helpers.php';
 
 $auth = new Auth();
 
-// Artıq daxil olubsa, dashboard-a yönləndir
+// Already logged in on Distant — go straight to dashboard.
 if ($auth->isLoggedIn()) {
     header('Location: ./');
     exit;
 }
+
+// --- Auto-login via TMIS SSO ---
+// If the teacher didn't explicitly skip SSO (no ?sso=0 or error param),
+// redirect them to TMIS's auto-login endpoint. TMIS will:
+//   - generate a token and redirect back here via sso.php  (if logged in)
+//   - show the TMIS login page and redirect back afterwards (if not logged in)
+// We add ?sso=0 on the redirect-back URL so we don't loop if TMIS has no session.
+$skipSso = isset($_GET['sso']) || isset($_GET['error']) || isset($_GET['no_sso']);
+if (!$skipSso) {
+    $tmisUrl    = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
+    $distantUrl = rtrim(getenv('DISTANT_URL') ?: 'https://distant.ndu.edu.az', '/');
+    // After TMIS auto-generates a token it redirects to sso.php.
+    // If the TMIS session doesn't exist the user logs in at TMIS and
+    // is then bounced to /teacher/sso/auto, which sends them here via sso.php.
+    header('Location: ' . $tmisUrl . '/teacher/sso/auto');
+    exit;
+}
+// If auto-login was attempted and failed (or skipped), fall through to the
+// normal username/password form below.
 
 $error = '';
 
@@ -441,7 +461,7 @@ if (isset($_GET['error'])) {
         lucide.createIcons();
 
         // Form submit zamanı loading göstər
-        document.getElementById('loginForm').addEventListener('submit', function () {
+        document.getElementById('loginForm').addEventListener('submit', function() {
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"></circle><path d="M4 12a8 8 0 0 1 8-8"></path></svg> Yoxlanılır...';
