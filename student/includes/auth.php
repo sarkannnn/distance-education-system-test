@@ -135,7 +135,11 @@ class Auth
                 'avatar_url'  => $profileData['avatar_url']  ?? '',
             ];
 
-            $this->createSession($localUser, ['id' => $userId], null, null);
+            $this->createSession($localUser, [
+                'id'           => $userId,
+                'access_token' => $profileData['access_token'] ?? '',
+                'expires_in'   => $profileData['expires_in'] ?? 3600,
+            ], null, null);
             $this->syncToLocalDb($localUser);
 
             return ['success' => true, 'user' => $localUser];

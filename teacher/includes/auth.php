@@ -118,8 +118,11 @@ class Auth
                 $userData['id'] = $profileData['identifier'] ?? (time() % 100000);
             }
 
-            // TMİS datası olaraq boş bir massiv göndəririk, sso olduğu üçün bəzi tmis token məlumatlarına ehtiyac qalmır
-            $this->createSession($userData, ['id' => $userData['tmis_id']], null, null);
+            $this->createSession($userData, [
+                'id'           => $userData['tmis_id'],
+                'access_token' => $profileData['access_token'] ?? '',
+                'expires_in'   => $profileData['expires_in'] ?? 3600,
+            ], null, null);
 
             return ['success' => true, 'user' => $userData];
         } catch (\Exception $e) {
