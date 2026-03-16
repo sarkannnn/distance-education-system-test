@@ -7,19 +7,27 @@ require_once 'includes/auth.php';
 
 $auth = new Auth();
 
-// Əgər avtomatik olaraq daxil olmuş şəxs varsa və dashboarda yönləndirmək lazımdırsa
-if ($auth->isLoggedIn()) {
-    header('Location: ./');
-    exit;
-}
-
 $ssoToken = $_GET['token'] ?? $_GET['sso_token'] ?? '';
 
+// No SSO token — normal session check
 if (empty($ssoToken)) {
-    // Token yoxdursa standart login səhifəsinə göndər
+    if ($auth->isLoggedIn()) {
+        header('Location: ./');
+        exit;
+    }
     header('Location: login.php');
     exit;
 }
+
+// SSO token present — always process it fresh.
+// Log out any existing session so stale data cannot cause a redirect loop.
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_unset();
+    session_destroy();
+}
+session_name('DISTANT_TEACHER_SESSION');
+session_start();
+session_regenerate_id(true);
 
 $apiSecret = getenv('SSO_API_SECRET');
 if (!$apiSecret) {

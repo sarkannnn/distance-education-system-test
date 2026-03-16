@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Distant Təhsil - Müəllim Autentifikasiya Sistemi
  */
@@ -12,9 +13,7 @@ require_once __DIR__ . '/tmis_api.php';
 
 class Auth
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function loginViaTmis(string $username, string $password): array
     {
@@ -30,8 +29,7 @@ class Auth
         $profileData = [];
         if (isset($tmisData['user'])) {
             $profileData = $tmisData;
-        }
-        else {
+        } else {
             $profileResult = TmisApi::me($tmisData['access_token']);
             $profileData = $profileResult['success'] ? $profileResult['data'] : [];
         }
@@ -69,8 +67,7 @@ class Auth
 
         if ($localUserId) {
             $userData['id'] = $localUserId;
-        }
-        else {
+        } else {
             $userData['id'] = $tmisData['id'] ?? (time() % 100000);
         }
 
@@ -117,8 +114,7 @@ class Auth
 
             if ($localUserId) {
                 $userData['id'] = $localUserId;
-            }
-            else {
+            } else {
                 $userData['id'] = $profileData['identifier'] ?? (time() % 100000);
             }
 
@@ -126,8 +122,7 @@ class Auth
             $this->createSession($userData, ['id' => $userData['tmis_id']], null, null);
 
             return ['success' => true, 'user' => $userData];
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             error_log('SSO Login xətası: ' . $e->getMessage());
             return ['success' => false, 'message' => 'SSO girişində sistem xətası baş verdi.'];
         }
@@ -145,8 +140,8 @@ class Auth
             return ['success' => false, 'message' => 'SSO konfiqurasiya xətası.'];
         }
 
-        $thmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://thmis.ndu.edu.az', '/');
-        $url = $thmisUrl . '/api/sso/verify?token=' . urlencode($token);
+        $tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
+        $url = $tmisUrl . '/api/sso/verify?token=' . urlencode($token);
 
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -217,11 +212,10 @@ class Auth
                 // Database class-ındakı update metodunda mixing parameter problemi ola bilər, direct query istifadə edək
                 $db->query(
                     "UPDATE users SET first_name = ?, last_name = ?, role = ?, is_active = ?, updated_at = ? WHERE id = ?",
-                [$userFields['first_name'], $userFields['last_name'], $userFields['role'], $userFields['is_active'], $userFields['updated_at'], $existingUser['id']]
+                    [$userFields['first_name'], $userFields['last_name'], $userFields['role'], $userFields['is_active'], $userFields['updated_at'], $existingUser['id']]
                 );
                 $localUserId = $existingUser['id'];
-            }
-            else {
+            } else {
                 $log("Yeni istifadəçi yaradılır...");
                 $userFields['created_at'] = date('Y-m-d H:i:s');
                 $userFields['password'] = password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT);
@@ -240,7 +234,7 @@ class Auth
             // 2. Instructors cədvəli
             $existingInstructor = $db->fetch(
                 "SELECT id FROM instructors WHERE user_id = ? OR email = ?",
-            [$localUserId, $data['email']]
+                [$localUserId, $data['email']]
             );
 
             $instructorFields = [
@@ -259,20 +253,19 @@ class Auth
                 $log("Mövcud müəllim qeydi tapıldı (ID: " . $existingInstructor['id'] . "). Yenilənir...");
                 $db->query(
                     "UPDATE instructors SET name = ?, email = ?, department = ?, title = ?, faculty = ?, specialty = ?, academic_title = ?, course_level = ? WHERE id = ?",
-                [
-                    $instructorFields['name'],
-                    $instructorFields['email'],
-                    $instructorFields['department'],
-                    $instructorFields['title'],
-                    $instructorFields['faculty'],
-                    $instructorFields['specialty'],
-                    $instructorFields['academic_title'],
-                    $instructorFields['course_level'],
-                    $existingInstructor['id']
-                ]
+                    [
+                        $instructorFields['name'],
+                        $instructorFields['email'],
+                        $instructorFields['department'],
+                        $instructorFields['title'],
+                        $instructorFields['faculty'],
+                        $instructorFields['specialty'],
+                        $instructorFields['academic_title'],
+                        $instructorFields['course_level'],
+                        $existingInstructor['id']
+                    ]
                 );
-            }
-            else {
+            } else {
                 $log("Yeni müəllim qeydi yaradılır...");
                 $db->insert('instructors', $instructorFields);
                 $log("Yeni müəllim qeydi yaradıldı.");
@@ -280,8 +273,7 @@ class Auth
 
             $log("Sinxronizasiya uğurla başa çatdı.");
             return (int)$localUserId;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $log("SİSTEM XƏTASI: " . $e->getMessage());
             error_log('Auth Sync Error: ' . $e->getMessage());
             return null;
@@ -312,6 +304,14 @@ class Auth
 
     private function createSession(array $user, ?array $tmisData = null, ?string $username = null, ?string $password = null): void
     {
+        // If session was destroyed (e.g. by logout() inside isLoggedIn()),
+        // start a new one so the data is actually persisted after redirect.
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_name('DISTANT_TEACHER_SESSION');
+            session_start();
+        }
+        session_regenerate_id(true);
+
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'] ?? '';
         $_SESSION['user_name'] = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
@@ -406,8 +406,7 @@ class Auth
 
             error_log('TMİS Teacher Silent Re-Login uğurlu: ' . $username);
             return true;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             error_log('TMİS Teacher Silent Re-Login xətası: ' . $e->getMessage());
             return false;
         }
