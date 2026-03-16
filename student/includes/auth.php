@@ -5,6 +5,15 @@
  */
 
 session_name('DISTANT_STUDENT_SESSION');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'secure'   => true,
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
+ini_set('session.use_strict_mode', 1);
+ini_set('session.use_only_cookies', 1);
 session_start();
 date_default_timezone_set('Asia/Baku');
 
@@ -193,6 +202,15 @@ class Auth
         // start a new one so the data is actually persisted after redirect.
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_name('DISTANT_STUDENT_SESSION');
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path'     => '/',
+                'secure'   => true,
+                'httponly' => true,
+                'samesite' => 'Strict',
+            ]);
+            ini_set('session.use_strict_mode', 1);
+            ini_set('session.use_only_cookies', 1);
             session_start();
         }
         session_regenerate_id(true);
@@ -223,9 +241,14 @@ class Auth
         if ($username)
             $_SESSION['tmis_username'] = $username;
         if ($password) {
-            $key = substr(md5('DISTANT_TMIS_KEY_2024'), 0, 16);
-            $iv = substr(md5('DISTANT_TMIS_IV_2024'), 0, 16);
-            $_SESSION['tmis_pwd_enc'] = base64_encode(openssl_encrypt($password, 'AES-128-CBC', $key, 0, $iv));
+            $appKey = getenv('APP_KEY') ?: '';
+            if (!empty($appKey)) {
+                $key = hash('sha256', $appKey, true); // 32-byte key
+                $iv  = random_bytes(16);
+                $enc = openssl_encrypt($password, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+                $_SESSION['tmis_pwd_enc'] = base64_encode($iv . $enc);
+            }
+            // If APP_KEY is not set, do not store the password in session (silent re-login disabled)
         }
     }
 
@@ -271,9 +294,15 @@ class Auth
         }
 
         try {
-            $key = substr(md5('DISTANT_TMIS_KEY_2024'), 0, 16);
-            $iv = substr(md5('DISTANT_TMIS_IV_2024'), 0, 16);
-            $password = openssl_decrypt(base64_decode($encPwd), 'AES-128-CBC', $key, 0, $iv);
+            $appKey = getenv('APP_KEY') ?: '';
+            if (empty($appKey)) {
+                return false;
+            }
+            $key    = hash('sha256', $appKey, true);
+            $raw    = base64_decode($encPwd);
+            $iv     = substr($raw, 0, 16);
+            $cipher = substr($raw, 16);
+            $password = openssl_decrypt($cipher, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
 
             if (!$password) {
                 return false;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WebRTC Live Recording Chunk Upload API (V3 - Fixed Auth)
  * Periodic flush zamanı recording parçalarını serverə yazır
@@ -30,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $uploadDir = '../../uploads/live_recordings/';
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+        mkdir($uploadDir, 0750, true);
     }
 
     $fileName = 'lesson_' . $lessonId . '.webm';

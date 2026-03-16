@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Verilənlər bazası konfiqurasiyası - Bərpa edilib
  */
@@ -25,10 +26,10 @@ if (file_exists($envFile)) {
     }
 }
 
-define('DB_HOST', getenv('DB_HOST') !== false ? getenv('DB_HOST') : 'localhost');
-define('DB_NAME', getenv('DB_NAME') !== false ? getenv('DB_NAME') : 'distant_tehsil');
-define('DB_USER', getenv('DB_USER') !== false ? getenv('DB_USER') : 'root');
-define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '12345678');
+define('DB_HOST',    getenv('DB_HOST')    !== false ? getenv('DB_HOST')    : 'localhost');
+define('DB_NAME',    getenv('DB_NAME')    !== false ? getenv('DB_NAME')    : '');
+define('DB_USER',    getenv('DB_USER')    !== false ? getenv('DB_USER')    : '');
+define('DB_PASS',    getenv('DB_PASS')    !== false ? getenv('DB_PASS')    : '');
 define('DB_CHARSET', getenv('DB_CHARSET') !== false ? getenv('DB_CHARSET') : 'utf8mb4');
 
 class Database
@@ -46,8 +47,7 @@ class Database
                 PDO::ATTR_EMULATE_PREPARES => false,
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET names utf8mb4, time_zone = '+04:00'"
             ]);
-        }
-        catch (PDOException $e) {
+        } catch (PDOException $e) {
             // Əgər baza qoşulmursa, sistemin dayanmaması üçün error_log-a yazırıq
             error_log("Baza qoşulma xətası: " . $e->getMessage());
         }

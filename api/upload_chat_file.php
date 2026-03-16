@@ -5,6 +5,21 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
+// Authentication check — must be logged in as student or instructor
+session_name('DISTANT_STUDENT_SESSION');
+session_start();
+if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    // Try teacher session
+    session_write_close();
+    session_name('DISTANT_TEACHER_SESSION');
+    session_start();
+    if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Giriş tələb olunur']);
+        exit;
+    }
+}
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST')
         throw new Exception("Yalnız POST.");
@@ -37,7 +52,7 @@ try {
     $targetDir = __DIR__ . "/../uploads/chat_files/";
 
     if (!file_exists($targetDir)) {
-        if (!mkdir($targetDir, 0777, true))
+        if (!mkdir($targetDir, 0750, true))
             throw new Exception("Qovluq yaradıla bilmədi.");
     }
 
@@ -64,8 +79,6 @@ try {
     } else {
         throw new Exception("Fayl köçürülə bilmədi.");
     }
-
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
-?>

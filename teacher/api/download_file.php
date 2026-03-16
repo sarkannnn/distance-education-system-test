@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Download Proxy - Arxiv fayllarını yükləmək üçün proxy
  * 
@@ -29,11 +30,13 @@ $host = $parsedUrl['host'] ?? '';
 $isLocal = false;
 if (strpos($url, 'http') !== 0) {
     // Nisbi yol - lokal fayldır
+    $webRoot = realpath(__DIR__ . '/../../');
     $localPath = realpath(__DIR__ . '/../' . ltrim($url, '/'));
     if (!$localPath) {
         $localPath = realpath(__DIR__ . '/../../' . ltrim($url, '/'));
     }
-    if ($localPath && file_exists($localPath)) {
+    // Yol traversal müdafiəsi: lokal yol web root-un xaricinə çıxa bilməz
+    if ($localPath && $webRoot && strpos($localPath, $webRoot) === 0 && file_exists($localPath)) {
         $isLocal = true;
     }
 }
@@ -71,7 +74,8 @@ $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
 if (!empty($tmisToken)) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, [

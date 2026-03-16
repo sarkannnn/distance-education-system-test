@@ -43,7 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($username) || empty($password)) {
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Sorğu yoxlanması uğursuz oldu. Səhifəni yenidən yükləyin.';
+    } elseif (empty($username) || empty($password)) {
         $error = 'İstifadəçi adı və şifrəni daxil edin';
     } else {
         $result = $auth->loginViaTmis($username, $password);
@@ -417,44 +419,38 @@ if (isset($_GET['error'])) {
             <?php endif; ?>
 
             <form class="login-form" method="POST" action="" id="loginForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
                 <div class="form-group">
-                    <label class="form-label" for="username">TMİS İstifadəçi adı</label>
-                    <div class="form-input-icon">
-                        <i data-lucide="user"></i>
-                        <input type="text" id="username" name="username" class="form-input"
-                            placeholder="TMİS istifadəçi adınızı daxil edin"
-                            value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
-                            required autocomplete="username">
-                    </div>
                 </div>
+        </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="password">TMİS Şifrə</label>
-                    <div class="form-input-icon">
-                        <i data-lucide="lock"></i>
-                        <input type="password" id="password" name="password" class="form-input"
-                            placeholder="TMİS şifrənizi daxil edin" required autocomplete="current-password">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary" id="loginBtn">
-                    <i data-lucide="log-in"></i>
-                    Daxil ol
-                </button>
-            </form>
-
-            <div class="login-footer">
-                <div class="divider">
-                    <span>Məlumat</span>
-                </div>
-                <p style="margin-top: 12px;">
-                    Bu sistemə giriş yalnız TMİS hesabı ilə mümkündür.<br>
-                    TMİS hesabınız yoxdursa,
-                    <a href="https://tmis.ndu.edu.az" target="_blank" class="tmis-link">TMİS platformasına</a>
-                    müraciət edin.
-                </p>
+        <div class="form-group">
+            <label class="form-label" for="password">TMİS Şifrə</label>
+            <div class="form-input-icon">
+                <i data-lucide="lock"></i>
+                <input type="password" id="password" name="password" class="form-input"
+                    placeholder="TMİS şifrənizi daxil edin" required autocomplete="current-password">
             </div>
         </div>
+
+        <button type="submit" class="btn-primary" id="loginBtn">
+            <i data-lucide="log-in"></i>
+            Daxil ol
+        </button>
+        </form>
+
+        <div class="login-footer">
+            <div class="divider">
+                <span>Məlumat</span>
+            </div>
+            <p style="margin-top: 12px;">
+                Bu sistemə giriş yalnız TMİS hesabı ilə mümkündür.<br>
+                TMİS hesabınız yoxdursa,
+                <a href="https://tmis.ndu.edu.az" target="_blank" class="tmis-link">TMİS platformasına</a>
+                müraciət edin.
+            </p>
+        </div>
+    </div>
     </div>
 
     <script>

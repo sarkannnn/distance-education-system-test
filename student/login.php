@@ -35,7 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($username) || empty($password)) {
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Sorğu yoxlanması uğursuz oldu. Səhifəni yenidən yükləyin.';
+    } elseif (empty($username) || empty($password)) {
         $error = 'İstifadəçi adı və şifrəni daxil edin';
     } else {
         $result = $auth->loginViaTmis($username, $password);
@@ -402,19 +404,8 @@ if (isset($_GET['expired'])) {
             <?php endif; ?>
 
             <form class="login-form" method="POST" action="" id="loginForm">
-                <div class="form-group">
-                    <label class="form-label" for="username">TMİS İstifadəçi adı</label>
-                    <div class="form-input-icon">
-                        <i data-lucide="user"></i>
-                        <input type="text" id="username" name="username" class="form-input"
-                            placeholder="TMİS istifadəçi adınızı daxil edin"
-                            value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
-                            required autocomplete="username">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="password">TMİS Şifrə</label>
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
+                <div class="form-group">frə</label>
                     <div class="form-input-icon">
                         <i data-lucide="lock"></i>
                         <input type="password" id="password" name="password" class="form-input"

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TMİS API Client
  * Distant Təhsil Sistemi - Tələbə Paneli üçün TMİS inteqrasiya modulu.
@@ -219,8 +220,8 @@ class TmisApi
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 
-        // SSL verification (Production-da TRUE olmalıdır)
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
@@ -295,7 +296,8 @@ function _tmis_request(string $method, string $endpoint, array $data = [], ?stri
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
     if ($method === 'POST') {
         curl_setopt($ch, CURLOPT_POST, true);

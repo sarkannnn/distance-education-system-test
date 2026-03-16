@@ -5,6 +5,15 @@
  */
 
 session_name('DISTANT_TEACHER_SESSION');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'secure'   => true,
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
+ini_set('session.use_strict_mode', 1);
+ini_set('session.use_only_cookies', 1);
 session_start();
 date_default_timezone_set('Asia/Baku');
 
@@ -37,8 +46,6 @@ class Auth
         // Məlumatları çıxar (Ssenari 2 API strukturuna uyğun)
         $p = $profileData['user'] ?? $profileData;
 
-        // DEBUG: TMİS mәlumatlarını loga yaz
-        file_put_contents(__DIR__ . '/../tmis_profile_debug.log', print_r($p, true));
 
         $fullName = $p['name'] ?? ($p['fullname'] ?? '');
         $email = $p['email'] ?? ($username . '@ndu.edu.az');
@@ -154,7 +161,8 @@ class Auth
                 'X-SSO-Secret: ' . $apiSecret,
                 'Accept: application/json',
             ],
-            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT        => 15,
         ]);
 
@@ -185,14 +193,9 @@ class Auth
      */
     private function syncUserWithDb(array $data): ?int
     {
-        $logFile = __DIR__ . '/../auth_debug.log';
-        $log = function ($msg) use ($logFile) {
-            file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] " . $msg . "\n", FILE_APPEND);
-        };
-
         try {
             $db = Database::getInstance();
-            $log("Sinxronizasiya başlayır: " . $data['email']);
+            error_log('Auth Sync: Sinxronizasiya başlayır: ' . $data['email']);
 
             // 1. Users cədvəli
             $existingUser = $db->fetch("SELECT id FROM users WHERE email = ?", [$data['email']]);
@@ -211,7 +214,7 @@ class Auth
             }
 
             if ($existingUser) {
-                $log("Mövcud istifadəçi tapıldı (ID: " . $existingUser['id'] . "). Yenilənir...");
+                error_log('Auth Sync: Mövcud istifadəçi tapıldı (ID: ' . $existingUser['id'] . '). Yenilənir...');
                 // Database class-ındakı update metodunda mixing parameter problemi ola bilər, direct query istifadə edək
                 $db->query(
                     "UPDATE users SET first_name = ?, last_name = ?, role = ?, is_active = ?, updated_at = ? WHERE id = ?",
@@ -219,18 +222,18 @@ class Auth
                 );
                 $localUserId = $existingUser['id'];
             } else {
-                $log("Yeni istifadəçi yaradılır...");
+                error_log('Auth Sync: Yeni istifadəçi yaradılır...');
                 $userFields['created_at'] = date('Y-m-d H:i:s');
                 $userFields['password'] = password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT);
                 // Bəzi bazalarda student_id vacib ola bilər (Null deyilse)
                 $userFields['student_id'] = 'INS-' . ($data['tmis_id'] ?? time());
 
                 $localUserId = $db->insert('users', $userFields);
-                $log("Yeni istifadəçi yaradıldı (ID: " . $localUserId . ")");
+                error_log('Auth Sync: Yeni istifadəçi yaradıldı (ID: ' . $localUserId . ')');
             }
 
             if (!$localUserId) {
-                $log("XƏTA: İstifadəçi ID-si alınmadı.");
+                error_log('Auth Sync: XƏTA: İstifadəçi ID-si alınmadı.');
                 return null;
             }
 
@@ -253,7 +256,7 @@ class Auth
             ];
 
             if ($existingInstructor) {
-                $log("Mövcud müəllim qeydi tapıldı (ID: " . $existingInstructor['id'] . "). Yenilənir...");
+                error_log('Auth Sync: Mövcud müəllim qeydi tapıldı (ID: ' . $existingInstructor['id'] . '). Yenilənir...');
                 $db->query(
                     "UPDATE instructors SET name = ?, email = ?, department = ?, title = ?, faculty = ?, specialty = ?, academic_title = ?, course_level = ? WHERE id = ?",
                     [
@@ -269,15 +272,14 @@ class Auth
                     ]
                 );
             } else {
-                $log("Yeni müəllim qeydi yaradılır...");
+                error_log('Auth Sync: Yeni müəllim qeydi yaradılır...');
                 $db->insert('instructors', $instructorFields);
-                $log("Yeni müəllim qeydi yaradıldı.");
+                error_log('Auth Sync: Yeni müəllim qeydi yaradıldı.');
             }
 
-            $log("Sinxronizasiya uğurla başa çatdı.");
+            error_log('Auth Sync: Sinxronizasiya uğurla başa çatdı.');
             return (int)$localUserId;
         } catch (\Exception $e) {
-            $log("SİSTEM XƏTASI: " . $e->getMessage());
             error_log('Auth Sync Error: ' . $e->getMessage());
             return null;
         }
@@ -310,6 +312,9 @@ class Auth
         // If session was destroyed (e.g. by logout() inside isLoggedIn()),
         // start a new one so the data is actually persisted after redirect.
         if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+            ini_set('session.use_strict_mode', 1);
+            ini_set('session.use_only_cookies', 1);
             session_name('DISTANT_TEACHER_SESSION');
             session_start();
         }
@@ -339,9 +344,13 @@ class Auth
         if ($username)
             $_SESSION['tmis_username'] = $username;
         if ($password) {
-            $key = substr(md5('DISTANT_TMIS_KEY_2024'), 0, 16);
-            $iv = substr(md5('DISTANT_TMIS_IV_2024'), 0, 16);
-            $_SESSION['tmis_pwd_enc'] = base64_encode(openssl_encrypt($password, 'AES-128-CBC', $key, 0, $iv));
+            $appKey = getenv('APP_KEY') ?: '';
+            if (!empty($appKey)) {
+                $key = hash('sha256', $appKey, true);
+                $iv  = random_bytes(16);
+                $enc = openssl_encrypt($password, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+                $_SESSION['tmis_pwd_enc'] = base64_encode($iv . $enc);
+            }
         }
     }
 
@@ -387,9 +396,15 @@ class Auth
         }
 
         try {
-            $key = substr(md5('DISTANT_TMIS_KEY_2024'), 0, 16);
-            $iv = substr(md5('DISTANT_TMIS_IV_2024'), 0, 16);
-            $password = openssl_decrypt(base64_decode($encPwd), 'AES-128-CBC', $key, 0, $iv);
+            $appKey = getenv('APP_KEY') ?: '';
+            if (empty($appKey)) {
+                return false;
+            }
+            $key    = hash('sha256', $appKey, true);
+            $raw    = base64_decode($encPwd);
+            $iv     = substr($raw, 0, 16);
+            $cipher = substr($raw, 16);
+            $password = openssl_decrypt($cipher, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
 
             if (!$password) {
                 return false;

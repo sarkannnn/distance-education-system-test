@@ -28,6 +28,15 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     session_destroy();
 }
 session_name('DISTANT_STUDENT_SESSION');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'secure'   => true,
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
+ini_set('session.use_strict_mode', 1);
+ini_set('session.use_only_cookies', 1);
 session_start();
 session_regenerate_id(true);
 
@@ -50,7 +59,8 @@ curl_setopt_array($ch, [
         "X-SSO-Secret: " . $apiSecret,
         "Accept: application/json",
     ],
-    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_SSL_VERIFYPEER => true,
+    CURLOPT_SSL_VERIFYHOST => 2,
     CURLOPT_TIMEOUT        => 15,
 ]);
 
