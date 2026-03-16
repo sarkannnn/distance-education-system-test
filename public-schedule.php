@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 🎓 NDU Distant Təhsil Sistemi - Publik Cədvəl & Arxiv (V2 UI)
  * Image-based exact recreation of the public-schedule layout.
@@ -24,7 +25,7 @@ $todayName = $weekdays[date('w')];
 $todayLessons = [];
 try {
     $todayLessons = $db->fetchAll(
-        "SELECT lc.id, lc.title as topic_name, lc.status, lc.start_time,
+        "SELECT DISTINCT  lc.id, lc.title as topic_name, lc.status, lc.start_time,
                 COALESCE(NULLIF(lc.subject_name, 'Fənn'), c.title, 'Fənn') as course_title, 
                 (CASE WHEN lc.is_stream = 1 AND lc.specialty_name IS NOT NULL AND lc.specialty_name != '' AND lc.specialty_name != 'Axın (çoxlu ixtisas)' THEN lc.specialty_name ELSE COALESCE(NULLIF(NULLIF(lc.specialty_name, ''), 'Axın (çoxlu ixtisas)'), i.specialty, i.department, 'Ümumi') END) as specialization_name,
                 COALESCE(NULLIF(lc.course_level, '-'), i.course_level, '-') as course_level_val,
@@ -48,7 +49,7 @@ $archivedLessons = [];
 try {
     // a. Canlı dərslərin yazıları
     $liveRecs = $db->fetchAll(
-        "SELECT lc.id, 
+        "SELECT DISTINCT lc.id, 
                 lc.title as topic_name, 
                 COALESCE(NULLIF(lc.subject_name, 'Fənn'), c.title, 'Fənn') as course_title, 
                 (CASE WHEN lc.is_stream = 1 AND lc.specialty_name IS NOT NULL AND lc.specialty_name != '' AND lc.specialty_name != 'Axın (çoxlu ixtisas)' THEN lc.specialty_name ELSE COALESCE(NULLIF(NULLIF(lc.specialty_name, ''), 'Axın (çoxlu ixtisas)'), i.specialty, i.department, 'Ümumi') END) as specialization_name,
@@ -988,7 +989,7 @@ try {
                             $isLive = ($lesson['status'] === 'live');
                             $startTime = date('H:i', strtotime($lesson['start_time']));
                             $endTime = date('H:i', strtotime($lesson['start_time'] . ' +90 minutes'));
-                            ?>
+                        ?>
                             <div class="lesson-card <?php echo $isLive ? 'live' : ''; ?>">
                                 <div class="card-header-wrapper">
                                     <h3 class="card-header-title">
