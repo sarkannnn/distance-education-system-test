@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Distant Təhsil - Tələbə Autentifikasiya Sistemi
  */
@@ -12,9 +13,7 @@ require_once __DIR__ . '/tmis_api.php';
 
 class Auth
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function loginViaTmis(string $username, string $password): array
     {
@@ -145,7 +144,7 @@ class Auth
             return ['success' => false, 'message' => 'SSO girişində sistem xətası baş verdi.'];
         }
     }
-     */
+
     public function getCurrentUser(): ?array
     {
         $user = $this->getUserData();
