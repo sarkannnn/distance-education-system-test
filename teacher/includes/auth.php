@@ -30,7 +30,8 @@ class Auth
         $profileData = [];
         if (isset($tmisData['user'])) {
             $profileData = $tmisData;
-        } else {
+        }
+        else {
             $profileResult = TmisApi::me($tmisData['access_token']);
             $profileData = $profileResult['success'] ? $profileResult['data'] : [];
         }
@@ -68,13 +69,68 @@ class Auth
 
         if ($localUserId) {
             $userData['id'] = $localUserId;
-        } else {
+        }
+        else {
             $userData['id'] = $tmisData['id'] ?? (time() % 100000);
         }
 
         $this->createSession($userData, $tmisData, $username, $password);
 
         return ['success' => true, 'user' => $userData];
+    }
+
+    public function loginViaSso(array $profileData): array
+    {
+        // Yüklənmiş JSON məlumatlarını sistemin obyekt strukturuna uyğunlaşdırırıq
+        // "identifier", "first_name", "last_name", "fullname", "email" vb.
+
+        try {
+            $fullName = $profileData['fullname'] ?? ($profileData['name'] ?? '');
+            $email = $profileData['ndu_mail'] ?? $profileData['email'] ?? '';
+
+            // Ad və soyad tam olaraq gəlməyibsə, onu tam addan ayırırıq
+            $nameParts = explode(' ', $fullName);
+            $firstName = $profileData['first_name'] ?? ($nameParts[1] ?? ($nameParts[0] ?? ''));
+            $lastName = $profileData['last_name'] ?? ($nameParts[0] ?? '');
+
+            if (empty($email)) {
+                // Əgər email yoxdursa, placeholder kimi identifier istifadə edək, və ya error ataq
+                return ['success' => false, 'message' => 'SSO profili natamamdır: Email tapılmadı.'];
+            }
+
+            $userData = [
+                'tmis_id' => $profileData['identifier'] ?? ($profileData['id'] ?? 0),
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'role' => 'instructor',
+                'faculty' => $profileData['faculty'] ?? ($profileData['faculty_name'] ?? ''),
+                'department' => $profileData['department'] ?? '',
+                'specialty' => $profileData['specialty'] ?? ($profileData['profession_name'] ?? ''),
+                'group' => $profileData['group'] ?? ($profileData['class_name'] ?? ''),
+                'avatar_url' => $profileData['avatar_url'] ?? ($profileData['avatar'] ?? ''),
+                'academic_title' => $profileData['academic_title'] ?? 'Müəllim'
+            ];
+
+            // Lokal baza ilə sinxronizasiya et
+            $localUserId = $this->syncUserWithDb($userData);
+
+            if ($localUserId) {
+                $userData['id'] = $localUserId;
+            }
+            else {
+                $userData['id'] = $profileData['identifier'] ?? (time() % 100000);
+            }
+
+            // TMİS datası olaraq boş bir massiv göndəririk, sso olduğu üçün bəzi tmis token məlumatlarına ehtiyac qalmır
+            $this->createSession($userData, ['id' => $userData['tmis_id']], null, null);
+
+            return ['success' => true, 'user' => $userData];
+        }
+        catch (\Exception $e) {
+            error_log('SSO Login xətası: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'SSO girişində sistem xətası baş verdi.'];
+        }
     }
 
     /**
@@ -112,10 +168,11 @@ class Auth
                 // Database class-ındakı update metodunda mixing parameter problemi ola bilər, direct query istifadə edək
                 $db->query(
                     "UPDATE users SET first_name = ?, last_name = ?, role = ?, is_active = ?, updated_at = ? WHERE id = ?",
-                    [$userFields['first_name'], $userFields['last_name'], $userFields['role'], $userFields['is_active'], $userFields['updated_at'], $existingUser['id']]
+                [$userFields['first_name'], $userFields['last_name'], $userFields['role'], $userFields['is_active'], $userFields['updated_at'], $existingUser['id']]
                 );
                 $localUserId = $existingUser['id'];
-            } else {
+            }
+            else {
                 $log("Yeni istifadəçi yaradılır...");
                 $userFields['created_at'] = date('Y-m-d H:i:s');
                 $userFields['password'] = password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT);
@@ -134,7 +191,7 @@ class Auth
             // 2. Instructors cədvəli
             $existingInstructor = $db->fetch(
                 "SELECT id FROM instructors WHERE user_id = ? OR email = ?",
-                [$localUserId, $data['email']]
+            [$localUserId, $data['email']]
             );
 
             $instructorFields = [
@@ -153,27 +210,29 @@ class Auth
                 $log("Mövcud müəllim qeydi tapıldı (ID: " . $existingInstructor['id'] . "). Yenilənir...");
                 $db->query(
                     "UPDATE instructors SET name = ?, email = ?, department = ?, title = ?, faculty = ?, specialty = ?, academic_title = ?, course_level = ? WHERE id = ?",
-                    [
-                        $instructorFields['name'],
-                        $instructorFields['email'],
-                        $instructorFields['department'],
-                        $instructorFields['title'],
-                        $instructorFields['faculty'],
-                        $instructorFields['specialty'],
-                        $instructorFields['academic_title'],
-                        $instructorFields['course_level'],
-                        $existingInstructor['id']
-                    ]
+                [
+                    $instructorFields['name'],
+                    $instructorFields['email'],
+                    $instructorFields['department'],
+                    $instructorFields['title'],
+                    $instructorFields['faculty'],
+                    $instructorFields['specialty'],
+                    $instructorFields['academic_title'],
+                    $instructorFields['course_level'],
+                    $existingInstructor['id']
+                ]
                 );
-            } else {
+            }
+            else {
                 $log("Yeni müəllim qeydi yaradılır...");
                 $db->insert('instructors', $instructorFields);
                 $log("Yeni müəllim qeydi yaradıldı.");
             }
 
             $log("Sinxronizasiya uğurla başa çatdı.");
-            return (int) $localUserId;
-        } catch (\Exception $e) {
+            return (int)$localUserId;
+        }
+        catch (\Exception $e) {
             $log("SİSTEM XƏTASI: " . $e->getMessage());
             error_log('Auth Sync Error: ' . $e->getMessage());
             return null;
@@ -298,7 +357,8 @@ class Auth
 
             error_log('TMİS Teacher Silent Re-Login uğurlu: ' . $username);
             return true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             error_log('TMİS Teacher Silent Re-Login xətası: ' . $e->getMessage());
             return false;
         }

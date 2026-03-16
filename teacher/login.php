@@ -49,6 +49,17 @@ if (isset($_GET['error'])) {
         case 'user_not_found':
             $error = 'İstifadəçi tapılmadı.';
             break;
+        case 'sso_config':
+        case 'sso_server':
+        case 'sso_error':
+            $error = 'SSO daxilolma sistemində texniki xəta baş verdi. Zəhmət olmasa biraz sonra yenidən cəhd edin.';
+            break;
+        case 'sso_invalid':
+            $error = 'Etibarsız və ya istifadə müddəti bitmiş SSO tokeni. Zəhmət olmasa yenidən daxil olmağa cəhd edin.';
+            break;
+        case 'sso_local':
+            $error = isset($_GET['msg']) ? htmlspecialchars($_GET['msg']) : 'SSO profili vasitəsilə daxil olmaq mümkün olmadı.';
+            break;
     }
 }
 ?>
