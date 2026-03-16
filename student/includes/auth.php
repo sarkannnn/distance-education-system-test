@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Distant Təhsil - Tələbə Autentifikasiya Sistemi
@@ -85,19 +85,20 @@ class Auth
     {
         try {
             $db = Database::getInstance();
-            $existing = $db->fetch("SELECT id FROM users WHERE id = ?", [$user['id']]);
+            // student_id holds the TMIS ID; local `id` is auto-increment
+            $studentId = (string) ($user['id'] ?? '');
+            $existing = $db->fetch("SELECT id FROM users WHERE student_id = ?", [$studentId]);
 
             if ($existing) {
                 $db->query(
-                    "UPDATE users SET first_name = ?, last_name = ?, father_name = ?, email = ?, role = 'student', updated_at = NOW() WHERE id = ?",
-                    [$user['first_name'], $user['last_name'], $user['father_name'] ?? '', $user['email'], $user['id']]
+                    "UPDATE users SET first_name = ?, last_name = ?, email = ?, role = 'student', updated_at = NOW() WHERE student_id = ?",
+                    [$user['first_name'], $user['last_name'], $user['email'], $studentId]
                 );
             } else {
-                // Şifrə hissəsi boş qalır, çünki TMİS ilə daxil olur
                 $db->query(
-                    "INSERT INTO users (id, first_name, last_name, father_name, email, role, is_active, created_at, updated_at) 
-                     VALUES (?, ?, ?, ?, ?, 'student', 1, NOW(), NOW())",
-                    [$user['id'], $user['first_name'], $user['last_name'], $user['father_name'] ?? '', $user['email']]
+                    "INSERT INTO users (student_id, first_name, last_name, email, role, is_active, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, 'student', 1, NOW(), NOW())",
+                    [$studentId, $user['first_name'], $user['last_name'], $user['email']]
                 );
             }
         } catch (Exception $e) {
