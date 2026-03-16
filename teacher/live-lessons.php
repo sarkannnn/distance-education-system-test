@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Teacher Live Lessons - Canlı Dərslər
  */
@@ -240,7 +241,6 @@ if (!$activeLesson && $instructor) {
         usort($upcomingLessons, function ($a, $b) {
             return strcmp($a['time'], $b['time']);
         });
-
     } catch (Exception $e) {
         // Fail silently
     }
@@ -262,7 +262,8 @@ if ($activeLesson) {
 $participants = [];
 if ($activeLesson) {
     try {
-        $participants = $db->fetchAll("SELECT u.first_name, u.last_name, lp.joined_at 
+        $participants = $db->fetchAll(
+            "SELECT u.first_name, u.last_name, lp.joined_at 
                                       FROM live_class_participants lp 
                                       JOIN users u ON lp.user_id = u.id 
                                       WHERE lp.live_class_id = ? 
@@ -442,7 +443,11 @@ require_once 'includes/header.php';
                     -webkit-overflow-scrolling: touch;
                     scrollbar-width: none;
                 }
-                .nav-tabs::-webkit-scrollbar { display: none; }
+
+                .nav-tabs::-webkit-scrollbar {
+                    display: none;
+                }
+
                 .nav-tab {
                     white-space: nowrap;
                 }
@@ -535,7 +540,7 @@ require_once 'includes/header.php';
                             </a>
                         <?php else: ?>
                             <div class="flex items-center gap-3">
-                                <a href="courses" class="btn btn-primary btn-lg"
+                                <a href="courses.php" class="btn btn-primary btn-lg"
                                     style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 700; display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px;">
                                     <i data-lucide="book-open"></i>
                                     Fənlərim
@@ -660,7 +665,7 @@ require_once 'includes/header.php';
                                 <p style="text-align: center; opacity: 0.6; font-size: 13px; padding: 10px 0;">Yeni
                                     bildiriş
                                     yoxdur.</p>
-                            <?php else:
+                                <?php else:
                                 foreach ($notifs as $n):
                                     $bgColor = 'rgba(59, 130, 246, 0.1)';
                                     $borderColor = 'rgba(59, 130, 246, 0.2)';
@@ -679,7 +684,7 @@ require_once 'includes/header.php';
                                         $borderColor = 'rgba(16, 185, 129, 0.2)';
                                         $textColor = '#047857';
                                     }
-                                    ?>
+                                ?>
                                     <div class="p-3 rounded-lg"
                                         style="background: <?php echo $bgColor; ?>; border: 1px solid <?php echo $borderColor; ?>;">
                                         <p style="font-size: 12px; color: <?php echo $textColor; ?>; font-weight: 500;">
@@ -690,7 +695,8 @@ require_once 'includes/header.php';
                                             <?php echo e($n['message']); ?>
                                         </p>
                                     </div>
-                                <?php endforeach; endif; ?>
+                            <?php endforeach;
+                            endif; ?>
                         </div>
                     </div>
 
@@ -710,8 +716,22 @@ require_once 'includes/header.php';
 </div>
 
 <?php if ($activeLesson): ?>
-    <script>     // Countdown Timer logic     let timeLeft = "<?php echo $remainingTime; ?>".split(':').reduce((acc, time) => (60 * acc) + +time);     const countdownEl = document.getElementById('countdown');
-        if (timeLeft > 0) { const interval = setInterval(() => { timeLeft--; if (timeLeft <= 0) { clearInterval(interval); countdownEl.innerText = "00:00:00"; return; } const h = Math.floor(timeLeft / 3600).toString().padStart(2, '0'); const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, '0'); const s = (timeLeft % 60).toString().padStart(2, '0'); countdownEl.innerText = `${h}:${m}:${s}`; }, 1000); }
+    <script>
+        // Countdown Timer logic     let timeLeft = "<?php echo $remainingTime; ?>".split(':').reduce((acc, time) => (60 * acc) + +time);     const countdownEl = document.getElementById('countdown');
+        if (timeLeft > 0) {
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    countdownEl.innerText = "00:00:00";
+                    return;
+                }
+                const h = Math.floor(timeLeft / 3600).toString().padStart(2, '0');
+                const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, '0');
+                const s = (timeLeft % 60).toString().padStart(2, '0');
+                countdownEl.innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
         // Avtomatik Studiyanı aç (Yalnız dərs yeni başlayanda)     const urlParams = new URLSearchParams(window.location.search);     if (urlParams.get('started') === '1') {         const studioLink = "live-studio?id=<?php echo $activeLesson['id']; ?>";         setTimeout(() => {             window.location.href = studioLink;         }, 1000);     }
     </script>
 <?php endif; ?>
@@ -731,7 +751,7 @@ require_once 'includes/header.php';
     }
 
     // Handle Send Alert Form
-    document.getElementById('sendAlertForm')?.addEventListener('submit', async function (e) {
+    document.getElementById('sendAlertForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         const form = this;
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -770,7 +790,7 @@ require_once 'includes/header.php';
     });
 
     // Close modal with Escape key
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (typeof closeStartLiveModal === 'function') closeStartLiveModal();
         }

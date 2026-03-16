@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Course Details Page
  */
-$currentPage = 'courses';
+$currentPage = 'courses.php';
 $pageTitle = 'Dərs Detalları';
 
 require_once 'includes/auth.php';
@@ -111,7 +112,6 @@ if ($tmisToken) {
                 }
             }
         }
-
     } catch (Exception $e) {
         error_log('TMİS Subject Details xətası: ' . $e->getMessage());
     }
@@ -137,7 +137,7 @@ require_once 'includes/header.php';
         <div class="content-container space-y-6">
             <!-- Breadcrumb -->
             <div class="flex items-center gap-2 text-sm text-muted mb-4">
-                <a href="courses" class="hover:text-primary transition-colors">Dərslərim</a>
+                <a href="courses.php" class="hover:text-primary transition-colors">Dərslərim</a>
                 <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i>
                 <span class="text-primary font-medium">
                     <?php echo e($course['title']); ?>
