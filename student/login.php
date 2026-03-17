@@ -33,12 +33,12 @@ if (getenv('SSO_AUTO_LOGIN') === 'false' || $isLocal) {
 
 if (!$skipSso) {
     $tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
-    
+
     // Yönləndirmə üçün ehtimal olunan callback URL (əgər TMİS dəstəkləyirsə)
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
     $currentHostUrl = $protocol . '://' . $host;
     $callbackUrl = $currentHostUrl . '/student/sso.php';
-    
+
     header('Location: ' . $tmisUrl . '/student/sso/auto?redirect_uri=' . urlencode($callbackUrl) . '&return_url=' . urlencode($callbackUrl));
     exit;
 }
@@ -419,7 +419,18 @@ if (isset($_GET['expired'])) {
 
             <form class="login-form" method="POST" action="" id="loginForm">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
-                <div class="form-group">frə</label>
+                <div class="form-group">
+                    <label class="form-label" for="username">TMİS İstifadəçi adı</label>
+                    <div class="form-input-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="username" name="username" class="form-input"
+                            placeholder="TMİS istifadəçi adınızı daxil edin"
+                            value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
+                            required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">TMİS Şifrə</label>
                     <div class="form-input-icon">
                         <i data-lucide="lock"></i>
                         <input type="password" id="password" name="password" class="form-input"

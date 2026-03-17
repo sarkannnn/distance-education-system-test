@@ -36,12 +36,12 @@ if (getenv('SSO_AUTO_LOGIN') === 'false' || $isLocal) {
 if (!$skipSso) {
     $tmisUrl    = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
     $distantUrl = rtrim(getenv('DISTANT_URL') ?: 'https://distant.ndu.edu.az', '/');
-    
+
     // Yönləndirmə üçün ehtimal olunan callback URL (əgər TMİS dəstəkləyirsə)
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
     $currentHostUrl = $protocol . '://' . $host;
     $callbackUrl = $currentHostUrl . '/teacher/sso.php';
-    
+
     // After TMIS auto-generates a token it redirects to sso.php.
     header('Location: ' . $tmisUrl . '/teacher/sso/auto?redirect_uri=' . urlencode($callbackUrl) . '&return_url=' . urlencode($callbackUrl));
     exit;
@@ -433,36 +433,42 @@ if (isset($_GET['error'])) {
             <form class="login-form" method="POST" action="" id="loginForm">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken()); ?>">
                 <div class="form-group">
+                    <label class="form-label" for="username">TMİS İstifadəçi adı</label>
+                    <div class="form-input-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="username" name="username" class="form-input"
+                            placeholder="TMİS istifadəçi adınızı daxil edin"
+                            value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
+                            required autocomplete="username">
+                    </div>
                 </div>
-        </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">TMİS Şifrə</label>
+                    <div class="form-input-icon">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="password" name="password" class="form-input"
+                            placeholder="TMİS şifrənizi daxil edin" required autocomplete="current-password">
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label class="form-label" for="password">TMİS Şifrə</label>
-            <div class="form-input-icon">
-                <i data-lucide="lock"></i>
-                <input type="password" id="password" name="password" class="form-input"
-                    placeholder="TMİS şifrənizi daxil edin" required autocomplete="current-password">
+                <button type="submit" class="btn-primary" id="loginBtn">
+                    <i data-lucide="log-in"></i>
+                    Daxil ol
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <div class="divider">
+                    <span>Məlumat</span>
+                </div>
+                <p style="margin-top: 12px;">
+                    Bu sistemə giriş yalnız TMİS hesabı ilə mümkündür.<br>
+                    TMİS hesabınız yoxdursa,
+                    <a href="https://tmis.ndu.edu.az" target="_blank" class="tmis-link">TMİS platformasına</a>
+                    müraciət edin.
+                </p>
             </div>
         </div>
-
-        <button type="submit" class="btn-primary" id="loginBtn">
-            <i data-lucide="log-in"></i>
-            Daxil ol
-        </button>
-        </form>
-
-        <div class="login-footer">
-            <div class="divider">
-                <span>Məlumat</span>
-            </div>
-            <p style="margin-top: 12px;">
-                Bu sistemə giriş yalnız TMİS hesabı ilə mümkündür.<br>
-                TMİS hesabınız yoxdursa,
-                <a href="https://tmis.ndu.edu.az" target="_blank" class="tmis-link">TMİS platformasına</a>
-                müraciət edin.
-            </p>
-        </div>
-    </div>
     </div>
 
     <script>
