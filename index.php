@@ -144,56 +144,54 @@ try {
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* Global scroll ləğv edildi */
         }
 
-        /* Top Bar / Header */
+        /* ===== HEADER — Compact ===== */
         .ndu-header {
-            background-color: var(--ndu-blue);
+            background: linear-gradient(135deg, var(--ndu-blue) 0%, #0c4a6e 100%);
             color: white;
             text-align: center;
-            padding: 25px 20px;
+            padding: clamp(8px, 1.5vh, 18px) 20px;
             flex-shrink: 0;
         }
 
         .ndu-header h1 {
-            font-size: 26px;
+            font-size: clamp(16px, 2vw, 24px);
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             letter-spacing: 0.5px;
         }
 
         .ndu-header p {
-            font-size: 14px;
+            font-size: clamp(10px, 1.2vw, 13px);
             opacity: 0.8;
         }
 
-        /* Main Content wrapper */
+        /* ===== MAIN CONTENT — Fills remaining space ===== */
         .main-container {
             flex: 1;
-            padding: 25px 20px;
+            padding: clamp(8px, 1.2vh, 16px) clamp(10px, 1.5vw, 20px);
             overflow: hidden;
             display: flex;
             justify-content: center;
             min-height: 0;
-            /* Vacibdir */
         }
 
         .content-grid {
-            max-width: 1350px;
+            max-width: 1500px;
             width: 100%;
             display: flex;
-            gap: 25px;
+            gap: clamp(10px, 1.2vw, 20px);
             height: 100%;
             min-height: 0;
         }
 
-        /* Column Styles */
+        /* ===== SCHEDULE COLUMNS ===== */
         .schedule-column {
             background: #ffffff;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            border-radius: 12px;
+            padding: clamp(12px, 1.5vh, 20px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
             border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -203,30 +201,32 @@ try {
             overflow: hidden;
         }
 
-        /* Portal Login Sidebar */
+        /* ===== PORTAL SIDEBAR — Compact ===== */
         .portal-sidebar {
-            width: 320px;
+            width: clamp(200px, 18vw, 280px);
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: clamp(8px, 1vh, 14px);
             height: 100%;
             overflow: hidden;
         }
 
         .sidebar-portal-box {
             background: #ffffff;
-            border-radius: 16px;
-            padding: 30px 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: clamp(14px, 1.8vh, 22px) clamp(12px, 1.2vw, 18px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
             border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 15px;
+            gap: clamp(6px, 0.8vh, 12px);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            flex: 1;
+            min-height: 0;
         }
 
         .sidebar-portal-box::before {
@@ -235,63 +235,68 @@ try {
             top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
+            height: 4px;
             background: var(--portal-accent, #0ea5e9);
         }
 
         .sidebar-portal-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             border-color: var(--portal-accent, #0ea5e9);
         }
 
         .sidebar-portal-icon {
-            width: 52px;
-            height: 52px;
+            width: clamp(36px, 4vh, 46px);
+            height: clamp(36px, 4vh, 46px);
             background: color-mix(in srgb, var(--portal-accent, #0ea5e9) 12%, white);
-            border-radius: 14px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--portal-accent, #0ea5e9);
             border: 1px solid color-mix(in srgb, var(--portal-accent, #0ea5e9) 25%, transparent);
+            flex-shrink: 0;
         }
 
         .sidebar-portal-icon i {
-            width: 24px;
-            height: 24px;
+            width: clamp(16px, 2vh, 22px);
+            height: clamp(16px, 2vh, 22px);
         }
 
         .sidebar-portal-box h3 {
-            font-size: 18px;
+            font-size: clamp(13px, 1.4vw, 16px);
             font-weight: 700;
             color: var(--text-dark);
-            line-height: 1.3;
+            line-height: 1.2;
             margin: 0;
         }
 
         .sidebar-portal-box p {
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: clamp(11px, 1vw, 13px);
+            line-height: 1.4;
             color: var(--text-muted);
             margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .sidebar-portal-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             background: var(--portal-accent, #0ea5e9);
             color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: clamp(7px, 1vh, 11px) 16px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 14px;
+            font-size: clamp(11px, 1.1vw, 13px);
             transition: all 0.3s ease;
             width: 100%;
-            margin-top: 5px;
+            margin-top: auto;
         }
 
         .sidebar-portal-btn:hover {
@@ -300,55 +305,54 @@ try {
             transform: scale(1.02);
         }
 
+        /* ===== COLUMN TITLES ===== */
         .column-title {
-            font-size: 20px;
+            font-size: clamp(14px, 1.4vw, 18px);
             font-weight: 700;
             color: var(--ndu-blue);
-            margin-bottom: 20px;
-            padding-bottom: 12px;
+            margin-bottom: clamp(8px, 1vh, 14px);
+            padding-bottom: clamp(6px, 0.8vh, 10px);
             border-bottom: 2px solid var(--bg-gray);
             flex-shrink: 0;
         }
 
-        /* Scrollable Container - Robust Scroll Fix */
+        /* ===== SCROLL AREA — fills column ===== */
         .cards-scroll-area {
             flex: 1 1 auto;
             height: 0;
-            /* Valideynin qalan sahəsinə sığması üçün vacibdir */
             overflow-y: auto;
             min-height: 0;
-            padding-right: 8px;
-            margin-right: -8px;
+            padding-right: 6px;
+            margin-right: -6px;
         }
 
-        /* Custom Scrollbar Styles */
+        /* Custom Scrollbar */
         .cards-scroll-area::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
 
         .cards-scroll-area::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
         }
 
         .cards-scroll-area::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            /* Daha tünd rəng */
+            background: #cbd5e1;
             border-radius: 10px;
         }
 
         .cards-scroll-area::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #94a3b8;
         }
 
+        /* ===== LESSON CARDS — Compact ===== */
         .lesson-card {
             background: #f8fafc;
-            border-radius: 12px;
-            padding: 18px;
-            /* Slightly reduced padding */
-            margin-bottom: 12px;
-            /* Slightly reduced margin */
-            border-left: 5px solid var(--ndu-blue);
-            transition: all 0.3s ease;
+            border-radius: 10px;
+            padding: clamp(10px, 1.2vh, 15px) clamp(10px, 1vw, 14px);
+            margin-bottom: clamp(6px, 0.8vh, 10px);
+            border-left: 4px solid var(--ndu-blue);
+            transition: all 0.2s ease;
         }
 
         .lesson-card:last-child {
@@ -356,7 +360,7 @@ try {
         }
 
         .lesson-card:hover {
-            transform: translateX(5px);
+            transform: translateX(3px);
             background: #f1f5f9;
         }
 
@@ -369,60 +373,53 @@ try {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: clamp(6px, 0.7vh, 10px);
         }
 
         .badge-live {
             background-color: #ef4444;
             color: white;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
-            padding: 3px 8px;
+            padding: 2px 7px;
             border-radius: 20px;
             display: flex;
             align-items: center;
             gap: 4px;
             animation: blink 2s infinite;
             text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         .badge-live::before {
             content: '';
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             background-color: white;
             border-radius: 50%;
             display: inline-block;
         }
 
         @keyframes blink {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.6;
-            }
-
-            100% {
-                opacity: 1;
-            }
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
         }
 
         .card-header-title {
-            font-size: 16px;
-            /* Slightly reduced font size */
+            font-size: clamp(12px, 1.2vw, 15px);
             font-weight: 700;
             color: var(--text-dark);
             margin-bottom: 0;
             flex: 1;
+            line-height: 1.3;
         }
 
         .card-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px 15px;
-            font-size: 12px;
+            gap: 6px 12px;
+            font-size: 11px;
             color: var(--text-muted);
             font-weight: 500;
         }
@@ -430,15 +427,15 @@ try {
         .meta-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            gap: 5px;
+            font-size: clamp(11px, 1vw, 13px);
             color: #64748b;
             font-weight: 500;
         }
 
         .meta-item i {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             color: #94a3b8;
             stroke-width: 2px;
         }
@@ -446,29 +443,29 @@ try {
         .meta-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px 25px;
-            margin-top: 10px;
+            gap: 6px 16px;
+            margin-top: clamp(4px, 0.6vh, 8px);
         }
 
-        /* Premium Card Metadata Styles */
+        /* ===== CARD METADATA (Archive cards) ===== */
         .card-metadata-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 20px;
+            gap: clamp(2px, 0.4vh, 5px);
+            margin-bottom: clamp(8px, 1vh, 14px);
         }
 
         .card-metadata-row {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            font-size: 13px;
-            line-height: 1.4;
+            gap: 8px;
+            font-size: clamp(11px, 1vw, 12px);
+            line-height: 1.3;
         }
 
         .card-metadata-label {
             color: var(--text-muted);
-            width: 95px;
+            width: clamp(70px, 7vw, 90px);
             flex-shrink: 0;
             font-weight: 600;
         }
@@ -485,8 +482,8 @@ try {
 
         .archive-card-footer {
             display: flex;
-            gap: 10px;
-            padding-top: 20px;
+            gap: 8px;
+            padding-top: clamp(8px, 1vh, 14px);
             border-top: 1px solid var(--border-color);
             margin-top: auto;
         }
@@ -495,10 +492,10 @@ try {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 13px;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
             font-weight: 700;
             text-decoration: none;
             transition: all 0.2s;
@@ -519,7 +516,7 @@ try {
         .archive-btn-secondary {
             background: #f1f5f9;
             color: var(--ndu-accent);
-            width: 44px;
+            width: 38px;
             padding: 0;
         }
 
@@ -527,13 +524,14 @@ try {
             background: #e2e8f0;
         }
 
+        /* ===== FOOTER — Compact ===== */
         .ndu-footer {
             background-color: #01111d;
             background-image:
                 radial-gradient(at 50% 100%, #075985 0px, transparent 40%),
                 radial-gradient(at 0% 0%, rgba(12, 74, 110, 0.3) 0px, transparent 50%);
             color: white;
-            padding: 30px 20px 20px;
+            padding: clamp(10px, 1.5vh, 18px) 20px clamp(8px, 1vh, 14px);
             flex-shrink: 0;
             border-top: 1px solid rgba(56, 189, 248, 0.15);
             position: relative;
@@ -552,7 +550,7 @@ try {
         }
 
         .footer-container {
-            max-width: 1250px;
+            max-width: 1350px;
             margin: 0 auto;
             position: relative;
             z-index: 10;
@@ -562,40 +560,39 @@ try {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 40px;
-            margin-bottom: 25px;
+            gap: 24px;
+            margin-bottom: clamp(8px, 1vh, 16px);
         }
 
-        /* Contact Section */
         .contact-side {
             flex: 1;
         }
 
         .footer-section-tag {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: #38bdf8;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: block;
             opacity: 0.7;
         }
 
         .contact-cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
 
         .contact-glass-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 8px 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             text-decoration: none;
             color: white;
             transition: all 0.3s ease;
@@ -604,15 +601,15 @@ try {
         .contact-glass-card:hover {
             background: rgba(255, 255, 255, 0.07);
             border-color: rgba(56, 189, 248, 0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
         }
 
         .contact-icon-box {
-            width: 34px;
-            height: 34px;
+            width: 30px;
+            height: 30px;
             background: rgba(56, 189, 248, 0.1);
-            border-radius: 8px;
+            border-radius: 7px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -621,22 +618,27 @@ try {
             flex-shrink: 0;
         }
 
+        .contact-icon-box i {
+            width: 14px;
+            height: 14px;
+        }
+
         .contact-glass-card:hover .contact-icon-box {
             background: #38bdf8;
             color: #01111d;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
         }
 
         .contact-info-text h4 {
-            font-size: 9px;
+            font-size: 8px;
             color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             text-transform: uppercase;
             font-weight: 700;
         }
 
         .contact-info-text p {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.9);
         }
@@ -644,16 +646,16 @@ try {
         /* Portal Side */
         .portal-side {
             display: flex;
-            gap: 20px;
+            gap: 14px;
         }
 
         .portal-premium-box {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 16px;
+            border-radius: 14px;
+            padding: 12px;
             backdrop-filter: blur(20px);
-            width: 220px;
+            width: 180px;
             display: flex;
             flex-direction: column;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -676,8 +678,8 @@ try {
         .portal-premium-box:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
 
         .portal-premium-box:hover::before {
@@ -685,43 +687,43 @@ try {
         }
 
         .portal-icon-wrapper {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             color: var(--box-accent, #0ea5e9);
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
 
         .portal-icon-wrapper i {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
         }
 
         .portal-premium-box:hover .portal-icon-wrapper {
             background: var(--box-accent, #0ea5e9);
             color: white;
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
         }
 
         .portal-premium-box h3 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             color: #ffffff;
             letter-spacing: -0.01em;
         }
 
         .portal-premium-box p {
-            font-size: 11px;
-            line-height: 1.4;
+            font-size: 10px;
+            line-height: 1.3;
             color: rgba(255, 255, 255, 0.3);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             flex-grow: 1;
         }
 
@@ -729,30 +731,30 @@ try {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             background: var(--box-accent, #0ea5e9);
             color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 6px 10px;
+            border-radius: 7px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 11px;
             transition: all 0.3s ease;
         }
 
         .premium-action-btn:hover {
             transform: scale(1.02);
             filter: brightness(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
         }
 
         .footer-bottom-info {
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 20px;
+            padding-top: clamp(6px, 1vh, 12px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 10px;
+            font-size: 9px;
             color: rgba(255, 255, 255, 0.3);
             font-weight: 700;
             letter-spacing: 1.2px;
@@ -762,7 +764,7 @@ try {
         .dev-badge {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             color: rgba(255, 255, 255, 0.4);
             font-weight: 800;
         }
@@ -770,9 +772,9 @@ try {
         .dev-badge span {
             color: #38bdf8;
             background: rgba(56, 189, 248, 0.1);
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 8px;
         }
 
         /* Generic responsive tables */
@@ -788,20 +790,23 @@ try {
             border-collapse: collapse;
         }
 
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+
+        /* Large laptops / small desktops — allow scroll */
         @media (max-width: 1200px) {
             body {
                 height: auto;
-                overflow: visible;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
 
             .main-container {
-                height: auto;
                 overflow: visible;
-                display: block;
+                padding: 12px;
             }
 
             .content-grid {
-                flex-direction: column;
+                flex-wrap: wrap;
                 height: auto;
             }
 
@@ -809,28 +814,58 @@ try {
                 width: 100%;
                 flex-direction: row;
                 height: auto;
+                order: -1;
             }
 
             .sidebar-portal-box {
                 flex: 1;
+                min-width: 0;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 14px 16px;
+            }
+
+            .sidebar-portal-box p {
+                display: none;
+            }
+
+            .sidebar-portal-btn {
+                margin-top: 0;
             }
 
             .schedule-column {
+                flex: 1 1 calc(50% - 8px);
+                min-width: 280px;
                 height: auto;
                 overflow: visible;
-                min-height: auto;
             }
 
             .cards-scroll-area {
-                height: 450px;
+                height: auto;
+                max-height: 450px;
                 overflow-y: auto;
             }
         }
 
-        @media (max-width: 1100px) {
+        /* Tablets */
+        @media (max-width: 900px) {
+            .schedule-column {
+                flex: 1 1 100%;
+            }
+
+            .cards-scroll-area {
+                max-height: 380px;
+            }
+
+            .contact-cards-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
             .footer-flex {
                 flex-direction: column;
-                gap: 30px;
+                gap: 16px;
             }
 
             .portal-side {
@@ -838,98 +873,177 @@ try {
             }
         }
 
-        @media (max-width: 992px) {
-            .footer-main {
-                grid-template-columns: 1fr;
-                gap: 40px;
+        /* Small tablets / large phones */
+        @media (max-width: 768px) {
+            .ndu-header {
+                padding: 12px 10px;
             }
 
-            .contact-grid {
+            .ndu-header h1 {
+                font-size: 18px;
+            }
+
+            .ndu-header p {
+                font-size: 11px;
+            }
+
+            .main-container {
+                padding: 8px;
+            }
+
+            .content-grid {
+                gap: 8px;
+            }
+
+            .portal-sidebar {
+                gap: 8px;
+            }
+
+            .sidebar-portal-box {
+                padding: 12px;
+                gap: 8px;
+                border-radius: 10px;
+            }
+
+            .sidebar-portal-box::before {
+                height: 3px;
+            }
+
+            .sidebar-portal-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .sidebar-portal-icon i {
+                width: 18px;
+                height: 18px;
+            }
+
+            .sidebar-portal-box h3 {
+                font-size: 14px;
+            }
+
+            .sidebar-portal-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .schedule-column {
+                padding: 12px;
+                border-radius: 10px;
+            }
+
+            .column-title {
+                font-size: 15px;
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+            }
+
+            .lesson-card {
+                padding: 10px;
+                margin-bottom: 8px;
+            }
+
+            .card-header-title {
+                font-size: 13px;
+            }
+
+            .meta-item {
+                font-size: 12px;
+            }
+
+            .cards-scroll-area {
+                max-height: 320px;
+            }
+
+            .ndu-footer {
+                padding: 12px 10px 10px;
+            }
+
+            .contact-cards-grid {
                 grid-template-columns: 1fr;
+                gap: 6px;
             }
         }
 
-        @media (max-width: 768px) {
-            .content-grid {
-                gap: 15px;
+        /* Mobile */
+        @media (max-width: 480px) {
+            .ndu-header {
+                padding: 10px 8px;
+            }
+
+            .ndu-header h1 {
+                font-size: 16px;
             }
 
             .portal-sidebar {
                 flex-direction: column;
+                gap: 6px;
             }
 
-            .ndu-header {
-                padding: 15px 10px;
-            }
-
-            .ndu-header h1 {
-                font-size: 20px;
-            }
-
-            .ndu-header p {
+            .sidebar-portal-box h3 {
                 font-size: 13px;
             }
 
-            .main-container {
-                padding: 15px 10px;
+            .sidebar-portal-btn {
+                padding: 7px 10px;
+                font-size: 11px;
+                border-radius: 7px;
             }
 
             .schedule-column {
-                padding: 15px;
+                padding: 10px;
             }
 
             .column-title {
-                font-size: 18px;
-                margin-bottom: 15px;
-            }
-
-            .card-header-wrapper {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
+                font-size: 14px;
             }
 
             .lesson-card {
-                padding: 15px;
+                padding: 8px 10px;
             }
 
-            .meta-row {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .card-meta {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar-portal-box {
-                padding: 20px 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .contact-cards-grid {
-                grid-template-columns: 1fr;
+            .card-header-title {
+                font-size: 12px;
             }
 
             .card-metadata-row {
                 flex-direction: column;
-                gap: 2px;
+                gap: 1px;
+                font-size: 11px;
             }
 
             .card-metadata-label {
                 width: 100%;
             }
 
+            .meta-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .card-meta {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .cards-scroll-area {
+                max-height: 260px;
+            }
+
             .footer-bottom-info {
                 flex-direction: column;
-                gap: 15px;
+                gap: 8px;
                 text-align: center;
+            }
+
+            .portal-premium-box {
+                width: 100%;
+            }
+
+            .portal-side {
+                flex-direction: column;
+                gap: 8px;
             }
         }
     </style>
