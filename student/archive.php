@@ -36,6 +36,7 @@ try {
          FROM archived_lessons al
          JOIN enrollments e ON e.course_id = al.course_id AND e.user_id = ?
          LEFT JOIN courses c ON al.course_id = c.id
+         WHERE al.is_visible = 1
          ORDER BY al.created_at DESC",
         [$currentUser['id']]
     );
@@ -60,7 +61,8 @@ try {
                         c.title as course_title
                  FROM archived_lessons al
                  LEFT JOIN courses c ON al.course_id = c.id
-                 WHERE al.course_id IN ($placeholders) OR al.tmis_subject_id IN ($placeholders)
+                 WHERE (al.course_id IN ($placeholders) OR al.tmis_subject_id IN ($placeholders))
+                 AND al.is_visible = 1
                  ORDER BY al.created_at DESC",
                 $params
             );
@@ -140,7 +142,7 @@ try {
                 "SELECT lc.*, c.title as course_title_alt 
                  FROM live_classes lc
                  LEFT JOIN courses c ON lc.course_id = c.id
-                 WHERE lc.recording_path IS NOT NULL AND lc.is_approved = 1
+                 WHERE lc.recording_path IS NOT NULL AND lc.is_approved = 1 AND lc.is_visible = 1
                  AND (lc.course_id IN ($placeholders) OR lc.tmis_subject_id IN ($placeholders) OR ($findInSetSql))
                  ORDER BY lc.start_time DESC",
                 array_merge($allCourseIds, $allCourseIds, $allCourseIds)

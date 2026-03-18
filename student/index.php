@@ -79,11 +79,11 @@ try {
         $archiveCountLive = $db->fetch(
             "SELECT COUNT(*) as count FROM live_classes lc
              WHERE $courseMatchSql
-             AND lc.recording_path IS NOT NULL AND lc.recording_path != ''"
+             AND lc.recording_path IS NOT NULL AND lc.recording_path != '' AND lc.is_visible = 1"
         );
         $archiveCountManual = $db->fetch(
             "SELECT COUNT(*) as count FROM archived_lessons
-             WHERE course_id IN ($courseIdsList)"
+             WHERE course_id IN ($courseIdsList) AND is_visible = 1"
         );
         $stats['totalArchives'] = ($archiveCountLive['count'] ?? 0) + ($archiveCountManual['count'] ?? 0);
     }
@@ -229,7 +229,7 @@ if ($tmisRecent && is_array($tmisRecent)) {
                 "SELECT al.id, al.title, al.created_at, c.title as course_title, 'manual' as source
                  FROM archived_lessons al
                  JOIN courses c ON al.course_id = c.id
-                 WHERE al.course_id IN ($courseIdsList)
+                 WHERE al.course_id IN ($courseIdsList) AND al.is_visible = 1
                  ORDER BY al.created_at DESC LIMIT 5"
             );
 
@@ -239,7 +239,7 @@ if ($tmisRecent && is_array($tmisRecent)) {
                  FROM live_classes lc
                  JOIN courses c ON lc.course_id = c.id
                  WHERE lc.course_id IN ($courseIdsList)
-                 AND lc.recording_path IS NOT NULL AND lc.recording_path != ''
+                 AND lc.recording_path IS NOT NULL AND lc.recording_path != '' AND lc.is_visible = 1
                  ORDER BY lc.created_at DESC LIMIT 5"
             );
         } else {

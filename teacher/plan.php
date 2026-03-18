@@ -479,7 +479,8 @@ if ($tmisToken) {
                         'file_url' => $fileUrl,
                         'duration' => $lessonDuration,
                         'is_live' => $isLive,
-                        'type' => $type
+                        'type' => $type,
+                        'is_visible' => (isset($item['is_visible']) ? (int)$item['is_visible'] : 1)
                     ];
 
                     // Sayları dəqiqləşdir
@@ -548,7 +549,8 @@ if (!empty($myTeacherIds) || $isAdmin) {
             'file_url' => ($archive['pdf_url'] ?: $archive['video_url']),
             'duration' => $archive['duration'] ?? 'N/A',
             'is_live' => false,
-            'type' => $isPdf ? 'pdf' : 'video'
+            'type' => $isPdf ? 'pdf' : 'video',
+            'is_visible' => (int)($archive['is_visible'] ?? 1)
         ];
     }
 
@@ -666,7 +668,8 @@ if (!empty($myTeacherIds) || $isAdmin) {
             'file_url' => '../uploads/videos/' . $rec['recording_path'],
             'duration' => $formattedDuration,
             'is_live' => true,
-            'type' => 'video'
+            'type' => 'video',
+            'is_visible' => (int)($rec['is_visible'] ?? 1)
         ];
     }
 
@@ -919,7 +922,30 @@ require_once 'includes/header.php';
                                     <?php echo date('d.m.Y', strtotime($lesson['date'])); ?></span>
                                 <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="eye"
                                         style="width: 16px;"></i> <?php echo $lesson['views']; ?> baxış</span>
+                                
+                                <!-- Visibility Toggle -->
+                                <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 11px; font-weight: 800; color: <?php echo $lesson['is_visible'] ? '#059669' : '#94a3b8'; ?>;">
+                                        <?php echo $lesson['is_visible'] ? 'AÇIQ' : 'GİZLİ'; ?>
+                                    </span>
+                                    <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 18px;">
+                                        <input type="checkbox" <?php echo $lesson['is_visible'] ? 'checked' : ''; ?> 
+                                               onchange="toggleVisibility('<?php echo $lesson['is_live'] ? 'live' : 'arch'; ?>', <?php echo $lesson['db_id']; ?>, this)"
+                                               style="opacity: 0; width: 0; height: 0;">
+                                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 18px;"></span>
+                                    </label>
+                                </div>
                             </div>
+
+                            <style>
+                                .switch input:checked + .slider { background-color: #3b82f6; }
+                                .switch input:focus + .slider { box-shadow: 0 0 1px #3b82f6; }
+                                .switch input:checked + .slider:before { transform: translateX(16px); }
+                                .slider:before {
+                                    position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
+                                    background-color: white; transition: .4s; border-radius: 50%;
+                                }
+                            </style>
 
                             <!-- Card Actions -->
                             <div
@@ -1114,6 +1140,34 @@ require_once 'includes/header.php';
                 console.error('Delete error:', err);
                 alert('Serverlə əlaqə kəsildi');
             });
+    }
+
+    function toggleVisibility(type, id, checkbox) {
+        const isVisible = checkbox.checked ? 1 : 0;
+        const label = checkbox.parentElement.previousElementSibling;
+        
+        fetch('api/toggle_lesson_visibility.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: type, id: id, is_visible: isVisible })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                // Update label color/text
+                if (label) {
+                    label.textContent = isVisible ? 'AÇIQ' : 'GİZLİ';
+                    label.style.color = isVisible ? '#059669' : '#94a3b8';
+                }
+            } else {
+                alert(d.message || 'Xəta baş verdi');
+                checkbox.checked = !checkbox.checked; // Revert
+            }
+        })
+        .catch(err => {
+            alert('Serverlə əlaqə kəsildi');
+            checkbox.checked = !checkbox.checked; // Revert
+        });
     }
     // ============================================================
     // Real video müddətini video metadata-dan yüklə
