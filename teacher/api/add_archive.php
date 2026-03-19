@@ -49,6 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Fayl ölçüsü yoxlaması (10MB)
+    if ($_FILES['file']['size'] > 10 * 1024 * 1024) {
+        header('Location: ../plan.php?error=' . urlencode('Fayl ölçüsü 10MB-dan çox ola bilməz.'));
+        exit;
+    }
+
     try {
         $file_url = '';
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {

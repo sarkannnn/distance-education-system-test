@@ -1014,7 +1014,7 @@ require_once 'includes/header.php';
             <h2 style="font-weight: 800;">Yeni Arxiv Materialı</h2>
             <button class="modal-close" onclick="closeModal('planModal')"><i data-lucide="x"></i></button>
         </div>
-        <form action="api/add_archive" method="POST" enctype="multipart/form-data">
+        <form id="archiveForm" action="api/add_archive" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="course_name" id="modal_course_name">
             <input type="hidden" name="faculty_name" id="modal_faculty_name">
             <input type="hidden" name="specialty_name" id="modal_specialty_name">
@@ -1046,8 +1046,11 @@ require_once 'includes/header.php';
                 </div>
                 <div class="form-group mb-4">
                     <label class="form-label" style="font-weight: 700;">Fayl Seçin</label>
-                    <input type="file" name="file" class="form-input"
-                        style="border-radius: 12px; height: 50px; padding-top: 10px;">
+                    <input type="file" name="file" id="archiveFile" class="form-input"
+                        style="border-radius: 12px; height: 50px; padding-top: 10px;" required>
+                    <div id="fileSizeError" style="color: #ef4444; font-size: 13px; margin-top: 5px; display: none;">
+                        Fayl ölçüsü 10MB-dan çox ola bilməz.
+                    </div>
                 </div>
             </div>
             <div class="modal-footer" style="padding: 25px; border-top: 1px solid #f1f5f9;">
@@ -1061,6 +1064,37 @@ require_once 'includes/header.php';
 </div>
 
 <script>
+    // File Size Validation
+    const archiveForm = document.getElementById('archiveForm');
+    const archiveFile = document.getElementById('archiveFile');
+    const fileSizeError = document.getElementById('fileSizeError');
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+    if (archiveFile) {
+        archiveFile.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.size > MAX_FILE_SIZE) {
+                fileSizeError.style.display = 'block';
+                this.value = ''; // Clear the input
+                this.style.borderColor = '#ef4444';
+            } else {
+                fileSizeError.style.display = 'none';
+                this.style.borderColor = 'var(--border-color)';
+            }
+        });
+    }
+
+    if (archiveForm) {
+        archiveForm.addEventListener('submit', function(e) {
+            const file = archiveFile.files[0];
+            if (file && file.size > MAX_FILE_SIZE) {
+                e.preventDefault();
+                fileSizeError.style.display = 'block';
+                alert('Xəta: Fayl ölçüsü 10MB-dan çoxdur. Zəhmət olmasa daha kiçik fayl seçin.');
+            }
+        });
+    }
+
     let currentTypeFilter = 'all';
     const subjectMap = <?php echo json_encode($subjectMap); ?>;
 
