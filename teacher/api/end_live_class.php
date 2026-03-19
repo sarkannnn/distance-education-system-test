@@ -71,8 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        /*
         // ============================================================
-        // TMİS API-yə dərsin bitməsi haqqında bildiriş göndər
+        // TMİS API-yə dərsin bitməsi haqqında bildiriş göndər (LƏĞV EDİLDİ - SİSTEM ANCAQ PULL EDİR)
         // ============================================================
         $tmisToken = TmisApi::getToken();
         if ($tmisToken) {
@@ -106,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('TMİS End Session Exception: ' . $e->getMessage());
             }
         }
+        */
 
         header('Location: ../live-lessons.php?ended=1');
     } catch (Exception $e) {

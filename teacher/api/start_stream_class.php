@@ -189,11 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flush();
         }
 
-        // ============================================================
-        // ARXA FON ƏMƏLİYYATLARI
-        // ============================================================
-
-        // Hər kurs üçün TMİS journal topics əlavə et
+        /*
+        // Hər kurs üçün TMİS journal topics əlavə et (LƏĞV EDİLDİ - SİSTEM ANCAQ PULL EDİR)
         foreach ($course_ids as $cid) {
             $tmisSubject = $db->fetch("SELECT * FROM subjects WHERE id = ?", [$cid]);
             if ($tmisSubject && isset($tmisSubject['education_year_id'])) {
@@ -222,6 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+        */
 
         // Köhnə aktiv alertləri bitir (hər kurs üçün)
         foreach ($course_ids as $cid) {
@@ -253,7 +251,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // TMİS API — hər kurs üçün bildiriş
+        /*
+        // TMİS API — hər kurs üçün bildiriş (LƏĞV EDİLDİ - SİSTEM ANCAQ PULL EDİR)
         $tmisToken = TmisApi::getToken();
         if ($tmisToken) {
             foreach ($course_ids as $cid) {
@@ -270,6 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+        */
 
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

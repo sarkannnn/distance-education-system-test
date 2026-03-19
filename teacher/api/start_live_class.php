@@ -169,7 +169,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ARXA FON ƏMƏLİYYATLARI (İstifadəçi artıq cavab aldı)
         // ============================================================
 
-        // 3. TMİS Journal Topics-ə əlavə et
+        /* 
+        // 3. TMİS Journal Topics-ə əlavə et (LƏĞV EDİLDİ - SİSTEM ANCAQ PULL EDİR)
         if ($tmisSubject && isset($tmisSubject['education_year_id'])) {
             $js_type_id = 1; // Default: Mühazirə
             if ($lesson_type === 'seminar')
@@ -197,6 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('Journal Topics insert xətası: ' . $e->getMessage());
             }
         }
+        */
 
         // 4. Kursun adını tapmaq (Əgər lokalda varsa)
         $course = $db->fetch("SELECT title FROM courses WHERE id = ?", [$course_id]);
@@ -230,8 +232,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log('Alert əlavə etmə xətası: ' . $e->getMessage());
         }
 
+        /*
         // ============================================================
-        // 8. TMİS API-yə canlı dərs başlaması haqqında bildiriş göndər
+        // 8. TMİS API-yə canlı dərs başlaması haqqında bildiriş göndər (LƏĞV EDİLDİ - SİSTEM ANCAQ PULL EDİR)
         // ============================================================
         $tmisToken = TmisApi::getToken();
         $tmis_subject_id = $course_id;
@@ -261,6 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('TMİS Start Session Exception: ' . $e->getMessage());
             }
         }
+        */
 
     } catch (Exception $e) {
         // Əgər əsas insert xətası baş verdisə (hələ cavab göndərilməyib)
