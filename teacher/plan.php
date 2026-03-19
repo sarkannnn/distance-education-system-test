@@ -534,14 +534,15 @@ if (!empty($myTeacherIds) || $isAdmin) {
         $totalViews += (int) $archive['views'];
 
         $localTitle = $archive['title'];
+        $sInfoManual = $subjectMap[$archive['course_id']] ?? [];
         $archivedLessons[] = [
             'id' => 'arch_' . $archive['id'],
             'db_id' => $archive['id'],
             'title' => $localTitle,
             'course_id' => $archive['course_id'],
             'course_name' => $archive['course_name'],
-            'specialization_name' => 'Təyin edilməyib',
-            'course_level' => 'Təyin edilməyib',
+            'specialization_name' => (!empty($archive['specialty_name']) && !in_array($archive['specialty_name'], ['Təyin edilməyib', '-'])) ? $archive['specialty_name'] : ($sInfoManual['profession_name'] ?? 'Təyin edilməyib'),
+            'course_level' => (!empty($archive['course_level']) && !in_array($archive['course_level'], ['Təyin edilməyib', '-'])) ? $archive['course_level'] : (isset($sInfoManual['course']) ? $sInfoManual['course'] . '-cü kurs' : 'Təyin edilməyib'),
             'lesson_type' => $localTitle, // "Dərs: " sahəsi
             'instructor_name' => $archive['instructor_name'],
             'date' => $archive['created_at'] ?? $archive['archived_date'],
@@ -649,7 +650,9 @@ if (!empty($myTeacherIds) || $isAdmin) {
         $specName = (!empty($rec['specialty_name']) && $rec['specialty_name'] !== 'Axın (çoxlu ixtisas)') 
                     ? $rec['specialty_name'] 
                     : ($sInfo['profession_name'] ?? 'Təyin edilməyib');
-        $courseLvl = isset($sInfo['course']) ? $sInfo['course'] . '-cü kurs' : 'Təyin edilməyib';
+        $courseLvl = (!empty($rec['course_level']) && !in_array($rec['course_level'], ['-', 'Təyin edilməyib']))
+                    ? (is_numeric($rec['course_level']) ? $rec['course_level'] . '-cü kurs' : $rec['course_level'])
+                    : (isset($sInfo['course']) ? $sInfo['course'] . '-cü kurs' : 'Təyin edilməyib');
 
         $archivedLessons[] = [
             'id' => 'live_' . $rec['id'],
