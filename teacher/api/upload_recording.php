@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Upload Recording API
  */
@@ -14,7 +15,10 @@ function shutdownHandler()
     $error = error_get_last();
     if ($error && ($error['type'] === E_ERROR || $error['type'] === E_PARSE || $error['type'] === E_CORE_ERROR || $error['type'] === E_COMPILE_ERROR)) {
         $logMsg = date('Y-m-d H:i:s') . " - FATAL ERROR: " . print_r($error, true) . "\n";
-        file_put_contents('../../uploads/upload_error.log', $logMsg, FILE_APPEND);
+        // file_put_contents('../../uploads/upload_error.log', $logMsg, FILE_APPEND);
+        file_put_contents(__DIR__ . '/../../uploads/upload_error.log', $logMsg, FILE_APPEND);
+
+
 
         // Try to send JSON if headers haven't been sent (though unpredictable on fatal)
         if (!headers_sent()) {
@@ -285,4 +289,3 @@ if ($fileSaved) {
     file_put_contents($logFile, $logData, FILE_APPEND);
     jsonResponse(['success' => false, 'message' => 'Faylı server diskində saxlamaq mümkün olmadı']);
 }
-?>
