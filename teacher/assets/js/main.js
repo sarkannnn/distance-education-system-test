@@ -27,18 +27,24 @@ function initTheme() {
     const themeToggle = document.getElementById('theme-toggle');
     if (!themeToggle) return;
 
-    const sunIcon = themeToggle.querySelector('.theme-icon-light');
-    const moonIcon = themeToggle.querySelector('.theme-icon-dark');
+    const updateIcons = (theme) => {
+        const sunIcon = themeToggle.querySelector('.theme-icon-light');
+        const moonIcon = themeToggle.querySelector('.theme-icon-dark');
+        
+        if (!sunIcon || !moonIcon) return;
 
-    // Set initial icon state
+        if (theme === 'dark') {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        } else {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        }
+    };
+
+    // Set initial state
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    if (currentTheme === 'dark') {
-        sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
-    } else {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = 'block';
-    }
+    updateIcons(currentTheme);
 
     themeToggle.addEventListener('click', () => {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -47,14 +53,8 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
 
-        // Update icons
-        if (newTheme === 'dark') {
-            sunIcon.style.display = 'block';
-            moonIcon.style.display = 'none';
-        } else {
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'block';
-        }
+        // Update icons dynamically (find them fresh)
+        updateIcons(newTheme);
 
         // Re-create icons if lucide is available
         if (typeof lucide !== 'undefined') {
