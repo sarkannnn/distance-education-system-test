@@ -71,26 +71,26 @@ try {
     );
 
     // b. Manual yüklənən arxivlər
-    $manualArchives = $db->fetchAll(
-        "SELECT al.id, 
-                al.title as topic_name, 
-                COALESCE(NULLIF(al.subject_name, 'Fənn'), c.title, 'Fənn') as course_title, 
-                COALESCE(NULLIF(NULLIF(al.specialty_name, ''), 'Axın (çoxlu ixtisas)'), i.specialty, i.department, 'Ümumi') as specialization_name,
-                COALESCE(NULLIF(al.course_level, '-'), i.course_level, '-') as course_level_val,
-                COALESCE(NULLIF(al.instructor_name, ''), NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), i.name, 'Müəllim təyin edilməyib') as instructor_display_name, 
-                COALESCE(NULLIF(al.instructor_title, ''), i.title, '') as instructor_title,
-                al.created_at as activity_date,
-                al.created_at as end_time,
-                al.duration as duration,
-                al.views as views,
-                al.video_url as video_url,
-                al.pdf_url as pdf_url,
-                'manual' as record_type
-         FROM archived_lessons al
-         LEFT JOIN courses c ON al.course_id = c.id
-         LEFT JOIN instructors i ON al.instructor_id = i.id OR al.instructor_id = i.user_id
-         LEFT JOIN users u ON i.user_id = u.id"
-    );
+    // $manualArchives = $db->fetchAll(
+    //     "SELECT al.id, 
+    //             al.title as topic_name, 
+    //             COALESCE(NULLIF(al.subject_name, 'Fənn'), c.title, 'Fənn') as course_title, 
+    //             COALESCE(NULLIF(NULLIF(al.specialty_name, ''), 'Axın (çoxlu ixtisas)'), i.specialty, i.department, 'Ümumi') as specialization_name,
+    //             COALESCE(NULLIF(al.course_level, '-'), i.course_level, '-') as course_level_val,
+    //             COALESCE(NULLIF(al.instructor_name, ''), NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), i.name, 'Müəllim təyin edilməyib') as instructor_display_name, 
+    //             COALESCE(NULLIF(al.instructor_title, ''), i.title, '') as instructor_title,
+    //             al.created_at as activity_date,
+    //             al.created_at as end_time,
+    //             al.duration as duration,
+    //             al.views as views,
+    //             al.video_url as video_url,
+    //             al.pdf_url as pdf_url,
+    //             'manual' as record_type
+    //      FROM archived_lessons al
+    //      LEFT JOIN courses c ON al.course_id = c.id
+    //      LEFT JOIN instructors i ON al.instructor_id = i.id OR al.instructor_id = i.user_id
+    //      LEFT JOIN users u ON i.user_id = u.id"
+    // );
 
     $allArchives = array_merge($liveRecs, $manualArchives);
     // Sort by date (newest first - DESC)
@@ -401,9 +401,17 @@ try {
         }
 
         @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .card-header-title {

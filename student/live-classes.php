@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Canlı Dərslər - Live Classes
  * TMİS API inteqrasiyası ilə.
@@ -22,22 +23,22 @@ $db = Database::getInstance();
 $liveClasses = [];
 
 // 1. TMIS API-dən aktiv canlı dərsləri yoxla
-$tmisLive = tmis_get('/student/live-sessions/active');
-if ($tmisLive && is_array($tmisLive)) {
-    foreach ($tmisLive as $item) {
-        $liveClasses[] = [
-            'id' => $item['id'] ?? 0,
-            'title' => $item['title'] ?? 'Canlı Dərs',
-            'course' => $item['course_title'] ?? 'Fənn',
-            'instructor' => $item['instructor_name'] ?? 'Müəllim',
-            'startTime' => $item['start_time'] ?? '10:00',
-            'duration' => ($item['duration_minutes'] ?? 90) . ' dəqiqə',
-            'participants' => $item['participants_count'] ?? 0,
-            'maxParticipants' => $item['max_participants'] ?? 50,
-            'status' => $item['status'] ?? 'live'
-        ];
-    }
-}
+// $tmisLive = tmis_get('/student/live-sessions/active');
+// if ($tmisLive && is_array($tmisLive)) {
+//     foreach ($tmisLive as $item) {
+//         $liveClasses[] = [
+//             'id' => $item['id'] ?? 0,
+//             'title' => $item['title'] ?? 'Canlı Dərs',
+//             'course' => $item['course_title'] ?? 'Fənn',
+//             'instructor' => $item['instructor_name'] ?? 'Müəllim',
+//             'startTime' => $item['start_time'] ?? '10:00',
+//             'duration' => ($item['duration_minutes'] ?? 90) . ' dəqiqə',
+//             'participants' => $item['participants_count'] ?? 0,
+//             'maxParticipants' => $item['max_participants'] ?? 50,
+//             'status' => $item['status'] ?? 'live'
+//         ];
+//     }
+// }
 
 // 2. HƏMİŞƏ lokal bazanı da yoxla (müəllim canlı dərsi lokal başladır)
 //    Tələbənin fənn ID-lərini topla (TMİS + lokal enrollments)
@@ -95,7 +96,7 @@ try {
 
     // TMIS nəticələri ilə birləşdir, dublikatları yoxla
     $existingIds = array_column($liveClasses, 'id');
-    
+
     // Dublikatları (köhnə amma hələ də 'live' qalan dərsləri) təmizləmək üçün course_id üzrə qruplaşdırma
     $courseMap = [];
     foreach ($liveClasses as $lc) {
@@ -105,7 +106,7 @@ try {
     foreach ($dbLive as $row) {
         if (!in_array($row['id'], $existingIds)) {
             $courseName = $row['subject_name'] ?: 'Fənn';
-            
+
             // Əgər eyni fənn üçün artıq bir canlı dərs varsa və bu dərs daha yenidirsə, onu göstər
             if (!isset($courseMap[$courseName]) || strtotime($row['start_time']) > (isset($courseMap[$courseName]['raw_start']) ? strtotime($courseMap[$courseName]['raw_start']) : 0)) {
                 $courseMap[$courseName] = [
@@ -123,7 +124,7 @@ try {
             }
         }
     }
-    
+
     // Yenidən siyahıya çevir
     $liveClasses = array_values($courseMap);
 } catch (Exception $e) {
@@ -251,7 +252,6 @@ if ($tmisUpcoming && is_array($tmisUpcoming)) {
             return $a['sort_key'] - $b['sort_key'];
         });
         $upcomingClasses = array_slice($upcomingClasses, 0, 5);
-
     } catch (Exception $e) {
         $upcomingClasses = [];
     }
@@ -331,15 +331,18 @@ require_once 'includes/header.php';
                     .live-class-card {
                         padding: 16px;
                     }
+
                     .nav-tabs {
                         gap: 20px;
                         overflow-x: auto;
                         -webkit-overflow-scrolling: touch;
                         scrollbar-width: none;
                     }
+
                     .nav-tabs::-webkit-scrollbar {
                         display: none;
                     }
+
                     .nav-tab {
                         font-size: 14px;
                         white-space: nowrap;
@@ -353,7 +356,7 @@ require_once 'includes/header.php';
                 }
 
                 @media (max-width: 768px) {
-                    .live-class-card .flex.gap-6 > div:first-child {
+                    .live-class-card .flex.gap-6>div:first-child {
                         min-width: 0 !important;
                     }
 
@@ -367,13 +370,13 @@ require_once 'includes/header.php';
                     }
 
                     /* Upcoming classes stacked */
-                    .card-dark > .space-y-4 > div {
+                    .card-dark>.space-y-4>div {
                         flex-direction: column !important;
                         align-items: flex-start !important;
                         gap: 8px;
                     }
 
-                    .card-dark > .space-y-4 > div > div:last-child {
+                    .card-dark>.space-y-4>div>div:last-child {
                         text-align: left !important;
                     }
 
@@ -384,7 +387,6 @@ require_once 'includes/header.php';
                         gap: 12px !important;
                     }
                 }
-
             </style>
 
             <div class="nav-tabs">
