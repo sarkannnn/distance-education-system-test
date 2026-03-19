@@ -92,7 +92,7 @@ try {
     //      LEFT JOIN users u ON i.user_id = u.id"
     // );
 
-    $allArchives = array_merge($liveRecs, $manualArchives);
+    $allArchives = array_merge($liveRecs);
     // Sort by date (newest first - DESC)
     usort($allArchives, function ($a, $b) {
         $t1 = strtotime($a['activity_date']);
