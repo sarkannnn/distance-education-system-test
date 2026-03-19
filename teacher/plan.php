@@ -927,15 +927,20 @@ require_once 'includes/header.php';
                                         style="width: 16px;"></i> <?php echo $lesson['views']; ?> baxış</span>
                                 
                                 <!-- Visibility Toggle -->
-                                <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 11px; font-weight: 800; color: <?php echo $lesson['is_visible'] ? '#059669' : '#94a3b8'; ?>;">
-                                        <?php echo $lesson['is_visible'] ? 'AÇIQ' : 'GİZLİ'; ?>
-                                    </span>
-                                    <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 18px;">
+                                <div class="visibility-status" 
+                                     style="margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 5px 12px; border-radius: 12px; background: <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)'; ?>; border: 1px solid <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)'; ?>; transition: all 0.3s ease;">
+                                    <div class="status-badge" style="display: flex; align-items: center; gap: 6px;">
+                                        <i data-lucide="<?php echo $lesson['is_visible'] ? 'eye' : 'eye-off'; ?>" 
+                                           style="width: 14px; height: 14px; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>;"></i>
+                                        <span class="status-text" style="font-size: 11px; font-weight: 800; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>; letter-spacing: 0.5px;">
+                                            <?php echo $lesson['is_visible'] ? 'AÇIQ' : 'GİZLİ'; ?>
+                                        </span>
+                                    </div>
+                                    <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 18px; margin: 0;">
                                         <input type="checkbox" <?php echo $lesson['is_visible'] ? 'checked' : ''; ?> 
                                                onchange="toggleVisibility('<?php echo $lesson['is_live'] ? 'live' : 'arch'; ?>', <?php echo $lesson['db_id']; ?>, this)"
                                                style="opacity: 0; width: 0; height: 0;">
-                                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 18px;"></span>
+                                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 18px;"></span>
                                     </label>
                                 </div>
                             </div>
@@ -1179,9 +1184,32 @@ require_once 'includes/header.php';
             });
     }
 
+    function updateVisibilityUI(checkbox, isVisible) {
+        const container = checkbox.closest('.visibility-status');
+        if (!container) return;
+        
+        const label = container.querySelector('.status-text');
+        const icon = container.querySelector('i');
+        
+        container.style.background = isVisible ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)';
+        container.style.borderColor = isVisible ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)';
+        
+        if (label) {
+            label.textContent = isVisible ? 'AÇIQ' : 'GİZLİ';
+            label.style.color = isVisible ? '#059669' : '#64748b';
+        }
+        if (icon) {
+            icon.setAttribute('data-lucide', isVisible ? 'eye' : 'eye-off');
+            icon.style.color = isVisible ? '#059669' : '#64748b';
+            if (window.lucide) window.lucide.createIcons();
+        }
+    }
+
     function toggleVisibility(type, id, checkbox) {
         const isVisible = checkbox.checked ? 1 : 0;
-        const label = checkbox.parentElement.previousElementSibling;
+        
+        // Optimistic UI update
+        updateVisibilityUI(checkbox, isVisible);
         
         fetch('api/toggle_lesson_visibility.php', {
             method: 'POST',
@@ -1190,20 +1218,16 @@ require_once 'includes/header.php';
         })
         .then(r => r.json())
         .then(d => {
-            if (d.success) {
-                // Update label color/text
-                if (label) {
-                    label.textContent = isVisible ? 'AÇIQ' : 'GİZLİ';
-                    label.style.color = isVisible ? '#059669' : '#94a3b8';
-                }
-            } else {
+            if (!d.success) {
                 alert(d.message || 'Xəta baş verdi');
-                checkbox.checked = !checkbox.checked; // Revert
+                checkbox.checked = !checkbox.checked;
+                updateVisibilityUI(checkbox, !isVisible);
             }
         })
         .catch(err => {
             alert('Serverlə əlaqə kəsildi');
-            checkbox.checked = !checkbox.checked; // Revert
+            checkbox.checked = !checkbox.checked;
+            updateVisibilityUI(checkbox, !isVisible);
         });
     }
     // ============================================================
