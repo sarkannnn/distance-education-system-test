@@ -122,10 +122,14 @@ CREATE TABLE IF NOT EXISTS lesson_completions (
 CREATE TABLE IF NOT EXISTS live_classes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     course_id INT NOT NULL,
+    tmis_subject_id INT DEFAULT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
+    lesson_type ENUM('lecture', 'seminar', 'laboratory') DEFAULT 'lecture',
+    lesson_number INT DEFAULT 1,
     instructor_id INT NOT NULL,
     start_time DATETIME NOT NULL,
+    started_at DATETIME DEFAULT NULL,
     end_time DATETIME NOT NULL,
     duration_minutes INT NOT NULL,
     max_participants INT DEFAULT 100,
@@ -133,17 +137,23 @@ CREATE TABLE IF NOT EXISTS live_classes (
     zoom_link VARCHAR(500),
     webrtc_link VARCHAR(500),
     teams_link VARCHAR(500),
+    recording_path VARCHAR(500) DEFAULT NULL,
+    is_approved BOOLEAN DEFAULT TRUE,
+    is_visible BOOLEAN DEFAULT TRUE,
+    tmis_session_id VARCHAR(100) DEFAULT NULL,
+    is_stream BOOLEAN DEFAULT FALSE,
+    stream_course_ids TEXT DEFAULT NULL,
     zoom_available BOOLEAN DEFAULT TRUE,
     webrtc_available BOOLEAN DEFAULT TRUE,
     teams_available BOOLEAN DEFAULT FALSE,
-    recording_path VARCHAR(500) DEFAULT NULL,
-    tmis_session_id VARCHAR(100) DEFAULT NULL,
-    views INT DEFAULT 0,
-    is_approved TINYINT(1) DEFAULT 0,
-    is_visible TINYINT(1) DEFAULT 1,
-    is_stream TINYINT(1) DEFAULT 0,
-    stream_course_ids TEXT DEFAULT NULL,
+    instructor_name VARCHAR(255) DEFAULT NULL,
+    instructor_title VARCHAR(255) DEFAULT NULL,
+    subject_name VARCHAR(255) DEFAULT NULL,
+    faculty_name VARCHAR(255) DEFAULT NULL,
     specialty_name VARCHAR(255) DEFAULT NULL,
+    group_name VARCHAR(100) DEFAULT NULL,
+    course_level VARCHAR(50) DEFAULT NULL,
+    views INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     FOREIGN KEY (instructor_id) REFERENCES instructors(id) ON DELETE CASCADE
@@ -197,6 +207,7 @@ CREATE TABLE IF NOT EXISTS archived_lessons (
     lesson_id INT,
     live_class_id INT,
     course_id INT NOT NULL,
+    tmis_subject_id INT DEFAULT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     instructor_id INT NOT NULL,
@@ -208,6 +219,14 @@ CREATE TABLE IF NOT EXISTS archived_lessons (
     has_video BOOLEAN DEFAULT TRUE,
     has_pdf BOOLEAN DEFAULT FALSE,
     has_slides BOOLEAN DEFAULT FALSE,
+    is_visible BOOLEAN DEFAULT TRUE,
+    instructor_name VARCHAR(255) DEFAULT NULL,
+    instructor_title VARCHAR(255) DEFAULT NULL,
+    subject_name VARCHAR(255) DEFAULT NULL,
+    faculty_name VARCHAR(255) DEFAULT NULL,
+    specialty_name VARCHAR(255) DEFAULT NULL,
+    group_name VARCHAR(100) DEFAULT NULL,
+    course_level VARCHAR(50) DEFAULT NULL,
     views INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
@@ -295,6 +314,44 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Canlı dərs iştirak qeydləri (Attendance Logs)
+CREATE TABLE IF NOT EXISTS live_attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    live_class_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role VARCHAR(50),
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_heartbeat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    left_at TIMESTAMP NULL,
+    peer_id VARCHAR(255),
+    is_kicked TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (live_class_id) REFERENCES live_classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Canlı dərs bildirişləri (Alerts)
+CREATE TABLE IF NOT EXISTS live_alerts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    instructor_id INT,
+    course_id INT,
+    message TEXT,
+    type VARCHAR(50),
+    category VARCHAR(50),
+    expires_at DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TMİS Fənlər cədvəli (Lokal keş)
+CREATE TABLE IF NOT EXISTS subjects (
+    id INT PRIMARY KEY,
+    subject_name VARCHAR(255),
+    education_year_id INT,
+    faculty_name_id INT,
+    profession_id INT,
+    course INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================

@@ -57,7 +57,10 @@ Sistem **Təhsil İdarəetmə İnformasiya Sistemi (TMİS)** ilə tam inteqrasiy
 1. Layihəni `C:\laragon\www\distant-tehsil` qovluğuna yerləşdirin.
 2. `student/config/database.php` faylında verilənlər bazası ayarlarını edin.
 3. `database/schema.sql` faylını bazaya import edin.
-4. virtual host vasitəsilə `distant-tehsil.test` ünvanına daxil olun.
+4. Virtual host vasitəsilə `distant-tehsil.test` ünvanına daxil olun.
+
+### 🔄 Verilənlər Bazası Yenilənmələri
+Layihədə bazanı yeniləmək üçün `database/migrations/` qovluğundaki skriptlərdən istifadə edin. Ətraflı məlumat üçün [MIGRATION_GUIDE.md](database/MIGRATION_GUIDE.md) rəhbərinə baxın.
 
 ---
 

@@ -680,7 +680,11 @@ require_once 'includes/header.php';
                     </a>
                     <button onclick="downloadPDF()"
                         style="background: #3b82f6; border: none; color: white; padding: 10px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="download-cloud" style="width:16px; height:16px;"></i> PDF Yüklə
+                        <i data-lucide="file-text" style="width:16px; height:16px;"></i> PDF Format
+                    </button>
+                    <button onclick="window.print()"
+                        style="background: #6366f1; border: none; color: white; padding: 10px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); display: flex; align-items: center; gap: 8px;" title="Brauzer vasitəsilə sadə çap">
+                        <i data-lucide="printer" style="width:16px; height:16px;"></i> Sürətli Çap
                     </button>
                     <a href="javascript:history.back()"
                         style="background: white; border: 1px solid #e2e8f0; color: #475569; padding: 10px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 8px;">
@@ -695,7 +699,11 @@ require_once 'includes/header.php';
                     </a>
                     <button onclick="downloadPDF()"
                         style="background: #3b82f6; border: none; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;" title="PDF yüklə">
-                        <i data-lucide="download-cloud" style="width:16px; height:16px;"></i> PDF Yüklə
+                        <i data-lucide="file-text" style="width:16px; height:16px;"></i> PDF
+                    </button>
+                    <button onclick="window.print()"
+                        style="background: #6366f1; border: none; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;" title="Sürətli Çap">
+                        <i data-lucide="printer" style="width:16px; height:16px;"></i> Çap
                     </button>
                 </div>
                 <?php endif; ?>
@@ -1054,18 +1062,33 @@ require_once 'includes/header.php';
 
 
 <!-- PDF Generation Script -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="assets/js/vendor/html2pdf.bundle.min.js"></script>
 <script>
 function downloadPDF() {
+    // Check if library is loaded
+    if (typeof html2pdf === 'undefined') {
+        alert("Xəta: PDF kitabxanası yüklənməyib. Zəhmət olmasa internet bağlantınızı yoxlayın və ya 'Sürətli Çap' düyməsindən istifadə edin.");
+        return;
+    }
+
     const element = document.querySelector('.report-container');
-    const courseTitle = "<?php echo addslashes($lesson['course_title']); ?>";
-    const lessonDate = "<?php echo date('d_m_Y', strtotime($lesson['created_at'])); ?>";
+    const courseTitle = "<?php echo addslashes($lesson['course_title'] ?? 'Ders'); ?>";
+    const lessonDate = "<?php echo date('d_m_Y', strtotime($lesson['created_at'] ?? 'now')); ?>";
     const fileName = `Ishtirak_Jurnali_${courseTitle.replace(/[^a-z0-9]/gi, '_')}_${lessonDate}.pdf`;
 
     // Show elements that are print-only, hide non-print ones and history
     const printElements = document.querySelectorAll('.print-only');
     const hideElements = document.querySelectorAll('.print-only-hide, .lifetime-analytics');
     
+    // UI Feedback
+    const btn = event?.currentTarget;
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin" style="width:16px; height:16px;"></i> Hazırlanır...';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
     printElements.forEach(el => el.style.display = 'flex');
     hideElements.forEach(el => el.style.display = 'none');
 
@@ -1094,6 +1117,24 @@ function downloadPDF() {
         // Ensure lifetime-analytics is restored correctly
         const analytics = document.querySelector('.lifetime-analytics');
         if (analytics) analytics.style.display = 'block';
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }).catch(err => {
+        console.error("PDF Generation Error:", err);
+        alert("PDF yaradılarkən xəta baş verdi. Zəhmət olmasa 'Sürətli Çap' düyməsindən istifadə edin.");
+        
+        // Revert UI
+        printElements.forEach(el => el.style.display = 'none');
+        hideElements.forEach(el => el.style.display = 'flex');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
     });
 }
 </script>
