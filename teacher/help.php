@@ -128,10 +128,24 @@ require_once 'includes/header.php';
                     sualınız var?</h2>
                 <p style="color: var(--text-muted); margin-bottom: 24px;">Distant Təhsil Mərkəzinin texniki dəstək
                     komandası sizə kömək etməyə hazırdır.</p>
-                <a href="mailto:distant@ndu.edu.az" class="btn btn-primary"
-                    style="padding: 12px 32px; border-radius: 12px; font-weight: 600;">
+                <button onclick="openMail()" id="send-query-btn"
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 36px; border-radius: 14px; font-weight: 700; font-size: 15px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; text-decoration: none; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3); transition: all 0.3s ease; cursor: pointer; border: none;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(59, 130, 246, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 14px rgba(59, 130, 246, 0.3)'">
+                    <i data-lucide="mail" style="width: 18px; height: 18px;"></i>
                     Sorğu Göndər
-                </a>
+                </button>
+                <script>
+                function openMail() {
+                    var to = 'distant@ndu.edu.az';
+                    var subject = encodeURIComponent('Distant Təhsil - Texniki Dəstək Sorğusu');
+                    var body = encodeURIComponent('Salam,\n\nMən aşağıdakı məsələ ilə bağlı kömək istəyirəm:\n\n');
+                    
+                    // Try Gmail compose (universal, works everywhere)
+                    var gmailUrl = 'https://mail.google.com/mail/?view=cm&to=' + to + '&su=' + subject + '&body=' + body;
+                    window.open(gmailUrl, '_blank');
+                }
+                </script>
             </div>
         </div>
     </main>
