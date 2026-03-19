@@ -1050,11 +1050,28 @@ require_once 'includes/header.php';
             width: 100% !important;
         }
         
-        .table-responsive .table, table { 
+        table { 
             width: 100% !important; 
-            min-width: 0 !important; 
-            min-width: auto !important;
+            table-layout: fixed !important;
+            border-collapse: collapse !important;
         }
+
+        th, td { 
+            font-size: 7.5pt !important; 
+            word-wrap: break-word !important; 
+            overflow: hidden !important;
+        }
+
+        th { font-size: 8pt !important; padding: 4px 2px !important; }
+        
+        /* Column Widths (Landscape Optimized) */
+        th:nth-child(1), td:nth-child(1) { width: 28% !important; } /* İştirakçı */
+        th:nth-child(2), td:nth-child(2) { width: 10% !important; } /* Vəzifə */
+        th:nth-child(3), td:nth-child(3) { width: 10% !important; } /* Giriş */
+        th:nth-child(4), td:nth-child(4) { width: 12% !important; } /* Son Görülmə */
+        th:nth-child(5), td:nth-child(5) { width: 10% !important; } /* Müddət */
+        th:nth-child(6), td:nth-child(6) { width: 15% !important; } /* İştirak % */
+        th:nth-child(7), td:nth-child(7) { width: 15% !important; } /* Nəticə */
         
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
@@ -1093,7 +1110,7 @@ function downloadPDF() {
     hideElements.forEach(el => el.style.display = 'none');
 
     const opt = {
-        margin: [5, 5, 5, 5],
+        margin: [10, 10, 10, 10],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
@@ -1101,10 +1118,9 @@ function downloadPDF() {
             useCORS: true, 
             letterRendering: true,
             scrollX: 0,
-            scrollY: 0,
-            width: 800
+            scrollY: 0
         },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
         pagebreak: { mode: ['avoid-all', 'css'] }
     };
 
