@@ -919,21 +919,23 @@ require_once 'includes/header.php';
                             <?php endif; ?>
 
                             <div
-                                style="display: flex; gap: 20px; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 24px;">
-                                <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="calendar"
+                                style="display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 24px; overflow: hidden; height: 32px;">
+                                <span style="display: flex; align-items: center; gap: 6px; white-space: nowrap;"><i data-lucide="calendar"
                                         style="width: 16px;"></i>
                                     <?php echo date('d.m.Y', strtotime($lesson['date'])); ?></span>
-                                <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="eye"
+                                <span style="display: flex; align-items: center; gap: 6px; white-space: nowrap;"><i data-lucide="eye"
                                         style="width: 16px;"></i> <?php echo $lesson['views']; ?> baxış</span>
                                 
                                 <!-- Visibility Toggle -->
                                 <div class="visibility-status" 
-                                     style="margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 5px 12px; border-radius: 12px; background: <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)'; ?>; border: 1px solid <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)'; ?>; transition: all 0.3s ease;">
-                                    <div class="status-badge" style="display: flex; align-items: center; gap: 6px;">
-                                        <i data-lucide="<?php echo $lesson['is_visible'] ? 'eye' : 'eye-off'; ?>" 
-                                           style="width: 14px; height: 14px; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>;"></i>
-                                        <span class="status-text" style="font-size: 11px; font-weight: 800; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>; letter-spacing: 0.5px;">
-                                            <?php echo $lesson['is_visible'] ? 'AÇIQ' : 'GİZLİ'; ?>
+                                     style="margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 4px 12px; border-radius: 12px; background: <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.08)' : 'rgba(100, 116, 139, 0.08)'; ?>; border: 1px solid <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.15)' : 'rgba(100, 116, 139, 0.15)'; ?>; transition: all 0.3s ease; white-space: nowrap;">
+                                    <div class="status-badge" style="display: flex; align-items: center; gap: 8px;">
+                                        <div class="status-icon-wrapper" style="display: flex; align-items: center;">
+                                            <i data-lucide="<?php echo $lesson['is_visible'] ? 'eye' : 'eye-off'; ?>" 
+                                               style="width: 16px; height: 16px; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>;"></i>
+                                        </div>
+                                        <span class="status-text" style="font-size: 11px; font-weight: 800; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>; letter-spacing: 0.2px; line-height: 1;">
+                                            <?php echo $lesson['is_visible'] ? 'Tələbə: Açıq' : 'Tələbə: Gizli'; ?>
                                         </span>
                                     </div>
                                     <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 18px; margin: 0;">
@@ -1189,18 +1191,19 @@ require_once 'includes/header.php';
         if (!container) return;
         
         const label = container.querySelector('.status-text');
-        const icon = container.querySelector('i');
+        const iconWrapper = container.querySelector('.status-icon-wrapper');
         
-        container.style.background = isVisible ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)';
-        container.style.borderColor = isVisible ? 'rgba(5, 150, 105, 0.1)' : 'rgba(148, 163, 184, 0.1)';
+        container.style.background = isVisible ? 'rgba(5, 150, 105, 0.08)' : 'rgba(100, 116, 139, 0.08)';
+        container.style.borderColor = isVisible ? 'rgba(5, 150, 105, 0.15)' : 'rgba(100, 116, 139, 0.15)';
         
         if (label) {
-            label.textContent = isVisible ? 'AÇIQ' : 'GİZLİ';
+            label.textContent = isVisible ? 'Tələbə: Açıq' : 'Tələbə: Gizli';
             label.style.color = isVisible ? '#059669' : '#64748b';
         }
-        if (icon) {
-            icon.setAttribute('data-lucide', isVisible ? 'eye' : 'eye-off');
-            icon.style.color = isVisible ? '#059669' : '#64748b';
+        
+        if (iconWrapper) {
+            const iconColor = isVisible ? '#059669' : '#64748b';
+            iconWrapper.innerHTML = `<i data-lucide="${isVisible ? 'eye' : 'eye-off'}" style="width: 16px; height: 16px; color: ${iconColor};"></i>`;
             if (window.lucide) window.lucide.createIcons();
         }
     }
