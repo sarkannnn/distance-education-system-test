@@ -2315,45 +2315,58 @@ require_once 'includes/header.php';
         box.scrollTop = box.scrollHeight;
     }
 
-    const iceServers = {
-        iceServers: [{
-                urls: 'stun:stun.l.google.com:19302'
-            },
-            {
-                urls: 'stun:stun1.l.google.com:19302'
-            },
-            {
-                urls: 'stun:stun2.l.google.com:19302'
-            },
-            {
-                urls: 'stun:stun3.l.google.com:19302'
-            },
-            {
-                urls: 'stun:stun4.l.google.com:19302'
-            },
-            {
-                urls: 'turn:openrelay.metered.ca:80',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-            },
-            {
-                urls: 'turn:openrelay.metered.ca:443',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-            },
-            {
-                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-            }
+    // ─── Dynamic ICE/TURN Configuration ───
+    // Default fallback (STUN only — works on LAN, fails on mobile)
+    let iceServers = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
         ],
         sdpSemantics: 'unified-plan',
-        iceCandidatePoolSize: 0
+        iceCandidatePoolSize: 10
     };
+
+    let turnCredentialsFetched = false;
+
+    async function fetchTurnCredentials() {
+        try {
+            LOG("🔑 TURN server məlumatları yüklənir...", "#3b82f6");
+            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now());
+            const data = await resp.json();
+
+            if (data.success && data.iceServers && data.iceServers.length > 0) {
+                iceServers = {
+                    iceServers: data.iceServers,
+                    sdpSemantics: 'unified-plan',
+                    iceCandidatePoolSize: 10
+                };
+                turnCredentialsFetched = true;
+
+                const hasTurn = data.iceServers.some(s => 
+                    (typeof s.urls === 'string' && s.urls.startsWith('turn:')) ||
+                    (typeof s.urls === 'string' && s.urls.startsWith('turns:'))
+                );
+
+                if (hasTurn) {
+                    LOG("✅ TURN server hazırdır (mobil bağlantı dəstəklənir)", "#10b981");
+                } else {
+                    LOG("⚠️ TURN server tapılmadı! Yalnız lokal şəbəkə işləyəcək.", "#f59e0b");
+                    LOG("ℹ️ .env faylında METERED_API_KEY təyin edin.", "#94a3b8");
+                }
+
+                if (data.source === 'fallback_stun_only' && data.warning) {
+                    console.warn('TURN config warning:', data.warning);
+                }
+            }
+        } catch (err) {
+            LOG("⚠️ TURN məlumatları alınmadı. Yalnız STUN istifadə olunacaq.", "#f59e0b");
+            console.error("TURN credential fetch error:", err);
+        }
+    }
 
     const peerConfig = {
         debug: 1,
-        config: iceServers,
+        get config() { return iceServers; },
         host: window.location.hostname,
         port: 9000,
         secure: false,
@@ -2363,6 +2376,9 @@ require_once 'includes/header.php';
     async function init() {
         try {
             LOG("Sistem yoxlanılır...", "#3b82f6");
+
+            // 0. Fetch TURN credentials first (critical for mobile/LTE)
+            await fetchTurnCredentials();
 
             // 1. Secure Context Warning
             if (!window.isSecureContext && window.location.hostname !== 'localhost') {
