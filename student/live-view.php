@@ -1369,12 +1369,20 @@ require_once 'includes/header.php';
                     DBG("✅ TURN server hazırdır (mobil bağlantı dəstəklənir)");
                 } else {
                     DBG("⚠️ TURN server tapılmadı. Yalnız lokal şəbəkə işləyəcək.");
-                    console.warn("Set METERED_API_KEY in .env for mobile/LTE support");
+                    console.error("No TURN servers returned from API. Config:", data);
                 }
+
+                if (data.source === 'fallback_stun_only') {
+                    if (data.warning) DBG("⚠️ Xəta: " + data.warning);
+                    console.warn('TURN fallback active:', data);
+                }
+            } else {
+                DBG("❌ API xətası (TURN yüklənmədi)");
+                console.error("API response was not successful:", data);
             }
         } catch (err) {
-            DBG("⚠️ TURN məlumatları alınmadı. STUN istifadə olunacaq.");
-            console.error("TURN credential fetch error:", err);
+            DBG("❌ Bağlantı xətası: TURN məlumatları alınmadı.");
+            console.error("TURN credential fetch exception:", err);
         }
     }
 

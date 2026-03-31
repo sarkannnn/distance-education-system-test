@@ -29,10 +29,12 @@ if (file_exists($envFile)) {
 }
 
 $apiKey = getenv('METERED_API_KEY');
+$appDomain = getenv('METERED_DOMAIN') ?: 'ndu.metered.live'; // Fallback to guess but allow override
 
 // ─── If Metered API key is configured, fetch dynamic credentials ───
 if (!empty($apiKey)) {
-    $url = "https://ndu.metered.live/api/v1/turn/credentials?apiKey=" . urlencode($apiKey);
+    // Try the specific subdomain first
+    $url = "https://{$appDomain}/api/v1/turn/credentials?apiKey=" . urlencode($apiKey);
     
     $ch = curl_init();
     curl_setopt_array($ch, [
@@ -47,6 +49,22 @@ if (!empty($apiKey)) {
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
     curl_close($ch);
+
+    // If subdomain fails (404/DNS), try the global metered.ca endpoint as fallback
+    if ($httpCode !== 200) {
+        $globalUrl = "https://www.metered.ca/api/v1/turn/credentials?apiKey=" . urlencode($apiKey);
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $globalUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_HTTPHEADER => ['Accept: application/json']
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
     
     if ($httpCode === 200 && $response) {
         $turnServers = json_decode($response, true);

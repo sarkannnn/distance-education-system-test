@@ -2351,16 +2351,21 @@ require_once 'includes/header.php';
                     LOG("✅ TURN server hazırdır (mobil bağlantı dəstəklənir)", "#10b981");
                 } else {
                     LOG("⚠️ TURN server tapılmadı! Yalnız lokal şəbəkə işləyəcək.", "#f59e0b");
-                    LOG("ℹ️ .env faylında METERED_API_KEY təyin edin.", "#94a3b8");
+                    LOG("ℹ️ METERED_API_KEY və ya METERED_DOMAIN yoxlayın.", "#94a3b8");
+                    console.error("No TURN servers returned from API. Config:", data);
                 }
 
-                if (data.source === 'fallback_stun_only' && data.warning) {
-                    console.warn('TURN config warning:', data.warning);
+                if (data.source === 'fallback_stun_only') {
+                    if (data.warning) LOG("⚠️ Xəta: " + data.warning, "#ef4444");
+                    console.warn('TURN fallback active:', data);
                 }
+            } else {
+                LOG("❌ API xətası (TURN yüklənmədi)", "#ef4444");
+                console.error("API response was not successful:", data);
             }
         } catch (err) {
-            LOG("⚠️ TURN məlumatları alınmadı. Yalnız STUN istifadə olunacaq.", "#f59e0b");
-            console.error("TURN credential fetch error:", err);
+            LOG("❌ Bağlantı xətası: TURN məlumatları alınmadı.", "#ef4444");
+            console.error("TURN credential fetch exception:", err);
         }
     }
 
