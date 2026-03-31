@@ -18,9 +18,11 @@
     </div>
 
     <div class="header-actions">
-        <button class="header-btn theme-toggle-btn" id="theme-toggle" title="Mövzunu dəyiş">
-            <i data-lucide="moon" class="theme-icon-dark"></i>
-            <i data-lucide="sun" class="theme-icon-light" style="display: none;"></i>
+        <button class="header-btn theme-toggle-btn" id="theme-toggle" title="Mövzunu dəyiş" aria-label="Mövzunu dəyiş">
+            <span class="theme-toggle-icon-wrap">
+                <i data-lucide="moon" class="theme-icon theme-icon-dark"></i>
+                <i data-lucide="sun" class="theme-icon theme-icon-light"></i>
+            </span>
         </button>
 
         <button class="header-btn notification-btn" id="notification-btn">
@@ -37,7 +39,7 @@
             </div>
         </div>
 
-        <a href="logout.php?action=exit" class="header-btn" id="exit-distant-btn"
+        <a href="logout.php?action=exit" class="header-btn hide-on-mobile" id="exit-distant-btn"
             style="width: auto; padding: 0 16px; border-radius: 12px; font-size: 14px; font-weight: 500; text-decoration: none; display: flex; align-items: center; color: var(--text-primary);">
             Distant təhsildən çıx
         </a>

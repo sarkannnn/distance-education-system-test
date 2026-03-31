@@ -300,7 +300,7 @@ require_once 'includes/header.php';
     <?php require_once 'includes/topnav.php'; ?>
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="main-content dashboard-page">
         <div class="content-container space-y-6">
             <!-- Page Header -->
             <div class="page-header">

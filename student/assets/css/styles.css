@@ -349,7 +349,13 @@ img {
     flex: 1;
     overflow-y: auto;
     padding: var(--content-padding);
+    padding-top: calc(var(--header-height) + var(--content-padding));
     background-color: var(--bg-primary);
+}
+
+.main-content.archive-page,
+.main-content.dashboard-page {
+    padding-top: calc(var(--header-height) + var(--content-padding) + 12px);
 }
 
 .content-container {
@@ -561,6 +567,81 @@ img {
 .header-btn svg {
     width: 20px;
     height: 20px;
+}
+
+/* ==========================================
+   Theme Toggle - Animated Sun/Moon
+   ========================================== */
+.theme-toggle-btn {
+    position: relative;
+    overflow: hidden;
+    border-radius: 50% !important;
+    width: 42px;
+    height: 42px;
+    transition: background-color 0.4s ease, transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+    background-color: var(--gray-100);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.theme-icon {
+    position: absolute;
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 20px;
+    height: 20px;
+}
+
+.theme-icon-dark {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.theme-icon-light {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+[data-theme="dark"] .theme-icon-dark {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+}
+
+[data-theme="dark"] .theme-icon-light {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+    background-color: #334155;
+}
+
+/* Smooth body transition for theme change */
+html {
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body {
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Hide on mobile utility */
+.hide-on-mobile {
+    display: flex;
 }
 
 .notification-badge {
@@ -2290,7 +2371,16 @@ input:checked+.toggle-slider::before {
     }
 
     .user-name {
-        display: none;
+        display: block;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .hide-on-mobile {
+        display: none !important;
     }
 
     .user-info {
@@ -2419,11 +2509,40 @@ input:checked+.toggle-slider::before {
     }
 
     .page-header h1 {
-        font-size: 24px;
+        font-size: 22px;
     }
 
     .page-header p {
-        font-size: 14px;
+        font-size: 13px;
+    }
+
+    .page-header {
+        margin-bottom: 16px;
+    }
+
+    .content-container.space-y-6 > * + * {
+        margin-top: 16px;
+    }
+
+    /* Archive filter mobile responsiveness */
+    .archive-filter-container {
+        padding: 16px;
+        gap: 12px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .archive-card .archive-content {
+        padding: 14px;
+    }
+
+    .archive-actions {
+        flex-wrap: wrap;
+    }
+
+    .archive-actions .btn {
+        font-size: 13px;
+        padding: 10px 14px;
     }
 
     .login-card {
@@ -2485,7 +2604,16 @@ input:checked+.toggle-slider::before {
     }
 
     .page-header h1 {
-        font-size: 22px;
+        font-size: 20px;
+    }
+
+    .user-name {
+        max-width: 90px;
+        font-size: 12px;
+    }
+
+    .archive-card .archive-thumbnail {
+        height: 120px;
     }
 
     .grid-7 {
@@ -2620,15 +2748,15 @@ input:checked+.toggle-slider::before {
 /* Çox kiçik ekranlar */
 @media (max-width: 360px) {
     .top-header {
-        padding: 0 12px;
+        padding: 0 8px;
     }
 
     .main-content {
-        padding: 12px;
+        padding: 10px;
     }
 
     .page-header h1 {
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .card {
@@ -2641,6 +2769,22 @@ input:checked+.toggle-slider::before {
 
     .stat-value {
         font-size: 22px;
+    }
+
+    .user-name {
+        max-width: 70px;
+        font-size: 11px;
+    }
+
+    .user-info {
+        padding-left: 6px;
+        margin-left: 4px;
+        gap: 6px;
+    }
+
+    .archive-filter-container {
+        padding: 12px;
+        gap: 10px;
     }
 }
 

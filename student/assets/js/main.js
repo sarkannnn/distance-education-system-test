@@ -25,19 +25,6 @@ function initTheme() {
     const themeToggle = document.getElementById('theme-toggle');
     if (!themeToggle) return;
 
-    const sunIcon = themeToggle.querySelector('.theme-icon-light');
-    const moonIcon = themeToggle.querySelector('.theme-icon-dark');
-
-    // Set initial icon state
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    if (currentTheme === 'dark') {
-        sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
-    } else {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = 'block';
-    }
-
     themeToggle.addEventListener('click', () => {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const newTheme = isDark ? 'light' : 'dark';
@@ -45,18 +32,9 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
 
-        // Update icons
-        if (newTheme === 'dark') {
-            sunIcon.style.display = 'block';
-            moonIcon.style.display = 'none';
-        } else {
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'block';
-        }
-
-        // Re-create icons if lucide is available
+        // Re-create icons after a short delay so Lucide renders the new SVGs
         if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+            setTimeout(() => lucide.createIcons(), 50);
         }
     });
 }

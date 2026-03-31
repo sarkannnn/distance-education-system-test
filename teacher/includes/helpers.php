@@ -177,7 +177,7 @@ function getMonths()
 /**
  * Mətni müəyyən uzunluğa qədər qısalt
  */
-function truncate($text, $length = 45)
+function truncate($text, $length = 80)
 {
     if (mb_strlen($text, 'UTF-8') <= $length) {
         return $text;

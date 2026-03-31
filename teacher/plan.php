@@ -824,7 +824,7 @@ require_once 'includes/header.php';
                         onchange="filterArchives()">
                         <option value="all">Bütün fənlər</option>
                         <?php foreach ($courses as $c): ?>
-                            <option value="<?php echo $c['id']; ?>"><?php echo e(truncate($c['title'])); ?></option>
+                            <option value="<?php echo $c['id']; ?>"><?php echo e($c['title']); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -871,8 +871,8 @@ require_once 'includes/header.php';
 
                         <!-- Content Body -->
                         <div style="padding: 24px;">
-                            <h3
-                                style="font-size: 20px; font-weight: 950; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.3; height: 52px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <h3 class="archive-card-title"
+                                style="font-size: 20px; font-weight: 950; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.3; min-height: 26px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
                                 <?php echo e($lesson['title']); ?>
                             </h3>
 
@@ -918,44 +918,32 @@ require_once 'includes/header.php';
                                 <div style="margin-bottom: 6px;"></div>
                             <?php endif; ?>
 
-                            <div
-                                style="display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 24px; overflow: hidden; height: 32px;">
-                                <span style="display: flex; align-items: center; gap: 6px; white-space: nowrap;"><i data-lucide="calendar"
+                            <div class="archive-card-meta-row">
+                                <span class="archive-card-meta-item"><i data-lucide="calendar"
                                         style="width: 16px;"></i>
                                     <?php echo date('d.m.Y', strtotime($lesson['date'])); ?></span>
-                                <span style="display: flex; align-items: center; gap: 6px; white-space: nowrap;"><i data-lucide="eye"
+                                <span class="archive-card-meta-item"><i data-lucide="eye"
                                         style="width: 16px;"></i> <?php echo $lesson['views']; ?> baxış</span>
                                 
                                 <!-- Visibility Toggle -->
-                                <div class="visibility-status" 
-                                     style="margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 4px 12px; border-radius: 12px; background: <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.08)' : 'rgba(100, 116, 139, 0.08)'; ?>; border: 1px solid <?php echo $lesson['is_visible'] ? 'rgba(5, 150, 105, 0.15)' : 'rgba(100, 116, 139, 0.15)'; ?>; transition: all 0.3s ease; white-space: nowrap;">
-                                    <div class="status-badge" style="display: flex; align-items: center; gap: 8px;">
-                                        <div class="status-icon-wrapper" style="display: flex; align-items: center;">
-                                            <i data-lucide="<?php echo $lesson['is_visible'] ? 'eye' : 'eye-off'; ?>" 
-                                               style="width: 16px; height: 16px; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>;"></i>
+                                <div class="visibility-status <?php echo $lesson['is_visible'] ? 'is-visible' : 'is-hidden'; ?>">
+                                    <div class="status-badge">
+                                        <div class="status-icon-wrapper">
+                                            <i data-lucide="<?php echo $lesson['is_visible'] ? 'eye' : 'eye-off'; ?>"></i>
                                         </div>
-                                        <span class="status-text" style="font-size: 11px; font-weight: 800; color: <?php echo $lesson['is_visible'] ? '#059669' : '#64748b'; ?>; letter-spacing: 0.2px; line-height: 1;">
+                                        <span class="status-text">
                                             <?php echo $lesson['is_visible'] ? 'Tələbə: Açıq' : 'Tələbə: Gizli'; ?>
                                         </span>
                                     </div>
-                                    <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 18px; margin: 0;">
+                                    <label class="switch">
                                         <input type="checkbox" <?php echo $lesson['is_visible'] ? 'checked' : ''; ?> 
-                                               onchange="toggleVisibility('<?php echo $lesson['is_live'] ? 'live' : 'arch'; ?>', <?php echo $lesson['db_id']; ?>, this)"
-                                               style="opacity: 0; width: 0; height: 0;">
-                                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 18px;"></span>
+                                               onchange="toggleVisibility('<?php echo $lesson['is_live'] ? 'live' : 'arch'; ?>', <?php echo $lesson['db_id']; ?>, this)">
+                                        <span class="slider round"></span>
                                     </label>
                                 </div>
                             </div>
 
-                            <style>
-                                .switch input:checked + .slider { background-color: #3b82f6; }
-                                .switch input:focus + .slider { box-shadow: 0 0 1px #3b82f6; }
-                                .switch input:checked + .slider:before { transform: translateX(16px); }
-                                .slider:before {
-                                    position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
-                                    background-color: white; transition: .4s; border-radius: 50%;
-                                }
-                            </style>
+
 
                             <!-- Card Actions -->
                             <div
@@ -1193,17 +1181,16 @@ require_once 'includes/header.php';
         const label = container.querySelector('.status-text');
         const iconWrapper = container.querySelector('.status-icon-wrapper');
         
-        container.style.background = isVisible ? 'rgba(5, 150, 105, 0.08)' : 'rgba(100, 116, 139, 0.08)';
-        container.style.borderColor = isVisible ? 'rgba(5, 150, 105, 0.15)' : 'rgba(100, 116, 139, 0.15)';
+        // Toggle CSS classes instead of inline styles
+        container.classList.remove('is-visible', 'is-hidden');
+        container.classList.add(isVisible ? 'is-visible' : 'is-hidden');
         
         if (label) {
             label.textContent = isVisible ? 'Tələbə: Açıq' : 'Tələbə: Gizli';
-            label.style.color = isVisible ? '#059669' : '#64748b';
         }
         
         if (iconWrapper) {
-            const iconColor = isVisible ? '#059669' : '#64748b';
-            iconWrapper.innerHTML = `<i data-lucide="${isVisible ? 'eye' : 'eye-off'}" style="width: 16px; height: 16px; color: ${iconColor};"></i>`;
+            iconWrapper.innerHTML = `<i data-lucide="${isVisible ? 'eye' : 'eye-off'}"></i>`;
             if (window.lucide) window.lucide.createIcons();
         }
     }

@@ -3204,3 +3204,200 @@ input:checked+.toggle-slider::before {
     }
 }
 
+/* ==========================================
+   Archive Card Meta Row & Visibility Toggle
+   ========================================== */
+.archive-card-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.archive-card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.visibility-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.visibility-status.is-visible {
+    background: rgba(5, 150, 105, 0.08);
+    border: 1px solid rgba(5, 150, 105, 0.15);
+}
+
+.visibility-status.is-hidden {
+    background: rgba(100, 116, 139, 0.08);
+    border: 1px solid rgba(100, 116, 139, 0.15);
+}
+
+.visibility-status .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.visibility-status .status-icon-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.visibility-status .status-icon-wrapper i,
+.visibility-status .status-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
+}
+
+.visibility-status.is-visible .status-icon-wrapper i,
+.visibility-status.is-visible .status-icon-wrapper svg {
+    color: #059669;
+}
+
+.visibility-status.is-hidden .status-icon-wrapper i,
+.visibility-status.is-hidden .status-icon-wrapper svg {
+    color: #64748b;
+}
+
+.visibility-status .status-text {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    line-height: 1;
+}
+
+.visibility-status.is-visible .status-text {
+    color: #059669;
+}
+
+.visibility-status.is-hidden .status-text {
+    color: #64748b;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.4s;
+    border-radius: 18px;
+}
+
+.switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+    background-color: #3b82f6;
+}
+
+.switch input:focus + .slider {
+    box-shadow: 0 0 1px #3b82f6;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(16px);
+}
+
+/* Course filter select - show full text */
+#courseFilter {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Archive card title - allow wrapping */
+.archive-card-title {
+    word-break: break-word;
+}
+
+/* ==========================================
+   Archive Card Mobile Responsive
+   ========================================== */
+@media (max-width: 768px) {
+    .archive-card-meta-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        height: auto;
+        margin-bottom: 16px;
+    }
+
+    .visibility-status {
+        margin-left: 0;
+        width: 100%;
+        justify-content: space-between;
+        padding: 8px 12px;
+    }
+
+    .archive-card-title {
+        font-size: 16px !important;
+        -webkit-line-clamp: unset !important;
+        line-clamp: unset !important;
+        display: block !important;
+        height: auto !important;
+        min-height: auto !important;
+    }
+
+    #courseFilter {
+        width: 100% !important;
+        min-width: unset !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .visibility-status .status-text {
+        font-size: 10px;
+    }
+
+    .visibility-status {
+        gap: 6px;
+        padding: 6px 10px;
+    }
+
+    .archive-card-meta-row {
+        font-size: 12px;
+    }
+}
