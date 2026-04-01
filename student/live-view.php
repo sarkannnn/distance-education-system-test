@@ -1336,9 +1336,12 @@ require_once 'includes/header.php';
     // ─── Dynamic ICE/TURN Configuration ───
     // Default fallback (STUN only — works on LAN, fails on mobile)
     let iceServers = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
+        iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            },
+            {
+                urls: 'stun:stun1.l.google.com:19302'
+            }
         ],
         sdpSemantics: 'unified-plan',
         iceCandidatePoolSize: 10
@@ -1360,10 +1363,10 @@ require_once 'includes/header.php';
                 };
                 turnCredentialsFetched = true;
 
-                const hasTurn = data.iceServers.some(s => 
-                    (typeof s.urls === 'string' && s.urls.startsWith('turn:')) ||
-                    (typeof s.urls === 'string' && s.urls.startsWith('turns:'))
-                );
+                const hasTurn = data.iceServers.some(s => {
+                    const urls = Array.isArray(s.urls) ? s.urls : [s.urls];
+                    return urls.some(u => typeof u === 'string' && (u.startsWith('turn:') || u.startsWith('turns:')));
+                });
 
                 if (hasTurn) {
                     DBG("✅ TURN server hazırdır (mobil bağlantı dəstəklənir)");
@@ -1388,7 +1391,9 @@ require_once 'includes/header.php';
 
     const peerConfig = {
         debug: 1,
-        get config() { return iceServers; },
+        get config() {
+            return iceServers;
+        },
         host: window.location.hostname,
         port: 9000,
         secure: false,
@@ -1501,6 +1506,8 @@ require_once 'includes/header.php';
     }
 
     function connectToTeacher(teacherId) {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const connTimeoutMs = isLocal ? 4000 : 12000;
         let connTimeout = setTimeout(() => {
             if (isConnecting) {
                 DBG("⚠️ Bağlantı zamanı aşımı (NAT problemi). Yenidən cəhd edilir...");
@@ -1513,7 +1520,7 @@ require_once 'includes/header.php';
                 dataConn = null;
                 startDiscovery();
             }
-        }, 4000);
+        }, connTimeoutMs);
 
         dataConn = p.connect(teacherId, {
             serialization: 'json',
