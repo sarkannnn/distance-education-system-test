@@ -474,7 +474,7 @@ try {
                                         </div>
                                     <?php endif; ?>
                                     <h3
-                                        class="text-base sm:text-lg font-bold text-white mb-4 line-clamp-1 group-hover:text-blue-400 transition-colors">
+                                        class="text-base sm:text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors">
                                         <?php echo e($lesson['topic_name'] ?: $lesson['course_title']); ?>
                                     </h3>
                                     <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[10px] sm:text-xs text-white/40">
@@ -486,21 +486,21 @@ try {
                                         <div class="flex items-center gap-2">
                                             <i data-lucide="user" class="w-3.5 h-3.5 text-blue-400"></i>
                                             <span
-                                                class="text-white/80 line-clamp-1"><?php echo e($lesson['instructor_display_name'] ?: 'Müəllim təyin edilməyib'); ?></span>
+                                                class="text-white/80"><?php echo e($lesson['instructor_display_name'] ?: 'Müəllim təyin edilməyib'); ?></span>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-blue-400"></i>
                                             <span class="text-white/80">Kurs: <?php echo $lesson['course_level_val']; ?>-ci
                                                 kurs</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2 col-span-2">
                                             <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-400"></i>
-                                            <span class="text-white/80 line-clamp-1">İxtisas:
+                                            <span class="text-white/80">İxtisas:
                                                 <?php echo e($lesson['specialization_name']); ?></span>
                                         </div>
                                         <div class="flex items-center gap-2 col-span-2">
                                             <i data-lucide="monitor" class="w-3.5 h-3.5 text-blue-400"></i>
-                                            <span class="text-white/80 line-clamp-1">Fənn:
+                                            <span class="text-white/80">Fənn:
                                                 <?php echo e($lesson['course_title']); ?></span>
                                         </div>
                                     </div>
@@ -534,19 +534,19 @@ try {
                                 <div
                                     class="p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group">
                                     <h4
-                                        class="text-base sm:text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors line-clamp-1">
+                                        class="text-base sm:text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors">
                                         <?php echo e($archive['topic_name'] ?: $archive['course_title']); ?>
                                     </h4>
                                     <div class="space-y-2 mb-6 text-[10px] sm:text-xs font-medium">
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Fənn:</span>
                                             <span
-                                                class="text-blue-400 line-clamp-1"><?php echo e($archive['course_title']); ?></span>
+                                                class="text-blue-400"><?php echo e($archive['course_title']); ?></span>
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">İxtisas:</span>
                                             <span
-                                                class="text-white/90 line-clamp-1"><?php echo e($archive['specialization_name']); ?></span>
+                                                class="text-white/90"><?php echo e($archive['specialization_name']); ?></span>
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Kurs:</span>
