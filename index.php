@@ -118,6 +118,10 @@ try {
             scroll-behavior: smooth;
         }
 
+        html {
+            scroll-padding-top: 80px;
+        }
+
         .bg-grid {
             background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0);
             background-size: 40px 40px;
@@ -207,23 +211,23 @@ try {
     <!-- Header Section -->
     <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-transparent py-5">
         <div class="container mx-auto px-4 lg:px-8">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center lg:justify-between relative">
                 <!-- Logo Section -->
-                <a href="#home" class="flex items-center gap-4 group">
+                <a href="#home" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 group text-center sm:text-left">
                     <div class="relative">
                         <div
                             class="absolute -inset-3 bg-blue-500/10 rounded-[1.5rem] blur opacity-0 group-hover:opacity-100 transition-all duration-500">
                         </div>
                         <div
-                            class="relative w-14 h-14 bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-white/5 shadow-xl transition-transform duration-500 group-hover:scale-105">
+                            class="relative w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-white/5 shadow-xl transition-transform duration-500 group-hover:scale-105">
                             <img src="assets/logo.png" alt="NDU Logo" class="w-full h-full object-contain p-1.5 pt-2">
                         </div>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-white font-bold text-base leading-tight tracking-tight uppercase">NAXÇIVAN
+                        <span class="text-white font-bold text-sm sm:text-base leading-tight tracking-tight uppercase">NAXÇIVAN
                             DÖVLƏT</span>
                         <span
-                            class="text-white font-bold text-base leading-tight tracking-tight uppercase">UNİVERSİTETİ</span>
+                            class="text-white font-bold text-sm sm:text-base leading-tight tracking-tight uppercase">UNİVERSİTETİ</span>
                     </div>
                 </a>
 
@@ -290,7 +294,7 @@ try {
 
                 <!-- Mobile Menu Toggle -->
                 <button id="mobile-toggle"
-                    class="lg:hidden p-3 text-white hover:bg-white/10 rounded-2xl transition-colors border border-white/10">
+                    class="lg:hidden absolute right-4 p-3 text-white hover:bg-white/10 rounded-2xl transition-colors border border-white/10">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -298,7 +302,7 @@ try {
     </header>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="hidden fixed inset-0 z-[49] bg-[#0a1f44] pt-24 px-4 transition-all duration-300">
+    <div id="mobile-menu" class="hidden fixed inset-0 z-[49] bg-[#0a1f44] pt-24 px-4 overflow-y-auto transition-all duration-300">
         <nav class="flex flex-col gap-2">
             <a href="#home"
                 class="px-6 py-4 text-lg font-medium text-blue-100 hover:text-white hover:bg-white/5 rounded-2xl">Ana
@@ -365,23 +369,23 @@ try {
                 </p>
                 <div class="flex flex-col sm:flex-row gap-6 pt-12 animate-fadeInUp" style="animation-delay: 0.6s;">
                     <a href="#schedule"
-                        class="group relative px-10 py-5 bg-white text-secondary rounded-full font-extrabold flex items-center justify-center gap-4 hover:scale-105 transition-all duration-500 shadow-[0_20px_50px_rgba(255,255,255,0.15)] overflow-hidden">
+                        class="group relative px-8 sm:px-10 py-5 bg-white text-secondary rounded-full font-extrabold flex items-center justify-center gap-4 hover:scale-105 transition-all duration-500 shadow-[0_20px_50px_rgba(255,255,255,0.15)] overflow-hidden">
                         <div
                             class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i data-lucide="play" class="w-5 h-5 fill-current"></i>
                         </div>
-                        <span class="text-lg">Dərslər və Cədvəl</span>
+                        <span class="text-base sm:text-lg">Dərslər və Cədvəl</span>
                         <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                     </a>
                     <a href="#about"
-                        class="px-10 py-5 bg-white/5 border border-white/15 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center">
+                        class="px-8 sm:px-10 py-5 bg-white/5 border border-white/15 text-white rounded-full font-bold text-base sm:text-lg hover:bg-white/10 transition-all flex items-center justify-center">
                         Daha Ətrafı
                     </a>
                 </div>
             </div>
 
             <!-- Side Card -->
-            <div class="hidden xl:block relative opacity-0 animate-fade-in delay-6">
+            <div class="hidden lg:block relative opacity-0 animate-fade-in delay-6">
                 <div
                     class="relative z-10 w-96 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[3rem] shadow-2xl">
                     <div class="space-y-8">
@@ -431,21 +435,21 @@ try {
     </section>
 
     <!-- LESSONS & SCHEDULE SECTION (2 Column Layout) -->
-    <section id="schedule" class="py-24 bg-secondary relative reveal-item">
+    <section id="schedule" class="py-12 sm:py-24 bg-secondary relative reveal-item">
         <div class="container mx-auto px-4 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-8 items-start">
 
                 <!-- 1st Column: Today's Lessons -->
                 <div
-                    class="flex-1 min-w-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] overflow-hidden flex flex-col h-full self-stretch">
-                    <div class="p-8 border-b border-white/10 flex items-center justify-between shrink-0">
+                    class="flex-1 min-w-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col h-full self-stretch">
+                    <div class="p-6 sm:p-8 border-b border-white/10 flex items-center justify-between shrink-0">
                         <h2 class="text-xl font-extrabold flex items-center gap-3 text-white">
                             <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                             Bu Günün Dərsləri - <span id="current-day"><?php echo $todayName; ?></span>
                         </h2>
                     </div>
                     <!-- Fixed Height Container for exactly ~3 smaller cards -->
-                    <div class="p-6 overflow-y-auto space-y-4 h-[580px] scrollbar-hide" data-lenis-prevent>
+                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[450px] sm:h-[580px] scrollbar-hide" data-lenis-prevent>
                         <?php if (empty($todayLessons)): ?>
                             <div class="flex flex-col items-center justify-center h-full text-center py-20">
                                 <div
@@ -470,10 +474,10 @@ try {
                                         </div>
                                     <?php endif; ?>
                                     <h3
-                                        class="text-lg font-bold text-white mb-4 line-clamp-1 group-hover:text-blue-400 transition-colors">
+                                        class="text-base sm:text-lg font-bold text-white mb-4 line-clamp-1 group-hover:text-blue-400 transition-colors">
                                         <?php echo e($lesson['topic_name'] ?: $lesson['course_title']); ?>
                                     </h3>
-                                    <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[11px] text-white/40">
+                                    <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[10px] sm:text-xs text-white/40">
                                         <div class="flex items-center gap-2">
                                             <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-400"></i>
                                             <span class="text-white/80"><?php echo $startTime; ?> -
@@ -508,15 +512,15 @@ try {
 
                 <!-- 2nd Column: Past Lessons -->
                 <div
-                    class="flex-1 min-w-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] overflow-hidden flex flex-col h-full self-stretch">
-                    <div class="p-8 border-b border-white/10 shrink-0">
+                    class="flex-1 min-w-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col h-full self-stretch">
+                    <div class="p-6 sm:p-8 border-b border-white/10 shrink-0">
                         <h2 class="text-xl font-extrabold flex items-center gap-3 text-white">
                             <i data-lucide="archive" class="w-5 h-5 text-blue-400"></i>
                             Keçirilmiş Dərslər
                         </h2>
                     </div>
                     <!-- Fixed Height Container for exactly ~3 cards -->
-                    <div class="p-6 overflow-y-auto space-y-4 h-[580px] scrollbar-hide" data-lenis-prevent>
+                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[450px] sm:h-[580px] scrollbar-hide" data-lenis-prevent>
                         <?php if (empty($archivedLessons)): ?>
                             <div class="flex flex-col items-center justify-center h-full text-center py-20">
                                 <div
@@ -530,10 +534,10 @@ try {
                                 <div
                                     class="p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group">
                                     <h4
-                                        class="text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors line-clamp-1">
+                                        class="text-base sm:text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors line-clamp-1">
                                         <?php echo e($archive['topic_name'] ?: $archive['course_title']); ?>
                                     </h4>
-                                    <div class="space-y-2 mb-6 text-xs font-medium">
+                                    <div class="space-y-2 mb-6 text-[10px] sm:text-xs font-medium">
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Fənn:</span>
                                             <span
@@ -575,17 +579,17 @@ try {
     </section>
 
     <!-- ABOUT SECTION (Refocused on Platform) -->
-    <section id="about" class="py-24 bg-secondary relative overflow-hidden reveal-item">
+    <section id="about" class="py-12 sm:py-24 bg-secondary relative overflow-hidden reveal-item">
         <div class="container mx-auto px-4 lg:px-8 relative z-10">
 
             <!-- Section Header (Statistics Removed) -->
-            <div class="text-center mb-20 animate-fadeInUp">
+            <div class="text-center mb-12 sm:mb-20 animate-fadeInUp">
                 <div
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-400 text-xs font-bold tracking-[0.2em] uppercase mb-6">
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-6">
                     <i data-lucide="layers" class="w-4 h-4 text-blue-400"></i> Platforma Haqqında
                 </div>
-                <h2 class="text-4xl lg:text-5xl font-extrabold text-white mb-6">NDU Distant Təhsil Ekosistemi</h2>
-                <p class="text-blue-100/40 max-w-3xl mx-auto text-lg leading-relaxed">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">NDU Distant Təhsil Ekosistemi</h2>
+                <p class="text-blue-100/40 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed">
                     Müasir texnologiyalarla təchiz olunmuş bu platforma, təhsilin hər kəs üçün və hər yerdə əlçatan
                     olması üçün yaradılmışdır.
                 </p>
@@ -594,10 +598,10 @@ try {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Mission -->
                 <div
-                    class="p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] hover:bg-white/10 transition-all text-center group">
+                    class="p-6 sm:p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] hover:bg-white/10 transition-all text-center group">
                     <div
-                        class="w-20 h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center text-blue-400 mx-auto mb-8 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
-                        <i data-lucide="zap" class="w-10 h-10"></i>
+                        class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600/10 rounded-2xl sm:rounded-3xl flex items-center justify-center text-blue-400 mx-auto mb-8 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="zap" class="w-8 h-8 sm:w-10 sm:h-10"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-white mb-6">Platformanın Məqsədi</h3>
                     <p class="text-blue-100/60 leading-relaxed text-sm">
@@ -608,12 +612,12 @@ try {
 
                 <!-- Vision -->
                 <div
-                    class="p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] hover:bg-white/10 transition-all text-center group">
+                    class="p-6 sm:p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] hover:bg-white/10 transition-all text-center group">
                     <div
-                        class="w-20 h-20 bg-emerald-600/10 rounded-3xl flex items-center justify-center text-emerald-400 mx-auto mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
-                        <i data-lucide="monitor" class="w-10 h-10"></i>
+                        class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-600/10 rounded-2xl sm:rounded-3xl flex items-center justify-center text-emerald-400 mx-auto mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="monitor" class="w-8 h-8 sm:w-10 sm:h-10"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-6">Texniki İmkanlar</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-white mb-6">Texniki İmkanlar</h3>
                     <p class="text-blue-100/60 leading-relaxed text-sm">
                         Stabil canlı dərs bağlantısı, fənn resurslarının onlayn idarəedilməsi və dərslərin
                         arxivləşdirilməsi vasitəsilə keyfiyyətli distant tədris mühiti təqdim edirik.
@@ -622,12 +626,12 @@ try {
 
                 <!-- Values -->
                 <div
-                    class="p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] hover:bg-white/10 transition-all text-center group">
+                    class="p-6 sm:p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] hover:bg-white/10 transition-all text-center group">
                     <div
-                        class="w-20 h-20 bg-purple-600/10 rounded-3xl flex items-center justify-center text-purple-400 mx-auto mb-8 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
-                        <i data-lucide="shield-check" class="w-10 h-10"></i>
+                        class="w-16 h-16 sm:w-20 sm:h-20 bg-purple-600/10 rounded-2xl sm:rounded-3xl flex items-center justify-center text-purple-400 mx-auto mb-8 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="shield-check" class="w-8 h-8 sm:w-10 sm:h-10"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-6">Prinsiplərimiz</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-white mb-6">Prinsiplərimiz</h3>
                     <p class="text-blue-100/60 leading-relaxed text-sm">
                         Məlumatların tam təhlükəsizliyi, akademik şəffaflıq və hər bir istifadəçiyə (tələbə/müəllim)
                         fərdi yanaşma bizim əsas iş prinsipimizdir.
@@ -638,18 +642,18 @@ try {
     </section>
 
     <!-- Platform Features (Platforma) Section -->
-    <section id="features" class="py-24 bg-[#0a1f44] relative overflow-hidden reveal-item">
+    <section id="features" class="py-12 sm:py-24 bg-[#0a1f44] relative overflow-hidden reveal-item">
 
         <div class="container mx-auto px-4 lg:px-8 relative z-10">
-            <div class="text-center mb-20 opacity-0 animate-fade-in">
+            <div class="text-center mb-12 sm:mb-20 opacity-0 animate-fade-in">
                 <div class="inline-flex items-center gap-3 px-6 py-2 bg-white/5 border border-white/10 rounded-full mb-8 animate-fadeInUp"
                     style="animation-delay: 0.1s;">
                     <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                    <span class="text-blue-200/60 text-sm font-bold tracking-wider uppercase">Naxçıvan Dövlət
+                    <span class="text-blue-200/60 text-[10px] sm:text-sm font-bold tracking-wider uppercase">Naxçıvan Dövlət
                         Universiteti — Distant Təhsil Mərkəzi</span>
                 </div>
-                <h2 class="text-white mb-6 font-extrabold leading-tight text-3xl lg:text-5xl">Vahid Tədris Mühiti</h2>
-                <p class="text-blue-200/60 max-w-2xl mx-auto text-lg leading-relaxed font-medium">NDU Distant Təhsil
+                <h2 class="text-white mb-6 font-extrabold leading-tight text-3xl sm:text-4xl lg:text-5xl">Vahid Tədris Mühiti</h2>
+                <p class="text-blue-200/60 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed font-medium">NDU Distant Təhsil
                     platforması akademik mükəmməllik üçün lazım olan bütün texnoloji alətləri bir pəncərədə birləşdirir.
                 </p>
             </div>
@@ -657,7 +661,7 @@ try {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
                 <!-- Feature 1: Canlı Dərslər -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="video" class="w-6 h-6 text-rose-400"></i>
@@ -669,7 +673,7 @@ try {
 
                 <!-- Feature 2: Video Arxiv -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="archive" class="w-6 h-6 text-blue-400"></i>
@@ -681,7 +685,7 @@ try {
 
                 <!-- Feature 3: Akademik Monitorinq -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="bar-chart-2" class="w-6 h-6 text-emerald-400"></i>
@@ -693,7 +697,7 @@ try {
 
                 <!-- Feature 4: Dinamik Cədvəl -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="calendar" class="w-6 h-6 text-purple-400"></i>
@@ -705,7 +709,7 @@ try {
 
                 <!-- Feature 5: Elektron Resurslar -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="book-open" class="w-6 h-6 text-amber-400"></i>
@@ -717,7 +721,7 @@ try {
 
                 <!-- Feature 6: Ani Bildirişlər -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-sky-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="bell" class="w-6 h-6 text-sky-400"></i>
@@ -729,7 +733,7 @@ try {
 
                 <!-- Feature 7: E-Davamiyyət -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="user-check" class="w-6 h-6 text-teal-400"></i>
@@ -741,7 +745,7 @@ try {
 
                 <!-- Feature 8: İnteraktiv Forum -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
                         class="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="message-square" class="w-6 h-6 text-indigo-400"></i>
@@ -753,7 +757,7 @@ try {
             </div>
         </div>
     </section>
-    <section id="portals" class="py-24 bg-primary relative overflow-hidden reveal-item">
+    <section id="portals" class="py-12 sm:py-24 bg-primary relative overflow-hidden reveal-item">
         <div class="container mx-auto px-4 lg:px-8">
             <div class="text-center mb-20">
                 <h2 class="text-white text-4xl lg:text-5xl font-extrabold mb-6">İstifadəçi Portalları</h2>
@@ -764,11 +768,11 @@ try {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
                 <!-- Student Portal Card -->
                 <div
-                    class="relative group bg-[#0e2652] border border-white/10 rounded-[3.5rem] p-12 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
+                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-12 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
                     <div class="flex items-start justify-between mb-10">
                         <div
-                            class="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.3)] transition-transform duration-500 group-hover:scale-110">
-                            <i data-lucide="graduation-cap" class="w-12 h-12"></i>
+                            class="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.3)] transition-transform duration-500 group-hover:scale-110">
+                            <i data-lucide="graduation-cap" class="w-10 h-10 sm:w-12 sm:h-12"></i>
                         </div>
                         <div class="px-4 py-1.5 bg-blue-500/10 border border-blue-400/20 rounded-full">
                             <span class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Tələbə
@@ -776,7 +780,7 @@ try {
                         </div>
                     </div>
 
-                    <h2 class="text-3xl font-extrabold text-white mb-6">Tələbə Girişi</h2>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-6">Tələbə Girişi</h2>
                     <p class="text-blue-100/60 text-lg mb-8 leading-relaxed">Şəxsi kabinetinizə daxil olaraq bütün
                         təhsil resurslarından yararlanın.</p>
 
@@ -803,11 +807,11 @@ try {
 
                 <!-- Admin Card -->
                 <div
-                    class="relative group bg-[#0e2652] border border-white/10 rounded-[3.5rem] p-12 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
+                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-12 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
                     <div class="flex items-start justify-between mb-10">
                         <div
-                            class="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-slate-700 to-slate-900 border border-white/10 flex items-center justify-center text-white shadow-2xl transition-transform duration-500 group-hover:scale-110">
-                            <i data-lucide="user-circle" class="w-12 h-12 text-slate-200"></i>
+                            class="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-slate-700 to-slate-900 border border-white/10 flex items-center justify-center text-white shadow-2xl transition-transform duration-500 group-hover:scale-110">
+                            <i data-lucide="user-circle" class="w-10 h-10 sm:w-12 sm:h-12 text-slate-200"></i>
                         </div>
                         <div class="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full">
                             <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Müəllim
@@ -815,7 +819,7 @@ try {
                         </div>
                     </div>
 
-                    <h2 class="text-3xl font-extrabold text-white mb-6">Müəllim Girişi</h2>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-6">Müəllim Girişi</h2>
                     <p class="text-blue-100/60 text-lg mb-8 leading-relaxed">Tədris prosesini və tələbə irəliləyişini
                         rəqəmsal mühitdə idarə edin.</p>
 
@@ -843,13 +847,13 @@ try {
     </section>
 
     <!-- Footer Section -->
-    <footer id="contact" class="bg-[#060f23] pt-20 pb-10 border-t border-white/5 reveal-item">
+    <footer id="contact" class="bg-[#060f23] pt-12 sm:pt-20 pb-10 border-t border-white/5 reveal-item">
         <div class="container mx-auto px-4 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 mb-20">
 
                 <!-- Left Column: Branding -->
-                <div class="space-y-6">
-                    <div class="flex items-center gap-4">
+                <div class="space-y-6 flex flex-col items-center text-center md:items-start md:text-left">
+                    <div class="flex flex-col items-center md:flex-row gap-4">
                         <div
                             class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-2 shadow-2xl border border-white/10">
                             <img src="assets/logo.png" alt="NDU Logo" class="w-full h-full object-contain">
@@ -982,22 +986,38 @@ try {
         });
 
         document.addEventListener('click', () => {
-            loginDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
-            loginBtn.querySelector('i:last-child').classList.remove('rotate-180');
+            if (loginDropdown) loginDropdown.classList.add('hidden', 'opacity-0', 'scale-95');
+            const arrow = loginBtn ? loginBtn.querySelector('[data-lucide="chevron-down"]') : null;
+            if (arrow) arrow.classList.remove('rotate-180');
         });
 
         // Mobile menu toggle
         const mobileToggle = document.getElementById('mobile-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
-        mobileToggle.addEventListener('click', () => {
+        
+        function toggleMenu() {
+            if (!mobileMenu || !mobileToggle) return;
             mobileMenu.classList.toggle('hidden');
-            const icon = mobileToggle.querySelector('i');
+            const icon = mobileToggle.querySelector('[data-lucide]');
             if (mobileMenu.classList.contains('hidden')) {
-                icon.setAttribute('data-lucide', 'menu');
+                if (icon) icon.setAttribute('data-lucide', 'menu');
+                document.body.style.overflow = '';
             } else {
-                icon.setAttribute('data-lucide', 'x');
+                if (icon) icon.setAttribute('data-lucide', 'x');
+                document.body.style.overflow = 'hidden';
             }
             lucide.createIcons();
+        }
+
+        mobileToggle.addEventListener('click', toggleMenu);
+
+        // Close menu on link click
+        mobileMenu.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    toggleMenu();
+                }
+            });
         });
 
         // Set current day
