@@ -462,6 +462,12 @@ if ($tmisToken) {
                         }
                     }
 
+                    // Fix relative paths to prevent 404
+                    if (!empty($fileUrl) && strpos($fileUrl, 'http') !== 0 && strpos($fileUrl, '../') !== 0) {
+                        $cleanPath = preg_replace('/^(\.\.\/)+/', '', ltrim($fileUrl, '/'));
+                        $fileUrl = '../' . $cleanPath;
+                    }
+
                     $archivedLessons[] = [
                         'id' => ($isLive ? 'live_' : 'arch_') . ($item['id'] ?? 0),
                         'db_id' => $item['id'] ?? 0,
@@ -535,6 +541,14 @@ if (!empty($myTeacherIds) || $isAdmin) {
 
         $localTitle = $archive['title'];
         $sInfoManual = $subjectMap[$archive['course_id']] ?? [];
+        
+        $rawFileUrl = $archive['pdf_url'] ?: $archive['video_url'];
+        // Fix relative paths for local environments
+        if (!empty($rawFileUrl) && strpos($rawFileUrl, 'http') !== 0 && strpos($rawFileUrl, '../') !== 0) {
+            $cleanPath = preg_replace('/^(\.\.\/)+/', '', ltrim($rawFileUrl, '/'));
+            $rawFileUrl = '../' . $cleanPath;
+        }
+
         $archivedLessons[] = [
             'id' => 'arch_' . $archive['id'],
             'db_id' => $archive['id'],
@@ -547,7 +561,7 @@ if (!empty($myTeacherIds) || $isAdmin) {
             'instructor_name' => $archive['instructor_name'],
             'date' => $archive['created_at'] ?? $archive['archived_date'],
             'views' => $archive['views'],
-            'file_url' => ($archive['pdf_url'] ?: $archive['video_url']),
+            'file_url' => $rawFileUrl,
             'duration' => $archive['duration'] ?? 'N/A',
             'is_live' => false,
             'type' => $isPdf ? 'pdf' : 'video',

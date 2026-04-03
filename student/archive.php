@@ -82,9 +82,18 @@ try {
             $rawVideo = $archive['video_url'] ?? '';
             $rawPdf = $archive['pdf_url'] ?? '';
 
-            // URL handling... (keeping existing logic for brevity or adding fix)
+            // Fix relative paths for student folder to prevent 404 errors
+            if (!empty($rawVideo) && strpos($rawVideo, 'http') !== 0 && strpos($rawVideo, '../') !== 0) {
+                // Remove leading / if it was added incorrectly, and use ../
+                $cleanPath = preg_replace('/^(\.\.\/)+/', '', ltrim($rawVideo, '/'));
+                $rawVideo = '../' . $cleanPath;
+            }
+            if (!empty($rawPdf) && strpos($rawPdf, 'http') !== 0 && strpos($rawPdf, '../') !== 0) {
+                $cleanPath = preg_replace('/^(\.\.\/)+/', '', ltrim($rawPdf, '/'));
+                $rawPdf = '../' . $cleanPath;
+            }
+
             $videoUrl = $rawVideo;
-            // ... (rest of URL logic is fine)
 
             $archivedLessons[] = [
                 'id' => $archive['id'],
