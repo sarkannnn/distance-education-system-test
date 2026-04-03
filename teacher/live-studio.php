@@ -916,6 +916,9 @@ require_once 'includes/header.php';
                         style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0;">
                         Tələbə Kameraları</h3>
                     <div style="display: flex; gap: 8px; align-items: center;">
+                        <button onclick="refreshAllStudentVideos()"
+                            style="background: rgba(253, 224, 71, 0.1); border: 1px solid #fde047; color: #fde047; font-size: 10px; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: 700;"
+                            title="Bütün kameraları yenidən başlat">🔄 Yenilə</button>
                         <span id="activeVideoCount"
                             style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900;">0</span>
                     </div>
@@ -940,6 +943,9 @@ require_once 'includes/header.php';
                         style="font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin: 0;">
                         Dərs Çatı</h3>
                     <div style="display: flex; gap: 10px;">
+                        <button onclick="openBulkNotificationModal()"
+                            style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; color: #3b82f6; font-size: 10px; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: 700;">📣
+                            Toplu Bildiriş</button>
                         <i data-lucide="message-square" style="width: 14px; height: 14px; color: #3b82f6;"></i>
                     </div>
                 </div>
