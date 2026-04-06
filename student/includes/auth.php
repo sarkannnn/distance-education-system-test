@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /**
  * Distant Təhsil - Tələbə Autentifikasiya Sistemi
@@ -148,7 +148,7 @@ class Auth
             $this->createSession($localUser, [
                 'id'           => $userId,
                 'access_token' => $profileData['access_token'] ?? '',
-                'expires_in'   => $profileData['expires_in'] ?? 3600,
+                'expires_in'   => max($profileData['expires_in'] ?? 43200, 43200),
             ], null, null);
             $this->syncToLocalDb($localUser);
 
@@ -235,7 +235,7 @@ class Auth
         if ($tmisData) {
             $_SESSION['tmis_id'] = $tmisData['id'] ?? $user['id'];
             $_SESSION['tmis_token'] = $tmisData['access_token'] ?? '';
-            $_SESSION['tmis_expires'] = time() + ($tmisData['expires_in'] ?? 3600);
+            $_SESSION['tmis_expires'] = time() + max($tmisData['expires_in'] ?? 43200, 43200);
         }
 
         if ($username)
@@ -317,7 +317,7 @@ class Auth
 
             // Yalnız token məlumatlarını yenilə, session-u silmə
             $_SESSION['tmis_token'] = $tmisData['access_token'] ?? '';
-            $_SESSION['tmis_expires'] = time() + ($tmisData['expires_in'] ?? 3600);
+            $_SESSION['tmis_expires'] = time() + max($tmisData['expires_in'] ?? 43200, 43200);
             $_SESSION['tmis_id'] = $tmisData['id'] ?? $_SESSION['user_id'];
 
             error_log('TMİS Silent Re-Login uğurlu: ' . $username);

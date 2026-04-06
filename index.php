@@ -448,8 +448,8 @@ try {
                             Bu Günün Dərsləri - <span id="current-day"><?php echo $todayName; ?></span>
                         </h2>
                     </div>
-                    <!-- Fixed Height Container for exactly ~3 smaller cards -->
-                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[450px] sm:h-[580px] scrollbar-hide" data-lenis-prevent>
+                    <!-- Dynamic Height Container based on Screen Height -->
+                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[60vh] max-h-[450px] sm:max-h-[580px] sm:h-[65vh] lg:h-[600px] scrollbar-hide" data-lenis-prevent>
                         <?php if (empty($todayLessons)): ?>
                             <div class="flex flex-col items-center justify-center h-full text-center py-20">
                                 <div
@@ -519,8 +519,8 @@ try {
                             Keçirilmiş Dərslər
                         </h2>
                     </div>
-                    <!-- Fixed Height Container for exactly ~3 cards -->
-                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[450px] sm:h-[580px] scrollbar-hide" data-lenis-prevent>
+                    <!-- Dynamic Height Container based on Screen Height -->
+                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[60vh] max-h-[450px] sm:max-h-[580px] sm:h-[65vh] lg:h-[600px] scrollbar-hide" data-lenis-prevent>
                         <?php if (empty($archivedLessons)): ?>
                             <div class="flex flex-col items-center justify-center h-full text-center py-20">
                                 <div

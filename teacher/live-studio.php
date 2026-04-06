@@ -200,6 +200,14 @@ require_once 'includes/header.php';
         display: none;
         flex-direction: column;
         font-family: 'Inter', sans-serif;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: scale(0.98);
+    }
+    
+    #whiteboardOverlay.is-visible {
+        opacity: 1;
+        transform: scale(1);
     }
 
     .wb-controls-floating {
@@ -219,6 +227,12 @@ require_once 'includes/header.php';
         border: 1px solid rgba(255, 255, 255, 0.15);
         z-index: 2010;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        max-width: 95vw;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .wb-controls-floating::-webkit-scrollbar {
+        display: none;
     }
 
     /* Collapsed: slide down */
@@ -586,8 +600,13 @@ require_once 'includes/header.php';
         }
 
         .control-btn {
-            width: 44px !important;
-            height: 44px !important;
+            width: min(13vw, 46px) !important;
+            height: min(13vw, 46px) !important;
+        }
+        
+        .control-btn i[data-lucide] {
+            width: min(6vw, 22px) !important;
+            height: min(6vw, 22px) !important;
         }
 
         /* Even more compact toggle and action buttons on small phones */
@@ -614,22 +633,36 @@ require_once 'includes/header.php';
 
         <?php endif; ?>
 
-        /* Controls bar: allow horizontal scroll to prevent overflow */
-        .studio-center>div:last-child {
-            overflow-x: auto !important;
-            overflow-y: hidden !important;
-            scrollbar-width: none;
+        /* Controls bar: fluid width distributing buttons evenly across the screen */
+        #mainControlsBar {
+            width: 100% !important;
+            overflow: visible !important;
+            padding: 0 1% !important;
+            box-sizing: border-box;
         }
 
-        .studio-center>div:last-child::-webkit-scrollbar {
-            display: none;
+        #mainControlsInner {
+            margin: 0 !important;
+            padding: 0 !important;
+            gap: 1% !important;
+            width: 100% !important;
+            min-width: 0 !important; /* overrides max-content */
+            justify-content: space-evenly !important;
         }
 
-        /* Inner buttons wrapper: left-align when scrolling */
-        .studio-center>div:last-child>div:first-child {
-            margin: 0 0 !important;
-            padding: 0 15px !important;
-            gap: 15px !important;
+        #mainControlsInner > div {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #mainControlsInner span {
+            font-size: min(2.8vw, 10px) !important;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
         }
 
         /* Log wrapper: position above controls bar */
@@ -645,22 +678,104 @@ require_once 'includes/header.php';
         display: none;
     }
 
-    /* === Whiteboard controls: scrollable when viewport is short === */
-    @media (max-width: 900px),
-    (max-height: 700px) {
+    /* === Whiteboard controls: 2-Row Horizontal Scrollable Bottom Panel === */
+    @media (max-width: 900px), (max-height: 700px) {
         .wb-controls-floating {
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-            scrollbar-width: thin;
+            top: auto !important;
+            bottom: 15px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            
+            /* Magic flex properties to create a perfect 2-row horizontal scroller */
+            display: flex !important;
+            flex-direction: column !important;
+            flex-wrap: wrap !important;
+            
+            /* Total height = 2 buttons (38*2) + gap (8) + padding (20) + scrollbar (6) + safety margin = 115px */
+            height: 115px !important;
+            max-height: 115px !important;
+            width: calc(100% - 20px) !important;
+            max-width: 600px !important;
+            
+            padding: 8px 12px !important;
+            padding-bottom: 10px !important;
+            border-radius: 20px !important;
+            
+            align-content: flex-start !important;
+            gap: 8px !important;
+            
+            overflow-x: auto !important; 
+            overflow-y: hidden !important;
+            
+            /* Explicitly stylize scrollbar so users know it scrolls! */
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1) !important;
         }
 
         .wb-controls-floating::-webkit-scrollbar {
-            width: 3px;
+            height: 6px !important;
+            display: block !important;
+        }
+        .wb-controls-floating::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2) !important;
+            border-radius: 10px !important;
+            margin: 0 10px;
+        }
+        .wb-controls-floating::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5) !important;
+            border-radius: 10px !important;
         }
 
-        .wb-controls-floating::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+        /* Flatten groupings so elements flow freely into the 2-row layout */
+        .wb-group, .wb-color-grid {
+            display: contents !important;
+        }
+
+        /* Dividers become tall columns to separate tools logically */
+        .wb-divider {
+            display: block !important;
+            width: 1px !important;
+            height: 80px !important; /* Will take up a whole column */
+            margin: 5px 6px !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .wb-tool-btn {
+            width: 38px !important;
+            height: 38px !important;
+        }
+        .wb-tool-btn i[data-lucide] {
+            width: 18px !important;
+            height: 18px !important;
+        }
+
+        /* Vertically center text like '1/1' or '3px' */
+        #pageIndicator, #sizeDisplay {
+            display: flex !important;
+            align-items: center !important;
+            height: 38px !important;
+            margin: 0 !important;
+        }
+
+        .wb-color {
+            width: 22px !important;
+            height: 22px !important;
+            margin: 8px 4px !important; /* Vertically align smaller color dots */
+        }
+
+        /* Toggle panel animation */
+        .wb-controls-floating.wb-collapsed {
+            transform: translate(-50%, calc(100% + 20px)) !important;
+        }
+
+        /* Re-open Tab centered */
+        #wbToolbarOpenTab {
+            top: auto !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            border-radius: 100px !important;
+            padding: 10px 20px !important;
         }
     }
 
@@ -702,17 +817,17 @@ require_once 'includes/header.php';
     /* === Ultra-small screens (≤ 400px) === */
     @media (max-width: 400px) {
         .control-btn {
-            width: 34px !important;
-            height: 34px !important;
+            width: 40px !important;
+            height: 40px !important;
         }
 
         .control-btn i[data-lucide] {
-            width: 16px !important;
-            height: 16px !important;
+            width: 18px !important;
+            height: 18px !important;
         }
 
         .studio-center>div:last-child {
-            gap: 8px !important;
+            gap: 6px !important;
         }
 
         .studio-header .live-status-badge {
@@ -721,7 +836,7 @@ require_once 'includes/header.php';
 
         .mobile-toggle-btn {
             padding: 4px 6px !important;
-            font-size: 9px !important;
+            font-size: 10px !important;
         }
     }
 </style>
@@ -729,8 +844,8 @@ require_once 'includes/header.php';
 <div class="main-wrapper" style="height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: white;">
     <!-- STUDIO HEADER -->
     <div class="studio-header"
-        style="height: 65px; min-height: 65px; padding: 0 30px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; z-index: 100;">
-        <div style="display: flex; align-items: center; gap: 20px;">
+        style="min-height: 65px; padding: 10px 30px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid #334155; z-index: 100;">
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
             <div class="live-status-badge"
                 style="display: flex; align-items: center; gap: 10px; background: rgba(239, 68, 68, 0.1); padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(239, 68, 68, 0.2);">
                 <div
@@ -838,10 +953,10 @@ require_once 'includes/header.php';
             </div>
 
             <!-- CONTROLS BAR -->
-            <div
-                style="height: 120px; display: flex; align-items: center; background: linear-gradient(to top, rgba(15,23,42,1), rgba(15,23,42,0)); z-index: 20; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; flex-shrink: 0;">
-                <div
-                    style="display: flex; align-items: center; gap: 30px; padding: 0 30px; margin: 0 auto; flex-shrink: 0;">
+            <div id="mainControlsBar"
+                style="height: 120px; width: 100%; display: flex; align-items: center; background: linear-gradient(to top, rgba(15,23,42,1), rgba(15,23,42,0)); z-index: 20; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; flex-shrink: 0;">
+                <div id="mainControlsInner"
+                    style="display: flex; align-items: center; justify-content: center; gap: 30px; padding: 0 30px; margin: 0 auto; flex-shrink: 0; min-width: max-content;">
 
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                         <button id="btnMic" onclick="toggleMic()" class="control-btn" title="Mikrofon">
@@ -1195,14 +1310,10 @@ require_once 'includes/header.php';
             <div style="width: 1px; height: 20px; background: rgba(255, 255, 255, 0.1); margin: 0 4px;"></div>
 
             <button class="wb-tool-btn" onclick="toggleWBToolbar()" title="Paneli Gizlət"
-                style="background: rgba(255, 255, 255, 0.1); color: white;">
-                <i data-lucide="chevron-down" style="width:20px;height:20px;"></i>
+                style="background: rgba(255, 255, 255, 0.1); color: white; width: auto !important; padding: 0 14px; border-radius: 12px; font-weight: bold; font-size: 11px;">
+                <i data-lucide="chevron-down" style="width:16px;height:16px; margin-right: 4px;"></i> GİZLƏT
             </button>
 
-            <button class="wb-tool-btn" onclick="toggleWhiteboard()" title="Lövhəni Bağla & Kameraya Qayıt"
-                style="background: #ef4444; color: white; border-color: #ef4444;">
-                <i data-lucide="video" style="width:20px;height:20px;"></i>
-            </button>
         </div>
     </div>
 
@@ -1212,12 +1323,23 @@ require_once 'includes/header.php';
         <span style="font-size: 11px; font-weight: 800; color: white; letter-spacing: 0.5px;">ALƏTLƏRİ AÇ</span>
     </div>
 
-    <!-- Info Badge -->
-    <div
-        style="position: absolute; top: 20px; right: 20px; background: #1e293b; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; z-index: 2010; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-        <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite;">
+    <!-- Top Bar Overlay (Info & Exit) -->
+    <div style="position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 2010; pointer-events: none;">
+        
+        <!-- Info Badge (Top Left) -->
+        <div style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); pointer-events: auto;">
+            <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);"></div>
+            STUDİO WHITEBOARD PRO
         </div>
-        STUDİO WHITEBOARD PRO
+
+        <!-- Exit Button (Top Right) -->
+        <button onclick="toggleWhiteboard()" title="Lövhəni Bağla & Kameraya Qayıt"
+            style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px); cursor: pointer; pointer-events: auto; transition: all 0.2s ease;" 
+            onmouseover="this.style.background='#ef4444'; this.style.borderColor='#ef4444'; this.style.transform='scale(1.05)'" 
+            onmouseout="this.style.background='rgba(15, 23, 42, 0.65)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)'">
+            <i data-lucide="x" style="width:16px;height:16px;"></i> BAĞLA
+        </button>
+
     </div>
 
     <div id="laserCursor"></div>
@@ -1451,17 +1573,21 @@ require_once 'includes/header.php';
 
         if (isWhiteboardActive) {
             overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('is-visible'), 10);
             btn.classList.add('active-blue');
             initWBCanvas();
             LOG("🎨 Advanced Whiteboard aktivdir.", "#3b82f6");
         } else {
-            overlay.style.display = 'none';
+            overlay.classList.remove('is-visible');
             btn.classList.remove('active-blue');
             document.getElementById('laserCursor').style.display = 'none';
             // Reset toolbar to visible state for next open
             document.querySelector('.wb-controls-floating').classList.remove('wb-collapsed');
             document.getElementById('wbToolbarOpenTab').classList.remove('visible');
-            LOG("🎥 Normal görünüşə qayıtdı.");
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                LOG("🎥 Normal görünüşə qayıtdı.");
+            }, 300);
         }
     }
 
@@ -2777,7 +2903,7 @@ require_once 'includes/header.php';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // 1.5 WHITEBOARD MODE: 
-        if (isWhiteboardActive && wbCanvas) {
+        if (isWhiteboardActive && wbCanvas && wbCanvas.width > 0 && wbCanvas.height > 0) {
             // First draw white background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
