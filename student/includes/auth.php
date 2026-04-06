@@ -250,6 +250,17 @@ class Auth
             }
             // If APP_KEY is not set, do not store the password in session (silent re-login disabled)
         }
+
+        // Persistent Activity Log
+        try {
+            $db = Database::getInstance();
+            $db->query("INSERT INTO system_logs (user_id, role, ip_address, activity_type) VALUES (?, 'student', ?, 'login')", [
+                $user['id'] ?? null,
+                $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail if logging errors
+        }
     }
 
     public function logout(): void

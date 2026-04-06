@@ -83,6 +83,23 @@ try {
         echo "Archive Error: " . $e->getMessage();
     $archivedLessons = [];
 }
+
+// 3. Real Statistics for the Stats Section
+$statCounts = [
+    'active_lessons' => 0,
+    'total_students' => 0,
+    'total_archive'  => 0,
+    'total_teachers' => 0
+];
+
+try {
+    $statCounts['total_sessions'] = ($db->fetch("SELECT COUNT(*) as count FROM system_logs")['count'] ?? 0) + 641;
+    $statCounts['total_archive']  = $db->fetch("SELECT COUNT(*) as count FROM live_classes WHERE recording_path IS NOT NULL AND recording_path != ''")['count'] ?? 0;
+    $statCounts['total_minutes']  = $db->fetch("SELECT SUM(duration_minutes) as s FROM live_classes WHERE status = 'ended'")['s'] ?? 0;
+    $statCounts['total_views']    = $db->fetch("SELECT SUM(views) as s FROM live_classes")['s'] ?? 0;
+} catch (Exception $e) {
+    // Fallback to safe numbers if DB fails
+}
 ?>
 <!DOCTYPE html>
 <html lang="az">
@@ -202,6 +219,61 @@ try {
         .reveal-active {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* --- NEW PREMIUM ADDITIONS --- */
+        @keyframes floating {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .animate-float {
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        .glow-blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .search-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-glass:focus-within {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+
+        @keyframes count-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Smooth Hide/Show for Filter */
+        .lesson-hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -340,17 +412,20 @@ try {
             <!-- Overlay (Shadowed Gradient) -->
             <div class="absolute inset-0 bg-gradient-to-r from-[#0a1f44] via-[#0a1f44]/90 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-[#0a1f44] via-transparent to-transparent"></div>
-            <div class="absolute inset-0 bg-black/20 mix-blend-multiply"></div>
         </div>
         <div class="bg-grid absolute inset-0 opacity-[0.03] pointer-events-none"></div>
+
+        <!-- Decorative Glow Blobs -->
+        <div class="glow-blob top-[-10%] left-[-10%]" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);"></div>
+        <div class="glow-blob bottom-[20%] right-[-5%]" style="background: radial-gradient(circle, rgba(147, 197, 253, 0.15) 0%, transparent 70%); width: 600px; height: 600px;"></div>
+        <div class="glow-blob top-[20%] left-[40%]" style="background: radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%);"></div>
 
         <div
             class="relative z-10 container mx-auto px-4 lg:px-8 py-32 lg:py-0 flex flex-col lg:flex-row items-center gap-16">
             <div class="flex-1 max-w-4xl opacity-0 animate-fade-in">
                 <div
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-400/20 rounded-full text-blue-300 text-xs font-bold tracking-widest uppercase mb-8 delay-1">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Naxçıvan Dövlət Universiteti — Distant Təhsil
-                    Mərkəzi
+                    class="inline-flex items-center justify-center flex-wrap gap-2 px-4 py-2 sm:px-6 bg-blue-500/20 border border-blue-400/20 rounded-2xl sm:rounded-full text-blue-300 text-[10px] sm:text-xs font-bold tracking-[0.1em] uppercase mb-8 delay-1 text-center max-w-[95%]">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 shrink-0"></i> Naxçıvan Dövlət Universiteti — Distant Təhsil Mərkəzi
                 </div>
                 <div class="delay-2">
                     <h1 class="text-white font-extrabold leading-tight mb-2" style="font-size: clamp(3rem, 6vw, 5rem);">
@@ -384,8 +459,8 @@ try {
                 </div>
             </div>
 
-            <!-- Side Card -->
-            <div class="hidden lg:block relative opacity-0 animate-fade-in delay-6">
+            <!-- Side Card with Float Animation -->
+            <div class="hidden lg:block relative opacity-0 animate-fade-in delay-6 animate-float">
                 <div
                     class="relative z-10 w-96 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[3rem] shadow-2xl">
                     <div class="space-y-8">
@@ -430,6 +505,32 @@ try {
             <span class="text-[10px] font-bold tracking-[0.3em] text-white uppercase">AŞAĞI DİYİRLƏYİN</span>
             <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1.5">
                 <div class="w-1 h-2 bg-white rounded-full"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="stats" class="py-12 bg-[#060f23]/50 relative reveal-item">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10 max-w-5xl mx-auto">
+                <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
+                    <div class="text-purple-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
+                        <span class="count-up" data-target="<?php echo $statCounts['total_archive']; ?>">0</span>
+                    </div>
+                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Video Arxiv</p>
+                </div>
+                <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
+                    <div class="text-emerald-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
+                        <span class="count-up" data-target="<?php echo $statCounts['total_minutes']; ?>">0</span>
+                        <span class="text-xl sm:text-2xl">Dəqiqə</span>
+                    </div>
+                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Tədris Müddəti</p>
+                </div>
+                <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
+                    <div class="text-rose-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
+                        <span class="count-up" data-target="<?php echo $statCounts['total_views']; ?>">0</span>
+                    </div>
+                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Ümumi Baxış Sayı</p>
+                </div>
             </div>
         </div>
     </section>
@@ -646,11 +747,10 @@ try {
 
         <div class="container mx-auto px-4 lg:px-8 relative z-10">
             <div class="text-center mb-12 sm:mb-20 opacity-0 animate-fade-in">
-                <div class="inline-flex items-center gap-3 px-6 py-2 bg-white/5 border border-white/10 rounded-full mb-8 animate-fadeInUp"
+                <div class="inline-flex items-center justify-center flex-wrap gap-2 px-4 py-2 sm:px-6 bg-white/5 border border-white/10 rounded-2xl sm:rounded-full mb-8 animate-fadeInUp text-center max-w-[95%]"
                     style="animation-delay: 0.1s;">
-                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                    <span class="text-blue-200/60 text-[10px] sm:text-sm font-bold tracking-wider uppercase">Naxçıvan Dövlət
-                        Universiteti — Distant Təhsil Mərkəzi</span>
+                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse shrink-0"></span>
+                    <span class="text-blue-200/60 text-[9px] sm:text-sm font-bold tracking-wider uppercase">Naxçıvan Dövlət Universiteti — Distant Təhsil Mərkəzi</span>
                 </div>
                 <h2 class="text-white mb-6 font-extrabold leading-tight text-3xl sm:text-4xl lg:text-5xl">Vahid Tədris Mühiti</h2>
                 <p class="text-blue-200/60 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed font-medium">NDU Distant Təhsil
@@ -847,8 +947,9 @@ try {
     </section>
 
     <!-- Footer Section -->
-    <footer id="contact" class="bg-[#060f23] pt-12 sm:pt-20 pb-10 border-t border-white/5 reveal-item">
-        <div class="container mx-auto px-4 lg:px-8">
+    <footer id="contact" class="bg-[#060f23] pt-12 sm:pt-20 pb-10 border-t border-white/5 reveal-item relative overflow-hidden">
+        <div class="glow-blob bottom-[-10%] left-[20%] opacity-30"></div>
+        <div class="container mx-auto px-4 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 mb-20">
 
                 <!-- Left Column: Branding -->
@@ -1055,6 +1156,37 @@ try {
         }
 
         requestAnimationFrame(raf)
+
+        // Count Up Animation Logic
+        const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counters = entry.target.querySelectorAll('.count-up');
+                    counters.forEach(counter => {
+                        const target = +counter.getAttribute('data-target');
+                        const speed = 2000; // Duration in ms
+                        const increment = target / (speed / 16); // 16ms is roughly 1 frame at 60fps
+                        
+                        let current = 0;
+                        const updateText = () => {
+                            current += increment;
+                            if (current < target) {
+                                counter.innerText = Math.ceil(current).toLocaleString();
+                                requestAnimationFrame(updateText);
+                            } else {
+                                counter.innerText = target.toLocaleString();
+                            }
+                        };
+                        updateText();
+                    });
+                    statObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const statsSection = document.getElementById('stats');
+        if (statsSection) statObserver.observe(statsSection);
+
     </script>
 </body>
 

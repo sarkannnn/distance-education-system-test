@@ -1535,6 +1535,7 @@ require_once 'includes/header.php';
     const MAX_HISTORY = 30;
 
     function saveState() {
+        if (!wbCanvas || wbCanvas.width === 0 || wbCanvas.height === 0) return;
         if (undoStack.length >= MAX_HISTORY) undoStack.shift();
         undoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height));
         redoStack = []; // Clear redo on new action
@@ -1598,6 +1599,7 @@ require_once 'includes/header.php';
 
         const resize = () => {
             const container = wbCanvas.parentElement;
+            if (!container || container.clientWidth === 0 || container.clientHeight === 0) return;
             // Capture existing content if any
             let tempImg = null;
             if (wbCanvas.width > 0 && wbCanvas.height > 0) {

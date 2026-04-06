@@ -352,6 +352,17 @@ class Auth
                 $_SESSION['tmis_pwd_enc'] = base64_encode($iv . $enc);
             }
         }
+
+        // Persistent Activity Log
+        try {
+            $db = Database::getInstance();
+            $db->query("INSERT INTO system_logs (user_id, role, ip_address, activity_type) VALUES (?, 'instructor', ?, 'login')", [
+                $user['id'] ?? $user['tmis_id'] ?? null,
+                $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail if logging errors
+        }
     }
 
     public function logout(): void
