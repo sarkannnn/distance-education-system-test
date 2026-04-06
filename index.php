@@ -96,7 +96,8 @@ try {
     $statCounts['total_sessions'] = ($db->fetch("SELECT COUNT(*) as count FROM system_logs")['count'] ?? 0) + 641;
     $statCounts['total_archive']  = $db->fetch("SELECT COUNT(*) as count FROM live_classes WHERE recording_path IS NOT NULL AND recording_path != ''")['count'] ?? 0;
     $statCounts['total_minutes']  = $db->fetch("SELECT SUM(duration_minutes) as s FROM live_classes WHERE status = 'ended'")['s'] ?? 0;
-    $statCounts['total_views']    = $db->fetch("SELECT SUM(views) as s FROM live_classes")['s'] ?? 0;
+    $statCounts['total_views']    = ($db->fetch("SELECT SUM(views) as s FROM live_classes")['s'] ?? 0) + 
+                                     ($db->fetch("SELECT SUM(views) as s FROM archived_lessons")['s'] ?? 0);
 } catch (Exception $e) {
     // Fallback to safe numbers if DB fails
 }
