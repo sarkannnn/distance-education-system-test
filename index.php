@@ -100,7 +100,11 @@ $statCounts = [
 
 try { $statCounts['total_sessions'] = ($db->fetch("SELECT COUNT(*) as count FROM system_logs")['count'] ?? 0) + 641; } catch (Exception $e) {}
 try { $statCounts['total_archive']  = $db->fetch("SELECT COUNT(*) as count FROM live_classes WHERE recording_path IS NOT NULL AND recording_path != ''")['count'] ?? 0; } catch (Exception $e) {}
-try { $statCounts['total_minutes']  = $db->fetch("SELECT SUM(duration_minutes) as s FROM live_classes WHERE status = 'ended'")['s'] ?? 0; } catch (Exception $e) {}
+try { 
+    $totalMins = $db->fetch("SELECT SUM(duration_minutes) as s FROM live_classes WHERE status = 'ended'")['s'] ?? 0;
+    $statCounts['total_hours'] = floor($totalMins / 60);
+    $statCounts['total_remaining_minutes'] = $totalMins % 60;
+} catch (Exception $e) {}
 try { $statCounts['total_views']    = ($db->fetch("SELECT SUM(views) as s FROM live_classes")['s'] ?? 0); } catch (Exception $e) {}
 try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM archived_lessons")['s'] ?? 0); } catch (Exception $e) {}
 ?>
@@ -525,9 +529,15 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                     <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Video Arxiv</p>
                 </div>
                 <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
-                    <div class="text-emerald-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
-                        <span class="count-up" data-target="<?php echo $statCounts['total_minutes']; ?>">0</span>
-                        <span class="text-xl sm:text-2xl">Dəqiqə</span>
+                    <div class="text-emerald-400 font-black text-3xl sm:text-5xl mb-2 flex flex-wrap justify-center items-baseline gap-2 sm:gap-3">
+                        <div class="flex items-baseline gap-1">
+                            <span class="count-up" data-target="<?php echo $statCounts['total_hours']; ?>">0</span>
+                            <span class="text-xl sm:text-2xl">saat</span>
+                        </div>
+                        <div class="flex items-baseline gap-1">
+                            <span class="count-up" data-target="<?php echo $statCounts['total_remaining_minutes']; ?>">0</span>
+                            <span class="text-xl sm:text-2xl">dəqiqə</span>
+                        </div>
                     </div>
                     <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Tədris Müddəti</p>
                 </div>
