@@ -380,8 +380,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
     </header>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="hidden fixed inset-0 z-[49] bg-[#0a1f44] pt-24 px-4 overflow-y-auto transition-all duration-300">
-        <nav class="flex flex-col gap-2">
+    <div id="mobile-menu" class="hidden fixed inset-0 z-[49] bg-[#0a1f44] pt-32 pb-10 px-4 overflow-y-auto transition-all duration-300">
+        <nav class="flex flex-col gap-2 mt-6">
             <a href="#home"
                 class="px-6 py-4 text-lg font-medium text-blue-100 hover:text-white hover:bg-white/5 rounded-2xl">Ana
                 Səhifə</a>
