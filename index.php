@@ -1202,6 +1202,37 @@ try {
         const statsSection = document.getElementById('stats');
         if (statsSection) statObserver.observe(statsSection);
 
+        // Active Navigation Links Highlighting
+        const navLinks = document.querySelectorAll('nav a[href^="#"]');
+        const sectionIds = Array.from(navLinks).map(link => link.getAttribute('href').substring(1));
+        const sectionsToObserve = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+
+        const navObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const activeId = entry.target.getAttribute('id');
+                    navLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href === `#${activeId}`) {
+                            // Active styling
+                            link.classList.remove('text-blue-10/80', 'text-blue-50/80', 'text-blue-100', 'text-blue-200/60');
+                            link.classList.add('text-white', 'bg-white/10');
+                        } else {
+                            // Inactive styling
+                            link.classList.remove('text-white', 'bg-white/10');
+                            if (link.closest('#mobile-menu')) {
+                                link.classList.add('text-blue-100');
+                            } else {
+                                link.classList.add('text-blue-200/60');
+                            }
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.15, rootMargin: "-80px 0px -30% 0px" });
+
+        sectionsToObserve.forEach(sec => navObserver.observe(sec));
+
     </script>
 </body>
 
