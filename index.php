@@ -775,9 +775,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
                 <!-- Feature 1: Canlı Dərslər -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="video" class="w-6 h-6 text-rose-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">Canlı Dərslər</h3>
@@ -787,9 +787,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 2: Video Arxiv -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="archive" class="w-6 h-6 text-blue-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">Video Arxiv</h3>
@@ -799,9 +799,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 3: Akademik Monitorinq -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="bar-chart-2" class="w-6 h-6 text-emerald-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">Akademik Monitorinq</h3>
@@ -811,9 +811,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 4: Dinamik Cədvəl -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="calendar" class="w-6 h-6 text-purple-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">Onlayn Cədvəl</h3>
@@ -823,9 +823,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 5: Elektron Resurslar -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="book-open" class="w-6 h-6 text-amber-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">Elektron Resurslar</h3>
@@ -835,9 +835,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 6: Ani Bildirişlər -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-sky-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-sky-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="bell" class="w-6 h-6 text-sky-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">Ani Bildirişlər</h3>
@@ -847,9 +847,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 7: E-Davamiyyət -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="user-check" class="w-6 h-6 text-teal-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">E-Davamiyyət</h3>
@@ -859,9 +859,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
                 <!-- Feature 8: İnteraktiv Forum -->
                 <div
-                    class="group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
+                    class="text-center group relative bg-[#0e2652] border border-white/10 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:bg-[#143269] hover:-translate-y-2 opacity-0 animate-fade-in shadow-lg">
                     <div
-                        class="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
+                        class="mx-auto w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-white/5 shadow-inner mb-6 transition-transform duration-300 group-hover:scale-110">
                         <i data-lucide="message-square" class="w-6 h-6 text-indigo-400"></i>
                     </div>
                     <h3 class="text-white text-xl font-bold mb-3">İnteraktiv Forum</h3>
