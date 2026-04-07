@@ -47,35 +47,41 @@ try {
 // 2. Keçirilmiş dərslər (Arxiv) - Ən sonuncu dərsi ən üstdə göstər
 $archivedLessons = [];
 try {
-    // a. Canlı dərslərin yazıları
+    // a. Canlı dərslərin yazıları (WebRTC)
     $liveRecs = $db->fetchAll(
         "SELECT DISTINCT lc.id, 
                 lc.title as topic_name, 
                 COALESCE(NULLIF(lc.subject_name, 'Fənn'), c.title, 'Fənn') as course_title, 
-                (CASE WHEN lc.is_stream = 1 AND lc.specialty_name IS NOT NULL AND lc.specialty_name != '' AND lc.specialty_name != 'Axın (çoxlu ixtisas)' THEN lc.specialty_name ELSE COALESCE(NULLIF(NULLIF(lc.specialty_name, ''), 'Axın (çoxlu ixtisas)'), i.specialty, i.department, 'Ümumi') END) as specialization_name,
-                COALESCE(NULLIF(lc.course_level, '-'), i.course_level, '-') as course_level_val,
+                COALESCE(
+                    NULLIF(NULLIF(lc.specialty_name, ''), 'Axın (çoxlu ixtisas)'), 
+                    i.specialty, 
+                    i.department, 
+                    'Ümumi'
+                ) as specialization_name,
+                COALESCE(
+                    NULLIF(lc.course_level, '-'), 
+                    NULLIF(c.course_level, '-'), 
+                    i.course_level, 
+                    '-'
+                ) as course_level_val,
                 COALESCE(NULLIF(lc.instructor_name, ''), NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), i.name, 'Müəllim təyin edilməyib') as instructor_display_name, 
                 COALESCE(NULLIF(lc.instructor_title, ''), i.title, '') as instructor_title,
                 lc.start_time as activity_date,
-                lc.end_time as end_time,
                 COALESCE(lc.duration_minutes, 0) as duration,
-                0 as views,
                 lc.recording_path as video_url,
-                NULL as pdf_url,
                 'live' as record_type
          FROM live_classes lc
-         LEFT JOIN courses c ON lc.course_id = c.tmis_subject_id OR lc.course_id = c.id
+         LEFT JOIN courses c ON lc.course_id = c.id OR lc.tmis_subject_id = c.tmis_subject_id
          LEFT JOIN instructors i ON lc.instructor_id = i.user_id OR lc.instructor_id = i.id
          LEFT JOIN users u ON i.user_id = u.id OR lc.instructor_id = u.id
          WHERE lc.status = 'ended' AND lc.recording_path IS NOT NULL AND lc.recording_path != ''"
     );
 
-    $allArchives = array_merge($liveRecs);
+    $allArchives = $liveRecs;
+    
     // Sort by date (newest first - DESC)
     usort($allArchives, function ($a, $b) {
-        $t1 = strtotime($a['activity_date']);
-        $t2 = strtotime($b['activity_date']);
-        return $t2 - $t1;
+        return strtotime($b['activity_date']) - strtotime($a['activity_date']);
     });
     $archivedLessons = $allArchives;
 } catch (Exception $e) {
@@ -402,7 +408,7 @@ try {
     </div>
 
     <!-- Hero Section -->
-    <section id="home" class="relative min-h-screen flex items-center overflow-hidden bg-secondary">
+    <section id="home" class="relative min-h-[100svh] lg:min-h-screen flex items-center overflow-hidden bg-secondary pt-32 pb-28 lg:pt-40 lg:pb-32 w-full">
         <!-- BG Elements -->
         <div class="absolute inset-0 z-0 bg-[#0a1f44]">
             <!-- Arxa fon şəkli -->
@@ -422,7 +428,7 @@ try {
         <div class="glow-blob top-[20%] left-[40%]" style="background: radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%);"></div>
 
         <div
-            class="relative z-10 container mx-auto px-4 lg:px-8 py-32 lg:py-0 flex flex-col lg:flex-row items-center gap-16">
+            class="relative z-10 container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 w-full">
             <div class="flex-1 max-w-4xl opacity-0 animate-fade-in">
                 <div
                     class="inline-flex items-center justify-center flex-wrap gap-2 px-4 py-2 sm:px-6 bg-blue-500/20 border border-blue-400/20 rounded-2xl sm:rounded-full text-blue-300 text-[10px] sm:text-xs font-bold tracking-[0.1em] uppercase mb-8 delay-1 text-center max-w-[95%]">
@@ -461,9 +467,9 @@ try {
             </div>
 
             <!-- Side Card with Float Animation -->
-            <div class="hidden lg:block relative opacity-0 animate-fade-in delay-6 animate-float">
+            <div class="hidden lg:block relative opacity-0 animate-fade-in delay-6">
                 <div
-                    class="relative z-10 w-96 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[3rem] shadow-2xl">
+                    class="relative z-10 w-96 p-8 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[3rem] shadow-2xl animate-float">
                     <div class="space-y-8">
                         <div class="flex items-center gap-5">
                             <div
@@ -652,8 +658,16 @@ try {
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Kurs:</span>
-                                            <span class="text-white/90"><?php echo $archive['course_level_val']; ?>-cü
-                                                kurs</span>
+                                            <span class="text-white/90">
+                                                <?php 
+                                                    $level = $archive['course_level_val'];
+                                                    if (is_numeric($level) && $level > 0) {
+                                                        echo e($level) . "-cü kurs";
+                                                    } else {
+                                                        echo "Ümumi";
+                                                    }
+                                                ?>
+                                            </span>
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Müddət:</span>
