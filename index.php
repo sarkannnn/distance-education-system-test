@@ -407,7 +407,7 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
     </div>
 
     <!-- Hero Section -->
-    <section id="home" class="relative min-h-[100svh] lg:min-h-screen flex items-center overflow-hidden bg-secondary pt-32 pb-28 lg:pt-40 lg:pb-32 w-full">
+    <section id="home" class="relative min-h-[100svh] lg:min-h-screen flex items-center overflow-hidden bg-secondary pt-32 pb-40 lg:pt-40 lg:pb-32 w-full">
         <!-- BG Elements -->
         <div class="absolute inset-0 z-0 bg-[#0a1f44]">
             <!-- Arxa fon şəkli -->
@@ -507,7 +507,7 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
         <!-- Scroll Hint -->
         <div id="scroll-hint"
-            class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-40 cursor-pointer animate-bounce">
+            class="absolute bottom-6 sm:bottom-10 inset-x-0 w-full flex flex-col items-center justify-center gap-3 opacity-40 cursor-pointer animate-bounce">
             <span class="text-[10px] font-bold tracking-[0.3em] text-white uppercase">AŞAĞI DİYİRLƏYİN</span>
             <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1.5">
                 <div class="w-1 h-2 bg-white rounded-full"></div>
