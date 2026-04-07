@@ -110,6 +110,9 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a1f44">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/logo.png">
     <title>NDU — Distant Təhsil Platforması</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1228,6 +1231,17 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
         }, { threshold: 0.15, rootMargin: "-80px 0px -30% 0px" });
 
         sectionsToObserve.forEach(sec => navObserver.observe(sec));
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('PWA ServiceWorker uğurla qeydiyyatdan keçdi:', registration.scope);
+                }).catch(error => {
+                    console.log('PWA ServiceWorker xətası:', error);
+                });
+            });
+        }
 
     </script>
 </body>
