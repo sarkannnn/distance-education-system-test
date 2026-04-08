@@ -78,7 +78,7 @@ try {
     );
 
     $allArchives = $liveRecs;
-    
+
     // Sort by date (newest first - DESC)
     usort($allArchives, function ($a, $b) {
         return strtotime($b['activity_date']) - strtotime($a['activity_date']);
@@ -94,19 +94,32 @@ try {
 $statCounts = [
     'active_lessons' => 0,
     'total_students' => 0,
-    'total_archive'  => 0,
+    'total_archive' => 0,
     'total_teachers' => 0
 ];
 
-try { $statCounts['total_sessions'] = ($db->fetch("SELECT COUNT(*) as count FROM system_logs")['count'] ?? 0) + 641; } catch (Exception $e) {}
-try { $statCounts['total_archive']  = $db->fetch("SELECT COUNT(*) as count FROM live_classes WHERE recording_path IS NOT NULL AND recording_path != ''")['count'] ?? 0; } catch (Exception $e) {}
-try { 
+try {
+    $statCounts['total_sessions'] = ($db->fetch("SELECT COUNT(*) as count FROM system_logs")['count'] ?? 0) + 641;
+} catch (Exception $e) {
+}
+try {
+    $statCounts['total_archive'] = $db->fetch("SELECT COUNT(*) as count FROM live_classes WHERE recording_path IS NOT NULL AND recording_path != ''")['count'] ?? 0;
+} catch (Exception $e) {
+}
+try {
     $totalMins = $db->fetch("SELECT SUM(duration_minutes) as s FROM live_classes WHERE status = 'ended'")['s'] ?? 0;
     $statCounts['total_hours'] = floor($totalMins / 60);
     $statCounts['total_remaining_minutes'] = $totalMins % 60;
-} catch (Exception $e) {}
-try { $statCounts['total_views']    = ($db->fetch("SELECT SUM(views) as s FROM live_classes")['s'] ?? 0); } catch (Exception $e) {}
-try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM archived_lessons")['s'] ?? 0); } catch (Exception $e) {}
+} catch (Exception $e) {
+}
+try {
+    $statCounts['total_views'] = ($db->fetch("SELECT SUM(views) as s FROM live_classes")['s'] ?? 0);
+} catch (Exception $e) {
+}
+try {
+    $statCounts['total_views'] += ($db->fetch("SELECT SUM(views) as s FROM archived_lessons")['s'] ?? 0);
+} catch (Exception $e) {
+}
 ?>
 <!DOCTYPE html>
 <html lang="az">
@@ -233,9 +246,17 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
 
         /* --- NEW PREMIUM ADDITIONS --- */
         @keyframes floating {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(1deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(1deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
         }
 
         .animate-float {
@@ -267,8 +288,15 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
         }
 
         @keyframes count-up {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .stat-card {
@@ -295,7 +323,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
         <div class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-center lg:justify-between relative">
                 <!-- Logo Section -->
-                <a href="#home" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 group text-center sm:text-left">
+                <a href="#home"
+                    class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 group text-center sm:text-left">
                     <div class="relative">
                         <div
                             class="absolute -inset-3 bg-blue-500/10 rounded-[1.5rem] blur opacity-0 group-hover:opacity-100 transition-all duration-500">
@@ -306,7 +335,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                         </div>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-white font-bold text-sm sm:text-base leading-tight tracking-tight uppercase">NAXÇIVAN
+                        <span
+                            class="text-white font-bold text-sm sm:text-base leading-tight tracking-tight uppercase">NAXÇIVAN
                             DÖVLƏT</span>
                         <span
                             class="text-white font-bold text-sm sm:text-base leading-tight tracking-tight uppercase">UNİVERSİTETİ</span>
@@ -384,7 +414,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
     </header>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="hidden fixed inset-0 z-[49] bg-[#0a1f44] pt-32 pb-10 px-4 overflow-y-auto transition-all duration-300">
+    <div id="mobile-menu"
+        class="hidden fixed inset-0 z-[49] bg-[#0a1f44] pt-32 pb-10 px-4 overflow-y-auto transition-all duration-300">
         <nav class="flex flex-col gap-2 mt-6">
             <a href="#home"
                 class="px-6 py-4 text-lg font-medium text-blue-100 hover:text-white hover:bg-white/5 rounded-2xl">Ana
@@ -411,7 +442,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
     </div>
 
     <!-- Hero Section -->
-    <section id="home" class="relative min-h-[100svh] lg:min-h-screen flex items-center overflow-hidden bg-secondary pt-32 pb-40 lg:pt-40 lg:pb-32 w-full">
+    <section id="home"
+        class="relative min-h-[100svh] lg:min-h-screen flex items-center overflow-hidden bg-secondary pt-32 pb-40 lg:pt-40 lg:pb-32 w-full">
         <!-- BG Elements -->
         <div class="absolute inset-0 z-0 bg-[#0a1f44]">
             <!-- Arxa fon şəkli -->
@@ -426,16 +458,21 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
         <div class="bg-grid absolute inset-0 opacity-[0.03] pointer-events-none"></div>
 
         <!-- Decorative Glow Blobs -->
-        <div class="glow-blob top-[-10%] left-[-10%]" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);"></div>
-        <div class="glow-blob bottom-[20%] right-[-5%]" style="background: radial-gradient(circle, rgba(147, 197, 253, 0.15) 0%, transparent 70%); width: 600px; height: 600px;"></div>
-        <div class="glow-blob top-[20%] left-[40%]" style="background: radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%);"></div>
+        <div class="glow-blob top-[-10%] left-[-10%]"
+            style="background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);"></div>
+        <div class="glow-blob bottom-[20%] right-[-5%]"
+            style="background: radial-gradient(circle, rgba(147, 197, 253, 0.15) 0%, transparent 70%); width: 600px; height: 600px;">
+        </div>
+        <div class="glow-blob top-[20%] left-[40%]"
+            style="background: radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%);"></div>
 
         <div
             class="relative z-10 container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 w-full">
             <div class="flex-1 max-w-4xl opacity-0 animate-fade-in">
                 <div
                     class="inline-flex items-center justify-center flex-wrap gap-2 px-4 py-2 sm:px-6 bg-blue-500/20 border border-blue-400/20 rounded-2xl sm:rounded-full text-blue-300 text-[10px] sm:text-xs font-bold tracking-[0.1em] uppercase mb-8 delay-1 text-center max-w-[95%]">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 shrink-0"></i> Naxçıvan Dövlət Universiteti — Distant Təhsil Mərkəzi
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 shrink-0"></i> Naxçıvan Dövlət Universiteti —
+                    Distant Təhsil Mərkəzi
                 </div>
                 <div class="delay-2">
                     <h1 class="text-white font-extrabold leading-tight mb-2" style="font-size: clamp(3rem, 6vw, 5rem);">
@@ -523,29 +560,36 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
         <div class="container mx-auto px-4 lg:px-8">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10 max-w-5xl mx-auto">
                 <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
-                    <div class="text-purple-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
+                    <div
+                        class="text-purple-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
                         <span class="count-up" data-target="<?php echo $statCounts['total_archive']; ?>">0</span>
                     </div>
-                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Video Arxiv</p>
+                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Video Arxiv
+                    </p>
                 </div>
                 <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
-                    <div class="text-emerald-400 font-black text-3xl sm:text-5xl mb-2 flex flex-wrap justify-center items-baseline gap-2 sm:gap-3">
+                    <div
+                        class="text-emerald-400 font-black text-3xl sm:text-5xl mb-2 flex flex-wrap justify-center items-baseline gap-2 sm:gap-3">
                         <div class="flex items-baseline gap-1">
                             <span class="count-up" data-target="<?php echo $statCounts['total_hours']; ?>">0</span>
                             <span class="text-xl sm:text-2xl">saat</span>
                         </div>
                         <div class="flex items-baseline gap-1">
-                            <span class="count-up" data-target="<?php echo $statCounts['total_remaining_minutes']; ?>">0</span>
+                            <span class="count-up"
+                                data-target="<?php echo $statCounts['total_remaining_minutes']; ?>">0</span>
                             <span class="text-xl sm:text-2xl">dəqiqə</span>
                         </div>
                     </div>
-                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Tədris Müddəti</p>
+                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Tədris
+                        Müddəti</p>
                 </div>
                 <div class="stat-card p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl text-center group">
-                    <div class="text-rose-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
+                    <div
+                        class="text-rose-400 font-black text-3xl sm:text-5xl mb-2 flex justify-center items-baseline gap-1">
                         <span class="count-up" data-target="<?php echo $statCounts['total_views']; ?>">0</span>
                     </div>
-                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Ümumi Baxış Sayı</p>
+                    <p class="text-blue-100/40 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Ümumi Baxış
+                        Sayı</p>
                 </div>
             </div>
         </div>
@@ -566,7 +610,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                         </h2>
                     </div>
                     <!-- Dynamic Height Container based on Screen Height -->
-                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[60vh] max-h-[450px] sm:max-h-[580px] sm:h-[65vh] lg:h-[600px] scrollbar-hide" data-lenis-prevent>
+                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[60vh] max-h-[450px] sm:max-h-[580px] sm:h-[65vh] lg:h-[600px] scrollbar-hide"
+                        data-lenis-prevent>
                         <?php if (empty($todayLessons)): ?>
                             <div class="flex flex-col items-center justify-center h-full text-center py-20">
                                 <div
@@ -630,14 +675,20 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                 <!-- 2nd Column: Past Lessons -->
                 <div
                     class="flex-1 min-w-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col h-full self-stretch">
-                    <div class="p-6 sm:p-8 border-b border-white/10 shrink-0">
+                    <div class="p-6 sm:p-8 border-b border-white/10 shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <h2 class="text-xl font-extrabold flex items-center gap-3 text-white">
                             <i data-lucide="archive" class="w-5 h-5 text-blue-400"></i>
                             Keçirilmiş Dərslər
                         </h2>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"></i>
+                            <input type="text" id="archive-search" placeholder="İxtisas, fənn və ya müəllim..." 
+                                class="w-full bg-white/5 border border-white/10 rounded-2xl py-2 pl-10 pr-4 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
                     </div>
                     <!-- Dynamic Height Container based on Screen Height -->
-                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[60vh] max-h-[450px] sm:max-h-[580px] sm:h-[65vh] lg:h-[600px] scrollbar-hide" data-lenis-prevent>
+                    <div class="p-4 sm:p-6 overflow-y-auto space-y-4 h-[60vh] max-h-[450px] sm:max-h-[580px] sm:h-[65vh] lg:h-[600px] scrollbar-hide"
+                        data-lenis-prevent>
                         <?php if (empty($archivedLessons)): ?>
                             <div class="flex flex-col items-center justify-center h-full text-center py-20">
                                 <div
@@ -647,9 +698,12 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                                 <p class="text-blue-100/40 font-medium">Hələ ki, heç bir keçirilmiş dərs yazısı yoxdur.</p>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($archivedLessons as $archive): ?>
+                            <?php foreach ($archivedLessons as $archive): 
+                                $searchStr = strtolower(e(($archive['topic_name'] ?? '') . ' ' . ($archive['course_title'] ?? '') . ' ' . ($archive['specialization_name'] ?? '') . ' ' . ($archive['instructor_display_name'] ?? '')));
+                            ?>
                                 <div
-                                    class="p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group">
+                                    class="archive-item p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group"
+                                    data-search="<?php echo $searchStr; ?>">
                                     <h4
                                         class="text-base sm:text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors">
                                         <?php echo e($archive['topic_name'] ?: $archive['course_title']); ?>
@@ -657,24 +711,22 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                                     <div class="space-y-2 mb-6 text-[10px] sm:text-xs font-medium">
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Fənn:</span>
-                                            <span
-                                                class="text-blue-400"><?php echo e($archive['course_title']); ?></span>
+                                            <span class="text-blue-400"><?php echo e($archive['course_title']); ?></span>
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">İxtisas:</span>
-                                            <span
-                                                class="text-white/90"><?php echo e($archive['specialization_name']); ?></span>
+                                            <span class="text-white/90"><?php echo e($archive['specialization_name']); ?></span>
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Kurs:</span>
                                             <span class="text-white/90">
-                                                <?php 
-                                                    $level = $archive['course_level_val'];
-                                                    if (is_numeric($level) && $level > 0) {
-                                                        echo e($level) . "-cü kurs";
-                                                    } else {
-                                                        echo "Ümumi";
-                                                    }
+                                                <?php
+                                                $level = $archive['course_level_val'];
+                                                if (is_numeric($level) && $level > 0) {
+                                                    echo e($level) . "-cü kurs";
+                                                } else {
+                                                    echo "Ümumi";
+                                                }
                                                 ?>
                                             </span>
                                         </div>
@@ -695,6 +747,13 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                                     </div>
                                 </div>
                             <?php endforeach; ?>
+                            <!-- Search Empty State -->
+                            <div id="archive-empty" class="hidden flex flex-col items-center justify-center h-full text-center py-20">
+                                <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10">
+                                    <i data-lucide="search-x" class="w-8 h-8 text-white/20"></i>
+                                </div>
+                                <p class="text-blue-100/40 text-sm font-medium">Axtarışa uyğun dərs tapılmadı.</p>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -713,7 +772,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                     class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-400 text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-6">
                     <i data-lucide="layers" class="w-4 h-4 text-blue-400"></i> Platforma Haqqında
                 </div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">NDU Distant Təhsil Ekosistemi</h2>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">NDU Distant Təhsil
+                    Ekosistemi</h2>
                 <p class="text-blue-100/40 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed">
                     Müasir texnologiyalarla təchiz olunmuş bu platforma, təhsilin hər kəs üçün və hər yerdə əlçatan
                     olması üçün yaradılmışdır.
@@ -774,10 +834,13 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                 <div class="inline-flex items-center justify-center flex-wrap gap-2 px-4 py-2 sm:px-6 bg-white/5 border border-white/10 rounded-2xl sm:rounded-full mb-8 animate-fadeInUp text-center max-w-[95%]"
                     style="animation-delay: 0.1s;">
                     <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse shrink-0"></span>
-                    <span class="text-blue-200/60 text-[9px] sm:text-sm font-bold tracking-wider uppercase">Naxçıvan Dövlət Universiteti — Distant Təhsil Mərkəzi</span>
+                    <span class="text-blue-200/60 text-[9px] sm:text-sm font-bold tracking-wider uppercase">Naxçıvan
+                        Dövlət Universiteti — Distant Təhsil Mərkəzi</span>
                 </div>
-                <h2 class="text-white mb-6 font-extrabold leading-tight text-3xl sm:text-4xl lg:text-5xl">Vahid Tədris Mühiti</h2>
-                <p class="text-blue-200/60 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed font-medium">NDU Distant Təhsil
+                <h2 class="text-white mb-6 font-extrabold leading-tight text-3xl sm:text-4xl lg:text-5xl">Vahid Tədris
+                    Mühiti</h2>
+                <p class="text-blue-200/60 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed font-medium">NDU
+                    Distant Təhsil
                     platforması akademik mükəmməllik üçün lazım olan bütün texnoloji alətləri bir pəncərədə birləşdirir.
                 </p>
             </div>
@@ -971,7 +1034,8 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
     </section>
 
     <!-- Footer Section -->
-    <footer id="contact" class="bg-[#060f23] pt-12 sm:pt-20 pb-10 border-t border-white/5 reveal-item relative overflow-hidden">
+    <footer id="contact"
+        class="bg-[#060f23] pt-12 sm:pt-20 pb-10 border-t border-white/5 reveal-item relative overflow-hidden">
         <div class="glow-blob bottom-[-10%] left-[20%] opacity-30"></div>
         <div class="container mx-auto px-4 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 mb-20">
@@ -1119,7 +1183,7 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
         // Mobile menu toggle
         const mobileToggle = document.getElementById('mobile-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
-        
+
         function toggleMenu() {
             if (!mobileMenu || !mobileToggle) return;
             mobileMenu.classList.toggle('hidden');
@@ -1190,7 +1254,7 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                         const target = +counter.getAttribute('data-target');
                         const speed = 2000; // Duration in ms
                         const increment = target / (speed / 16); // 16ms is roughly 1 frame at 60fps
-                        
+
                         let current = 0;
                         const updateText = () => {
                             current += increment;
@@ -1250,6 +1314,32 @@ try { $statCounts['total_views']   += ($db->fetch("SELECT SUM(views) as s FROM a
                 }).catch(error => {
                     console.log('PWA ServiceWorker xətası:', error);
                 });
+            });
+        }
+
+        // Archive Search Logic
+        const archiveSearch = document.getElementById('archive-search');
+        const archiveItems = document.querySelectorAll('.archive-item');
+        const archiveEmpty = document.getElementById('archive-empty');
+
+        if (archiveSearch) {
+            archiveSearch.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                let hasResults = false;
+
+                archiveItems.forEach(item => {
+                    const searchData = item.getAttribute('data-search') || '';
+                    if (searchData.includes(query)) {
+                        item.style.display = '';
+                        hasResults = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (archiveEmpty) {
+                    archiveEmpty.classList.toggle('hidden', hasResults);
+                }
             });
         }
 
