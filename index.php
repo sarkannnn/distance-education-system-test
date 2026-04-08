@@ -718,6 +718,10 @@ try {
                                             <span class="text-white/90"><?php echo e($archive['specialization_name']); ?></span>
                                         </div>
                                         <div class="flex gap-2"><span
+                                                class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Müəllim:</span>
+                                            <span class="text-white/90"><?php echo e($archive['instructor_display_name']); ?></span>
+                                        </div>
+                                        <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Kurs:</span>
                                             <span class="text-white/90">
                                                 <?php
