@@ -285,7 +285,7 @@
     <div id="chatbot-container" class="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 flex flex-col items-end gap-4 overflow-visible">
         <div id="chat-window" class="chat-window hidden w-[calc(100vw-48px)] sm:w-[400px] h-[580px] bg-[#0a1a3e]/98 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
             <!-- Header -->
-            <div class="p-3 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-white/10 flex items-center justify-between">
+            <div id="chat-header" class="cursor-move select-none p-3 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-white/10 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="relative w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
                         <i data-lucide="bot" class="w-3.5 h-3.5 text-white"></i>
@@ -366,6 +366,7 @@
 
             const chatToggle = document.getElementById('chat-toggle');
             const chatWindow = document.getElementById('chat-window');
+            const chatHeader = document.getElementById('chat-header');
             const closeChat = document.getElementById('close-chat');
             const clearChat = document.getElementById('clear-chat');
             const chatForm = document.getElementById('chat-form');
@@ -659,6 +660,53 @@
                     }
                 }, { passive: false });
             });
+
+            // --- Drag & Drop Logic for Chat Window ---
+            let isDragging = false;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
+
+            if (chatHeader && chatWindow) {
+                chatHeader.addEventListener('mousedown', (e) => {
+                    // Ignore clicks on close/clear buttons
+                    if (e.target.closest('button')) return;
+
+                    isDragging = true;
+                    
+                    // Switch to fixed positioning for dragging to separate from flow without interfering with transform animations
+                    const rect = chatWindow.getBoundingClientRect();
+                    chatWindow.style.position = 'fixed';
+                    chatWindow.style.margin = '0';
+                    chatWindow.style.bottom = 'auto';
+                    chatWindow.style.right = 'auto';
+                    
+                    // Only set initial position if it's the first time we drag, otherwise rect jumping occurs
+                    if (!chatWindow.style.left) {
+                        chatWindow.style.left = rect.left + 'px';
+                        chatWindow.style.top = rect.top + 'px';
+                    }
+
+                    dragOffsetX = e.clientX - rect.left;
+                    dragOffsetY = e.clientY - rect.top;
+                    
+                    document.body.style.userSelect = 'none'; // Prevent text selection while dragging
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    
+                    chatWindow.style.left = (e.clientX - dragOffsetX) + 'px';
+                    chatWindow.style.top = (e.clientY - dragOffsetY) + 'px';
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        document.body.style.userSelect = '';
+                    }
+                });
+            }
 
             // Init
             loadLocalFaq();
