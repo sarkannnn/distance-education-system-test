@@ -1,6 +1,28 @@
+<!-- Include Tailwind CSS uniquely for the Chatbot with Preflight disabled to protect existing dashboard styles -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        corePlugins: {
+            preflight: false, // Ensures existing dashboard styles are NOT overridden
+        }
+    }
+</script>
 <style>
 #chatbot-container {
-            z-index: 9999;
+            z-index: 99999;
+        }
+
+        /* Bulletproof theme overrides to protect against platform-specific global CSS */
+        #chat-window {
+            background-color: rgba(10, 26, 62, 0.98) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        #chat-window * {
+            box-sizing: border-box;
+            --tw-border-opacity: 1;
+            --tw-bg-opacity: 1;
+            --tw-text-opacity: 1;
         }
 
         .chat-window {
@@ -255,6 +277,8 @@
 
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
 </style>
 
 <!-- Chatbot Widget HTML — Gemini AI Powered -->
