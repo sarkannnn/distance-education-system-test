@@ -104,4 +104,3 @@ try {
         'error' => 'Xidmətdə müvəqqəti problem yarandı. Zəhmət olmasa bir qədər sonra yenidən cəhd edin.',
     ]);
 }
-}
