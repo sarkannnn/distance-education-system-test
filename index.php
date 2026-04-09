@@ -339,6 +339,7 @@ try {
         .lesson-hidden {
             display: none !important;
         }
+
         /* --- CHATBOT PREMIUM STYLES --- */
         #chatbot-container {
             z-index: 9999;
@@ -372,12 +373,14 @@ try {
             letter-spacing: -0.01em;
         }
 
-        .chat-message-bot b, .chat-message-bot strong {
+        .chat-message-bot b,
+        .chat-message-bot strong {
             color: #fff;
             font-weight: 700;
         }
 
-        .chat-message-bot i, .chat-message-bot em {
+        .chat-message-bot i,
+        .chat-message-bot em {
             color: #cbd5e1;
         }
 
@@ -412,19 +415,40 @@ try {
             letter-spacing: 0.5px;
         }
 
-        .source-local { color: #34d399; background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.2); }
-        .source-gemini { color: #60a5fa; background: rgba(96, 165, 250, 0.15); border: 1px solid rgba(96, 165, 250, 0.2); }
-        .source-openai { color: #a78bfa; background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.2); }
-        .source-fallback { color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.2); }
+        .source-local {
+            color: #34d399;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .source-gemini {
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.15);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+        }
+
+        .source-openai {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .source-fallback {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
 
         /* Scroll Indicators & Snap */
-        .faq-categories, #chat-suggestions {
+        .faq-categories,
+        #chat-suggestions {
             scroll-snap-type: x mandatory;
             padding-left: 20px;
             padding-right: 20px;
         }
 
-        .category-btn, .suggestion-btn {
+        .category-btn,
+        .suggestion-btn {
             scroll-snap-align: start;
         }
 
@@ -445,24 +469,36 @@ try {
 
         /* Desktop Scrollbar */
         @media (min-width: 640px) {
-            .faq-categories::-webkit-scrollbar, #chat-suggestions::-webkit-scrollbar {
+
+            .faq-categories::-webkit-scrollbar,
+            #chat-suggestions::-webkit-scrollbar {
                 height: 4px;
                 display: block;
             }
-            .faq-categories::-webkit-scrollbar-track, #chat-suggestions::-webkit-scrollbar-track {
+
+            .faq-categories::-webkit-scrollbar-track,
+            #chat-suggestions::-webkit-scrollbar-track {
                 background: transparent;
             }
-            .faq-categories::-webkit-scrollbar-thumb, #chat-suggestions::-webkit-scrollbar-thumb {
+
+            .faq-categories::-webkit-scrollbar-thumb,
+            #chat-suggestions::-webkit-scrollbar-thumb {
                 background: rgba(255, 255, 255, 0.05);
                 border-radius: 10px;
             }
-            .faq-categories:hover::-webkit-scrollbar-thumb, #chat-suggestions:hover::-webkit-scrollbar-thumb {
+
+            .faq-categories:hover::-webkit-scrollbar-thumb,
+            #chat-suggestions:hover::-webkit-scrollbar-thumb {
                 background: rgba(255, 255, 255, 0.15);
             }
         }
 
         @media (max-width: 640px) {
-            .faq-categories::-webkit-scrollbar, #chat-suggestions::-webkit-scrollbar { display: none; }
+
+            .faq-categories::-webkit-scrollbar,
+            #chat-suggestions::-webkit-scrollbar {
+                display: none;
+            }
         }
 
         .scroll-wrapper {
@@ -504,11 +540,18 @@ try {
             transform: translateY(-50%) scale(1.1);
         }
 
-        .scroll-arrow-left { left: 4px; }
-        .scroll-arrow-right { right: 4px; }
+        .scroll-arrow-left {
+            left: 4px;
+        }
+
+        .scroll-arrow-right {
+            right: 4px;
+        }
 
         @media (max-width: 768px) {
-            .scroll-arrow { display: none !important; }
+            .scroll-arrow {
+                display: none !important;
+            }
         }
 
         .category-btn {
@@ -533,9 +576,15 @@ try {
             scroll-snap-align: start;
         }
 
-        .category-btn i { width: 20px; height: 20px; color: #60a5fa; flex-shrink: 0; }
+        .category-btn i {
+            width: 20px;
+            height: 20px;
+            color: #60a5fa;
+            flex-shrink: 0;
+        }
 
-        .category-btn:hover, .category-btn.active {
+        .category-btn:hover,
+        .category-btn.active {
             background: rgba(59, 130, 246, 0.15);
             border-color: rgba(59, 130, 246, 0.3);
             color: white;
@@ -543,7 +592,9 @@ try {
             box-shadow: 0 8px 20px -5px rgba(59, 130, 246, 0.4);
         }
 
-        .category-btn.active i { color: #fff; }
+        .category-btn.active i {
+            color: #fff;
+        }
 
         #chat-suggestions {
             display: flex;
@@ -557,7 +608,10 @@ try {
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             width: 100%;
         }
-        #chat-suggestions::-webkit-scrollbar { display: none; }
+
+        #chat-suggestions::-webkit-scrollbar {
+            display: none;
+        }
 
         .suggestion-btn {
             flex: 0 0 auto;
@@ -591,12 +645,25 @@ try {
             animation: typing 1.4s infinite;
         }
 
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-4px);
+            }
         }
     </style>
 </head>
@@ -960,14 +1027,16 @@ try {
                 <!-- 2nd Column: Past Lessons -->
                 <div
                     class="flex-1 min-w-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col h-full self-stretch">
-                    <div class="p-6 sm:p-8 border-b border-white/10 shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div
+                        class="p-6 sm:p-8 border-b border-white/10 shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <h2 class="text-xl font-extrabold flex items-center gap-3 text-white">
                             <i data-lucide="archive" class="w-5 h-5 text-blue-400"></i>
                             Keçirilmiş Dərslər
                         </h2>
                         <div class="relative w-full sm:w-64">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"></i>
-                            <input type="text" id="archive-search" placeholder="İxtisas, fənn və ya müəllim..." 
+                            <i data-lucide="search"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"></i>
+                            <input type="text" id="archive-search" placeholder="İxtisas, fənn və ya müəllim..."
                                 class="w-full bg-white/5 border border-white/10 rounded-2xl py-2 pl-10 pr-4 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                     </div>
@@ -983,11 +1052,10 @@ try {
                                 <p class="text-blue-100/40 font-medium">Hələ ki, heç bir keçirilmiş dərs yazısı yoxdur.</p>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($archivedLessons as $archive): 
+                            <?php foreach ($archivedLessons as $archive):
                                 $searchStr = strtolower(e(($archive['topic_name'] ?? '') . ' ' . ($archive['course_title'] ?? '') . ' ' . ($archive['specialization_name'] ?? '') . ' ' . ($archive['instructor_display_name'] ?? '')));
-                            ?>
-                                <div
-                                    class="archive-item p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group"
+                                ?>
+                                <div class="archive-item p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group"
                                     data-search="<?php echo $searchStr; ?>">
                                     <h4
                                         class="text-base sm:text-lg font-bold text-white mb-4 group-hover:text-blue-400 transition-colors">
@@ -1004,7 +1072,8 @@ try {
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Müəllim:</span>
-                                            <span class="text-white/90"><?php echo e($archive['instructor_display_name']); ?></span>
+                                            <span
+                                                class="text-white/90"><?php echo e($archive['instructor_display_name']); ?></span>
                                         </div>
                                         <div class="flex gap-2"><span
                                                 class="text-white/40 w-28 shrink-0 uppercase tracking-tighter">Kurs:</span>
@@ -1037,8 +1106,10 @@ try {
                                 </div>
                             <?php endforeach; ?>
                             <!-- Search Empty State -->
-                            <div id="archive-empty" class="hidden flex flex-col items-center justify-center h-full text-center py-20">
-                                <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10">
+                            <div id="archive-empty"
+                                class="hidden flex flex-col items-center justify-center h-full text-center py-20">
+                                <div
+                                    class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10">
                                     <i data-lucide="search-x" class="w-8 h-8 text-white/20"></i>
                                 </div>
                                 <p class="text-blue-100/40 text-sm font-medium">Axtarışa uyğun dərs tapılmadı.</p>
@@ -1636,23 +1707,30 @@ try {
     </script>
 
     <!-- Chatbot Widget HTML — Gemini AI Powered -->
-    <div id="chatbot-container" class="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 flex flex-col items-end gap-4 overflow-visible">
-        <div id="chat-window" class="chat-window hidden w-[calc(100vw-48px)] sm:w-[400px] h-[580px] bg-[#0a1a3e]/98 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
+    <div id="chatbot-container"
+        class="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 flex flex-col items-end gap-4 overflow-visible">
+        <div id="chat-window"
+            class="chat-window hidden w-[calc(100vw-48px)] sm:w-[400px] h-[580px] bg-[#0a1a3e]/98 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
             <!-- Header -->
-            <div class="p-3 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-white/10 flex items-center justify-between">
+            <div
+                class="p-3 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-white/10 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <div class="relative w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-white"></i>
-                        <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-[#0a1a3e]"></span>
+                    <div
+                        class="relative w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
+                        <i data-lucide="bot" class="w-3.5 h-3.5 text-white"></i>
+                        <span
+                            class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-[#0a1a3e]"></span>
                     </div>
                     <div>
                         <h4 class="text-white font-bold text-sm tracking-tight flex items-center gap-2">NDU Asistent
-                            <span class="px-1.5 py-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-400/20 rounded-md text-[8px] text-blue-300 font-bold uppercase tracking-widest">AI</span>
+                            <span
+                                class="px-1.5 py-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-400/20 rounded-md text-[8px] text-blue-300 font-bold uppercase tracking-widest">AI</span>
                         </h4>
                     </div>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button id="clear-chat" class="p-2 hover:bg-white/5 rounded-full transition-colors" title="Söhbəti təmizlə">
+                    <button id="clear-chat" class="p-2 hover:bg-white/5 rounded-full transition-colors"
+                        title="Söhbəti təmizlə">
                         <i data-lucide="trash-2" class="w-4 h-4 text-white/30 hover:text-white/60"></i>
                     </button>
                     <button id="close-chat" class="p-2 hover:bg-white/5 rounded-full transition-colors" title="Bağla">
@@ -1661,7 +1739,8 @@ try {
                 </div>
             </div>
             <!-- Messages -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-5 flex flex-col gap-3 scrollbar-hide" data-lenis-prevent></div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-5 flex flex-col gap-3 scrollbar-hide"
+                data-lenis-prevent></div>
             <!-- FAQ Categories Scroll -->
             <div class="scroll-wrapper">
                 <button class="scroll-arrow scroll-arrow-left" data-target="chat-categories">
@@ -1677,7 +1756,8 @@ try {
                 <button class="scroll-arrow scroll-arrow-left" data-target="chat-suggestions">
                     <i data-lucide="chevron-left" class="w-4 h-4"></i>
                 </button>
-                <div id="chat-suggestions" class="px-3 py-1.5 border-t border-white/5 flex flex-nowrap gap-2 overflow-x-auto"></div>
+                <div id="chat-suggestions"
+                    class="px-3 py-1.5 border-t border-white/5 flex flex-nowrap gap-2 overflow-x-auto"></div>
                 <button class="scroll-arrow scroll-arrow-right" data-target="chat-suggestions">
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </button>
@@ -1687,22 +1767,24 @@ try {
                 <form id="chat-form" class="flex gap-2 items-center">
                     <input type="text" id="chat-input" placeholder="Sualınızı yazın..." autocomplete="off"
                         class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-blue-500/40 focus:bg-white/[0.07] transition-all placeholder:text-white/20">
-                    <button type="submit" id="chat-send-btn" class="w-9 h-9 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 transition-all active:scale-90">
+                    <button type="submit" id="chat-send-btn"
+                        class="w-9 h-9 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 transition-all active:scale-90">
                         <i data-lucide="send" class="w-3.5 h-3.5 text-white"></i>
                     </button>
                 </form>
             </div>
         </div>
         <!-- Floating Toggle Button -->
-        <button id="chat-toggle" class="group relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-lg shadow-blue-900/50 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300">
+        <button id="chat-toggle"
+            class="group relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-lg shadow-blue-900/50 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300">
             <span class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-15"></span>
-            <i data-lucide="sparkles" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
+            <i data-lucide="bot-message-square" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
         </button>
     </div>
 
     <script>
         // --- CHATBOT OPTIMIZED SYSTEM ---
-        (function() {
+        (function () {
             const chatToggle = document.getElementById('chat-toggle');
             const chatWindow = document.getElementById('chat-window');
             const closeChat = document.getElementById('close-chat');
@@ -1746,7 +1828,7 @@ try {
                         btn.classList.add('active');
                         currentCategoryId = cat.id;
                         renderSuggestions(cat.id);
-                        
+
                         // Reset scroll to start when category changes
                         chatSuggestions.scrollTo({ left: 0, behavior: 'smooth' });
                     };
@@ -1805,14 +1887,14 @@ try {
             function addMessage(text, type = 'bot', save = true, source = null) {
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `chat-message chat-message-${type}`;
-                
+
                 if (type === 'bot') {
                     msgDiv.innerHTML = text;
                     if (source) {
                         const badge = document.createElement('div');
                         badge.className = `source-badge source-${source}`;
-                        let sourceText = source === 'local' ? 'Rəsmi Məlumat' : 
-                                         source === 'fallback' ? 'Sistem Cavabı' : 'Süni İntellekt';
+                        let sourceText = source === 'local' ? 'Rəsmi Məlumat' :
+                            source === 'fallback' ? 'Sistem Cavabı' : 'Süni İntellekt';
                         badge.innerHTML = `<i data-lucide="shield-check" style="width:10px;height:10px;"></i> ${sourceText}`;
                         msgDiv.appendChild(badge);
                     }
@@ -1855,7 +1937,7 @@ try {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             message: message,
-                            history: conversationHistory.slice(-10).map(h => ({role: h.role, text: h.text}))
+                            history: conversationHistory.slice(-10).map(h => ({ role: h.role, text: h.text }))
                         })
                     });
 
@@ -1912,7 +1994,7 @@ try {
             // Drag to scroll & Arrows logic
             [chatCategories, chatSuggestions].forEach(el => {
                 if (!el) return;
-                
+
                 const wrapper = el.parentElement;
                 const leftArrow = wrapper.querySelector('.scroll-arrow-left');
                 const rightArrow = wrapper.querySelector('.scroll-arrow-right');
@@ -1921,7 +2003,7 @@ try {
                     if (!leftArrow || !rightArrow) return;
                     const canScrollLeft = el.scrollLeft > 5;
                     const canScrollRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 5);
-                    
+
                     leftArrow.classList.toggle('visible', canScrollLeft);
                     rightArrow.classList.toggle('visible', canScrollRight);
                 };

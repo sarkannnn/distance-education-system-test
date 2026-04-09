@@ -70,7 +70,7 @@ class FallbackManager
         $msg = mb_strtolower($message, 'UTF-8');
         
         if (strpos($msg, 'salam') !== false || strpos($msg, 'hi') !== false) {
-            return "Salam! 👋 Hazırda süni intellekt xidmətləri məşğuldur, amma mən sizə lokal bazadan kömək edə bilərəm. Naxçıvan Dövlət Universiteti Distant Təhsil sistemi haqqında nəyi bilmək istərdiniz?";
+            return "Salam! 👋 Hazırda süni intellekt xidmətləri məşğuldur, amma mən sizə lokal bazadan kömək edə bilərəm. Naxçıvan Dövlət Universiteti Distant Təhsil sistemi haqqında nəyi bilmək istərdiniz?<br><br>Aşağıdakı mövzularda suallarınıza cavab verə bilərəm:<br><br>📺 <b>Canlı Dərslər</b> — qoşulma, cədvəl<br>🔐 <b>Giriş/Hesab</b> — TMİS, şifrə bərpası<br>📂 <b>Arxiv</b> — keçmiş dərslər, materiallar<br>🔧 <b>Texniki</b> — brauzer, audio/video<br>👨‍🏫 <b>Müəllim</b> — studio, analitika<br>🎓 <b>Tələbə</b> — panel, statistika<br><br>Nə ilə maraqlanırsınız?";
         }
 
         if (strpos($msg, 'dərs') !== false || strpos($msg, 'canlı') !== false) {
@@ -81,6 +81,6 @@ class FallbackManager
             return "<b>Giriş və Şifrə:</b> Sistem TMİS (SSO) üzərindən işləyir. Şifrənizi unutmusunuzsa, TMİS portalından (tmis.ndu.edu.az) bərpa edə bilərsiniz.";
         }
 
-        return "Sualınızı tam analiz edə bilmədim. 😔 Hazırda sistemlərimizdə texniki məhdudiyyət var. Zəhmət olmasa bir qədər sonra yenidən cəhd edin və ya <b>distant@ndu.edu.az</b> ünvanına yazın.";
+        return "Salam! 👋 Hazırda süni intellekt xidmətləri məşğuldur, amma mən sizə lokal bazadan kömək edə bilərəm. Naxçıvan Dövlət Universiteti Distant Təhsil sistemi haqqında aşağıdakı mövzularda suallarınıza cavab verə bilərəm:<br><br>📺 <b>Canlı Dərslər</b> — qoşulma, cədvəl<br>🔐 <b>Giriş/Hesab</b> — TMİS, şifrə bərpası<br>📂 <b>Arxiv</b> — keçmiş dərslər, materiallar<br>🔧 <b>Texniki</b> — brauzer, audio/video<br>👨‍🏫 <b>Müəllim</b> — studio, analitika<br>🎓 <b>Tələbə</b> — panel, statistika<br><br>Nə ilə maraqlanırsınız?";
     }
 }
