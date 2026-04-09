@@ -35,12 +35,9 @@ if (getenv('SSO_AUTO_LOGIN') === 'false' || $isLocal) {
 
 if (!$skipSso) {
     $tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
+    // Use the configured DISTANT_URL to prevent Host header injection in callback URL
     $distantUrl = rtrim(getenv('DISTANT_URL') ?: 'https://distant.ndu.edu.az', '/');
-
-    // Yönləndirmə üçün ehtimal olunan callback URL (əgər TMİS dəstəkləyirsə)
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $currentHostUrl = $protocol . '://' . $host;
-    $callbackUrl = $currentHostUrl . '/teacher/sso.php';
+    $callbackUrl = $distantUrl . '/teacher/sso.php';
 
     // After TMIS auto-generates a token it redirects to sso.php.
     header('Location: ' . $tmisUrl . '/teacher/sso/auto?redirect_uri=' . urlencode($callbackUrl) . '&return_url=' . urlencode($callbackUrl));
@@ -291,8 +288,8 @@ if (isset($_GET['error'])) {
             position: relative;
         }
 
-        .form-input-icon > i,
-        .form-input-icon > svg {
+        .form-input-icon>i,
+        .form-input-icon>svg {
             position: absolute;
             left: 14px;
             top: 50%;
@@ -510,7 +507,7 @@ if (isset($_GET['error'])) {
         lucide.createIcons();
 
         // Form submit zamanı loading göstər
-        document.getElementById('loginForm').addEventListener('submit', function () {
+        document.getElementById('loginForm').addEventListener('submit', function() {
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"></circle><path d="M4 12a8 8 0 0 1 8-8"></path></svg> Yoxlanılır...';
@@ -525,12 +522,12 @@ if (isset($_GET['error'])) {
             togglePassword.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
-                
+
                 // İkonu yenilə
-                this.innerHTML = type === 'password' ? 
-                    '<i data-lucide="eye"></i>' : 
+                this.innerHTML = type === 'password' ?
+                    '<i data-lucide="eye"></i>' :
                     '<i data-lucide="eye-off"></i>';
-                
+
                 lucide.createIcons();
             });
         }

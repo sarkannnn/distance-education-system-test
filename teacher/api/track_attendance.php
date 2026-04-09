@@ -32,6 +32,12 @@ exit;
 }
 
 $type = $input['type'];
+// Whitelist allowed attendance tracking types
+if (!in_array($type, ['join', 'heartbeat', 'leave'], true)) {
+http_response_code(400);
+echo json_encode(['success' => false, 'message' => 'Invalid type']);
+exit;
+}
 $liveClassIdInput = (int) $input['live_class_id'];
 $db = Database::getInstance();
 
@@ -83,7 +89,8 @@ $db->query("UPDATE live_attendance SET left_at = NOW() WHERE id = ?", [$activeSe
 echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
+error_log('track_attendance error: ' . $e->getMessage());
 http_response_code(500);
-echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+echo json_encode(['success' => false, 'message' => 'Əməliyyat uğursuz oldu']);
 }
 ?>

@@ -64,6 +64,7 @@ try {
     ob_end_clean();
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
-    $err = ob_get_clean();
-    echo json_encode(['success' => false, 'message' => $e->getMessage(), 'debug' => $err]);
+    ob_end_clean();
+    error_log('kick_student error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Əməliyyat uğursuz oldu']);
 }

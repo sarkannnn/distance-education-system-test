@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API to update view count for videos
  * Həm lokal bazada həm də TMİS-də baxış sayını artırır.
@@ -55,5 +56,6 @@ try {
 
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    error_log('increment_views error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Server xətası']);
 }

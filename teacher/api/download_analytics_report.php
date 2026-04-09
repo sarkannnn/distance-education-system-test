@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API: Analitika Hesabatını Yüklə (CSV)
  */
@@ -134,7 +135,7 @@ try {
                 $totalStudents = (int) ($courseInitial['initial_students'] ?? 0);
             }
         }
-        $activeStudents = 0; 
+        $activeStudents = 0;
 
         // Davamiyyət hesabla
         $attendance = 0;
@@ -265,8 +266,8 @@ try {
 
     fclose($output);
     exit;
-
 } catch (Exception $e) {
-    die("Hesabat yaradılarkən xəta baş verdi: " . $e->getMessage());
+    error_log('download_analytics_report error: ' . $e->getMessage());
+    http_response_code(500);
+    die("Hesabat yaradılarkən xəta baş verdi.");
 }
-

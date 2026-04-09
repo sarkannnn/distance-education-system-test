@@ -14,10 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode($raw, true);
 
     $type = $data['type'] ?? ''; // 'arch' or 'live'
-    $id = $data['id'] ?? null;
+    $id = (int) ($data['id'] ?? 0);
     $is_visible = isset($data['is_visible']) ? (int)$data['is_visible'] : 1;
 
-    if (!$type || !$id) {
+    if (!in_array($type, ['arch', 'live'], true) || $id <= 0) {
         echo json_encode(['success' => false, 'message' => 'Parametrlər çatışmır']);
         exit;
     }
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $currentUser = $auth->getCurrentUser();
         $table = ($type === 'live') ? 'live_classes' : 'archived_lessons';
-        
+
         // Ownership verification
         $lesson = $db->fetch("SELECT instructor_id FROM {$table} WHERE id = ?", [$id]);
         if (!$lesson) {
@@ -44,13 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->update($table, ['is_visible' => $is_visible], 'id = :id', ['id' => $id]);
 
         echo json_encode([
-            'success' => true, 
+            'success' => true,
             'message' => $is_visible ? 'Dərs tələbələrə görünür' : 'Dərs tələbələrdən gizlədildi',
             'is_visible' => $is_visible
         ]);
-
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Xəta: ' . $e->getMessage()]);
+        error_log('toggle_lesson_visibility error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Əməliyyat uğursuz oldu']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Yanlış sorğu metodu']);

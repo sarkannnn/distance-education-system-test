@@ -61,15 +61,8 @@ try {
 
     if (move_uploaded_file($file['tmp_name'], $targetFile)) {
 
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-        $host = $_SERVER['HTTP_HOST'];
-
-        // Get script directory to build the URL properly
-        $scriptPath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-        $baseUrl = $protocol . "://" . $host . $scriptPath;
-        // Base URL points to /distant/api/, so we go up one level to /distant/
-        $distantUrl = dirname($baseUrl);
-        $url = $distantUrl . "/uploads/chat_files/" . $fileName;
+        $baseUrl = rtrim(getenv('DISTANT_URL') ?: '', '/');
+        $url = $baseUrl . "/uploads/chat_files/" . $fileName;
 
         echo json_encode([
             "success" => true,
@@ -80,5 +73,7 @@ try {
         throw new Exception("Fayl köçürülə bilmədi.");
     }
 } catch (Exception $e) {
+    // Only user-facing validation messages are thrown above; log unexpected errors
+    error_log('upload_chat_file error: ' . $e->getMessage());
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }

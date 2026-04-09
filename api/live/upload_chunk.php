@@ -22,10 +22,10 @@ if (!in_array($currentUser['role'], ['instructor', 'admin'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $lessonId = $_POST['lesson_id'] ?? null;
+    $lessonId = (int) ($_POST['lesson_id'] ?? 0);
 
-    if (!$lessonId || !isset($_FILES['video_blob'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing data: lesson_id=' . ($lessonId ?? 'null') . ', video_blob=' . (isset($_FILES['video_blob']) ? 'yes' : 'no')]);
+    if (!$lessonId || $lessonId <= 0 || !isset($_FILES['video_blob'])) {
+        echo json_encode(['success' => false, 'message' => 'Missing data: lesson_id=' . ($lessonId ?: 'invalid') . ', video_blob=' . (isset($_FILES['video_blob']) ? 'yes' : 'no')]);
         exit;
     }
 

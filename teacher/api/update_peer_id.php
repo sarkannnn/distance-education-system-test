@@ -1,16 +1,34 @@
 <?php
+
 /**
  * API to update Peer ID - AGNOSTIC VERSION (GET/POST)
  */
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+
+// Authentication check — only logged-in instructors can update peer IDs
+require_once '../includes/auth.php';
 require_once '../config/database.php';
 
-// Həm POST, həm də GET-dən məlumatları qəbul et
-$liveClassId = $_REQUEST['live_class_id'] ?? null;
-$peerId = $_REQUEST['peer_id'] ?? null;
+$auth = new Auth();
+if (!$auth->isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Giriş tələb olunur']);
+    exit;
+}
+$currentUser = $auth->getCurrentUser();
+if (!in_array($currentUser['role'] ?? '', ['instructor', 'admin'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'İcazə yoxdur']);
+    exit;
+}
 
-if ($liveClassId && $peerId) {
+// Accept POST or GET but sanitize inputs
+$liveClassId = (int) ($_REQUEST['live_class_id'] ?? 0);
+// peer_id must be alphanumeric/hyphen (PeerJS format) — never a URL
+$rawPeerId = $_REQUEST['peer_id'] ?? '';
+$peerId = preg_replace('/[^a-zA-Z0-9\-_]/', '', substr($rawPeerId, 0, 64));
+
+if ($liveClassId > 0 && !empty($peerId)) {
     try {
         $db = Database::getInstance();
 
@@ -28,10 +46,30 @@ if ($liveClassId && $peerId) {
             $db->query("ALTER TABLE live_classes ADD COLUMN peer_server VARCHAR(50) DEFAULT 'local'");
         }
 
-        $peerServer = $_REQUEST['server'] ?? 'local';
+        // Whitelist allowed server values
+        $rawServer = $_REQUEST['server'] ?? 'local';
+        $peerServer = in_array($rawServer, ['local', 'cloud'], true) ? $rawServer : 'local';
 
-        // Update Peer ID, server and set started_at if not already set
-        // Support both local ID and TMİS Session ID
+        // Verify the instructor owns this live class before updating
+        $instructor = $db->fetch("SELECT id FROM instructors WHERE user_id = ?", [$currentUser['id']]);
+        if (!$instructor && $currentUser['role'] !== 'admin') {
+            echo json_encode(['success' => false, 'message' => 'Müəllim tapılmadı']);
+            exit;
+        }
+
+        $ownershipWhere = ($currentUser['role'] === 'admin')
+            ? "(id = ? OR tmis_session_id = ?)"
+            : "(id = ? OR tmis_session_id = ?) AND (instructor_id = ? OR instructor_id IN (SELECT id FROM instructors WHERE user_id = ?))";
+        $ownershipParams = ($currentUser['role'] === 'admin')
+            ? [$liveClassId, $liveClassId]
+            : [$liveClassId, $liveClassId, $instructor['id'], $currentUser['id']];
+
+        $classCheck = $db->fetch("SELECT id FROM live_classes WHERE {$ownershipWhere}", $ownershipParams);
+        if (!$classCheck) {
+            echo json_encode(['success' => false, 'message' => 'Dərs tapılmadı və ya icazəniz yoxdur']);
+            exit;
+        }
+
         $db->query(
             "UPDATE live_classes 
              SET zoom_link = ?, 
@@ -44,8 +82,9 @@ if ($liveClassId && $peerId) {
 
         echo json_encode(['success' => true, 'method' => $_SERVER['REQUEST_METHOD']]);
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        error_log('update_peer_id error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Əməliyyat uğursuz oldu']);
     }
 } else {
-    echo json_encode(['success' => false, 'message' => 'Missing data', 'received' => $_REQUEST]);
+    echo json_encode(['success' => false, 'message' => 'Parametrlər çatışmır']);
 }

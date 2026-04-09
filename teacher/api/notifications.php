@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Teacher Notifications API
  */
@@ -44,9 +45,9 @@ switch ($method) {
     case 'POST':
         // Bildirişi oxunmuş kimi işarələ
         $data = json_decode(file_get_contents('php://input'), true);
-        $notificationId = $data['notification_id'] ?? null;
+        $notificationId = (int) ($data['notification_id'] ?? 0);
 
-        if ($notificationId) {
+        if ($notificationId > 0) {
             $db->update(
                 'notifications',
                 ['is_read' => 1],

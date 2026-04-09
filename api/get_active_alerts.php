@@ -7,7 +7,16 @@ $db = Database::getInstance();
 try {
     // Tələbə sessiyasını yoxla (əgər tələbə panelidirsə)
     session_name('DISTANT_STUDENT_SESSION');
-    @session_start();
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.use_only_cookies', 1);
+    session_start();
     $studentId = $_SESSION['user_id'] ?? null;
     $myCourseIds = $_SESSION['my_course_ids'] ?? [];
 
@@ -72,5 +81,6 @@ try {
 
     echo json_encode(['success' => true, 'alerts' => $alerts]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    error_log('get_active_alerts error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Xidmət müvəqqəti əlçatmazdır']);
 }

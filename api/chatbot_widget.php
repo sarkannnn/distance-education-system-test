@@ -28,6 +28,15 @@
         .chat-window {
             transform-origin: bottom right;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity, left, top;
+        }
+
+        /* Fluid Dragging Optimization */
+        .chat-window.dragging {
+            transition: none !important; /* Eliminate lag while dragging */
+            transform: scale(1.02) !important; /* Premium lift effect */
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6) !important;
+            z-index: 100000;
         }
 
         .chat-window.hidden {
@@ -661,51 +670,88 @@
                 }, { passive: false });
             });
 
-            // --- Drag & Drop Logic for Chat Window ---
+            // --- Drag & Drop Logic for Chat Window (High Performance) ---
             let isDragging = false;
-            let dragOffsetX = 0;
-            let dragOffsetY = 0;
+            let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+            let rafId = null;
 
             if (chatHeader && chatWindow) {
-                chatHeader.addEventListener('mousedown', (e) => {
+                const dragStart = (e) => {
                     // Ignore clicks on close/clear buttons
                     if (e.target.closest('button')) return;
 
                     isDragging = true;
+                    chatWindow.classList.add('dragging');
                     
-                    // Switch to fixed positioning for dragging to separate from flow without interfering with transform animations
                     const rect = chatWindow.getBoundingClientRect();
-                    chatWindow.style.position = 'fixed';
-                    chatWindow.style.margin = '0';
-                    chatWindow.style.bottom = 'auto';
-                    chatWindow.style.right = 'auto';
                     
-                    // Only set initial position if it's the first time we drag, otherwise rect jumping occurs
-                    if (!chatWindow.style.left) {
+                    // Switch to fixed if not already
+                    if (chatWindow.style.position !== 'fixed') {
+                        chatWindow.style.position = 'fixed';
+                        chatWindow.style.bottom = 'auto';
+                        chatWindow.style.right = 'auto';
+                        chatWindow.style.margin = '0';
                         chatWindow.style.left = rect.left + 'px';
                         chatWindow.style.top = rect.top + 'px';
                     }
 
-                    dragOffsetX = e.clientX - rect.left;
-                    dragOffsetY = e.clientY - rect.top;
+                    initialX = e.clientX - rect.left;
+                    initialY = e.clientY - rect.top;
                     
-                    document.body.style.userSelect = 'none'; // Prevent text selection while dragging
-                });
+                    // Initialize current position to prevent NaN on first RAF frame
+                    currentX = rect.left;
+                    currentY = rect.top;
 
-                document.addEventListener('mousemove', (e) => {
+                    document.body.style.userSelect = 'none';
+                    requestUpdate();
+                };
+
+                const dragMove = (e) => {
                     if (!isDragging) return;
                     e.preventDefault();
-                    
-                    chatWindow.style.left = (e.clientX - dragOffsetX) + 'px';
-                    chatWindow.style.top = (e.clientY - dragOffsetY) + 'px';
-                });
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                };
 
-                document.addEventListener('mouseup', () => {
-                    if (isDragging) {
-                        isDragging = false;
-                        document.body.style.userSelect = '';
+                const dragEnd = () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    chatWindow.classList.remove('dragging');
+                    document.body.style.userSelect = '';
+                    if (rafId) {
+                        cancelAnimationFrame(rafId);
+                        rafId = null;
                     }
-                });
+                };
+
+                const updatePosition = () => {
+                    if (!isDragging) {
+                        rafId = null;
+                        return;
+                    }
+
+                    // Bounds checking - ensure header remains visible
+                    const minX = -chatWindow.offsetWidth + 150;
+                    const maxX = window.innerWidth - 50;
+                    const minY = 0;
+                    const maxY = window.innerHeight - 80;
+
+                    let finalX = Math.min(Math.max(currentX, minX), maxX);
+                    let finalY = Math.min(Math.max(currentY, minY), maxY);
+
+                    chatWindow.style.left = finalX + 'px';
+                    chatWindow.style.top = finalY + 'px';
+
+                    rafId = requestAnimationFrame(updatePosition);
+                };
+
+                const requestUpdate = () => {
+                    if (!rafId) rafId = requestAnimationFrame(updatePosition);
+                };
+
+                chatHeader.addEventListener('mousedown', dragStart);
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('mouseup', dragEnd);
             }
 
             // Init
@@ -716,10 +762,10 @@
                 });
             }
 
-            // Restore Chat Visibility State from LocalStorage
-            if (localStorage.getItem('ndu_chat_visibility') === 'open') {
+            // Restore Chat Visibility State from LocalStorage - DISABLED as per user request
+            /* if (localStorage.getItem('ndu_chat_visibility') === 'open') {
                 toggleChat(true);
-            }
+            } */
             
         })();
     </script>

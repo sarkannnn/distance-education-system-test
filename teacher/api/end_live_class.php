@@ -8,7 +8,12 @@ requireInstructor();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = Database::getInstance();
-    $live_class_id = $_POST['live_class_id'];
+    $live_class_id = (int) ($_POST['live_class_id'] ?? 0);
+
+    if ($live_class_id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Dərs ID yanlışdır']);
+        exit;
+    }
 
     try {
         error_log("Ending live class. Received ID: " . $live_class_id);

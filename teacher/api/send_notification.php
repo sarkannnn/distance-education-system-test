@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Send Notification API
  * Allows teachers to send individual or bulk notifications to students
@@ -30,6 +31,9 @@ $targetId = $data['target_id'] ?? null; // user_id for individual, course_id for
 $title = $data['title'] ?? 'Müəllim Bildirişi';
 $message = $data['message'] ?? '';
 $type = $data['type'] ?? 'info'; // info, success, warning, error
+if (!in_array($type, ['info', 'success', 'warning', 'error'], true)) {
+    $type = 'info';
+}
 
 if (empty($message)) {
     echo json_encode(['success' => false, 'message' => 'Mesaj boş ola bilməz']);

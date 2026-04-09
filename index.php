@@ -39,8 +39,7 @@ try {
          ORDER BY lc.start_time ASC"
     );
 } catch (Exception $e) {
-    if (isset($_GET['debug']))
-        echo "Today Error: " . $e->getMessage();
+    error_log('index.php todayLessons error: ' . $e->getMessage());
     $todayLessons = [];
 }
 
@@ -85,8 +84,7 @@ try {
     });
     $archivedLessons = $allArchives;
 } catch (Exception $e) {
-    if (isset($_GET['debug']))
-        echo "Archive Error: " . $e->getMessage();
+    error_log('index.php archivedLessons error: ' . $e->getMessage());
     $archivedLessons = [];
 }
 
@@ -978,7 +976,7 @@ try {
                                 $isLive = ($lesson['status'] === 'live');
                                 $startTime = date('H:i', strtotime($lesson['start_time']));
                                 $endTime = date('H:i', strtotime($lesson['start_time'] . ' +90 minutes'));
-                                ?>
+                            ?>
                                 <div
                                     class="p-6 bg-white/5 border-l-4 <?php echo $isLive ? 'border-l-red-500' : 'border-l-blue-500/30'; ?> border border-white/10 rounded-[2rem] relative group mb-2 transition-all hover:bg-white/10">
                                     <?php if ($isLive): ?>
@@ -1054,7 +1052,7 @@ try {
                         <?php else: ?>
                             <?php foreach ($archivedLessons as $archive):
                                 $searchStr = strtolower(e(($archive['topic_name'] ?? '') . ' ' . ($archive['course_title'] ?? '') . ' ' . ($archive['specialization_name'] ?? '') . ' ' . ($archive['instructor_display_name'] ?? '')));
-                                ?>
+                            ?>
                                 <div class="archive-item p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group"
                                     data-search="<?php echo $searchStr; ?>">
                                     <h4
@@ -1581,7 +1579,9 @@ try {
                     revealObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15 });
+        }, {
+            threshold: 0.15
+        });
 
         document.querySelectorAll('.reveal-item').forEach(el => revealObserver.observe(el));
 
@@ -1630,7 +1630,9 @@ try {
                     statObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.5 });
+        }, {
+            threshold: 0.5
+        });
 
         const statsSection = document.getElementById('stats');
         if (statsSection) statObserver.observe(statsSection);
@@ -1662,7 +1664,10 @@ try {
                     });
                 }
             });
-        }, { threshold: 0.15, rootMargin: "-80px 0px -30% 0px" });
+        }, {
+            threshold: 0.15,
+            rootMargin: "-80px 0px -30% 0px"
+        });
 
         sectionsToObserve.forEach(sec => navObserver.observe(sec));
 
@@ -1702,12 +1707,48 @@ try {
                 }
             });
         }
-
-
     </script>
 
     <!-- Chatbot Widget Integrated -->
     <?php include_once __DIR__ . '/api/chatbot_widget.php'; ?>
+                    isDown = false;
+                });
+
+                el.addEventListener('mouseup', () => {
+                    isDown = false;
+                    el.style.cursor = 'grab';
+                });
+
+                el.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - el.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    el.scrollLeft = scrollLeft - walk;
+                });
+
+                // Mouse wheel support
+                el.addEventListener('wheel', (e) => {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        el.scrollLeft += e.deltaY * 1.5;
+                        updateArrows();
+                    }
+                }, {
+                    passive: false
+                });
+            });
+
+            // Init
+            loadLocalFaq();
+            if (conversationHistory.length > 0) {
+                conversationHistory.forEach(msg => {
+                    addMessage(msg.text, msg.role === 'user' ? 'user' : 'bot', false, msg.source);
+                });
+            }
+        })();
+    </script>
+>>>>>>> f48289a41d704b942cd2a4ca8de9c26bd260c273
 </body>
 
 </html>

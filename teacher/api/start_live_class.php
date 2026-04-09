@@ -38,11 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $instructorId = $user['id'] ?? 1;
     }
 
-    $course_id = $_POST['course_id'] ?? null;
-    $topic_name = $_POST['title'] ?? $_POST['topic_name'] ?? null;
+    $course_id = (int) ($_POST['course_id'] ?? 0);
+    $topic_name = trim($_POST['title'] ?? $_POST['topic_name'] ?? '');
     $lesson_type = $_POST['lesson_type'] ?? 'lecture'; // lecture, seminar, or laboratory
+    // Whitelist lesson type
+    if (!in_array($lesson_type, ['lecture', 'seminar', 'laboratory'], true)) {
+        $lesson_type = 'lecture';
+    }
 
-    if (!$course_id || !$topic_name) {
+    if (!$course_id || empty($topic_name)) {
         echo json_encode(['success' => false, 'message' => 'Məlumatlar tam deyil']);
         exit;
     }
@@ -265,7 +269,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         */
-
     } catch (Exception $e) {
         // Əgər əsas insert xətası baş verdisə (hələ cavab göndərilməyib)
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -273,4 +276,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
-?>
