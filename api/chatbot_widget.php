@@ -288,7 +288,7 @@
             <div class="p-3 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-white/10 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="relative w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-white"></i>
+                        <i data-lucide="bot" class="w-3.5 h-3.5 text-white"></i>
                         <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-[#0a1a3e]"></span>
                     </div>
                     <div>
@@ -342,7 +342,7 @@
         <!-- Floating Toggle Button -->
         <button id="chat-toggle" class="group relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-lg shadow-blue-900/50 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300">
             <span class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-15"></span>
-            <i data-lucide="sparkles" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
+            <i data-lucide="bot-message-square" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
         </button>
     </div>
 
