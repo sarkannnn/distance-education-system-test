@@ -338,6 +338,31 @@
 
             if (!chatToggle || !chatWindow) return;
 
+            // Resolve dynamic base path to ensure it works globally in subdirectories
+            let basePath = '';
+            if (window.location.pathname.includes('/student')) {
+                basePath = '../';
+            } else if (window.location.pathname.includes('/teacher')) {
+                basePath = '../';
+            } else {
+                // Determine typical roots, assuming it might be in a subfolder like /distant-tehsil/
+                const pathParts = window.location.pathname.split('/');
+                const appRootIndex = pathParts.indexOf('distant-tehsil');
+                if (appRootIndex !== -1) {
+                    basePath = '/' + pathParts.slice(1, appRootIndex + 1).join('/') + '/';
+                } else {
+                    basePath = '/';
+                }
+            }
+
+            // Ensure consistent prefix for API calls
+            const getApiUrl = (endpoint) => {
+                if(basePath.startsWith('../')) {
+                   return basePath + 'api/' + endpoint; 
+                }
+                return basePath.replace(/\/+$/, '') + '/api/' + endpoint;
+            };
+
             let conversationHistory = JSON.parse(sessionStorage.getItem('ndu_chat_history') || '[]');
             let localFaqData = { categories: [], faqs: [] };
             let currentCategoryId = 'dersler';
@@ -346,7 +371,7 @@
             // Load Local FAQ Data
             async function loadLocalFaq() {
                 try {
-                    const res = await fetch('api/data/local_qa_data.json');
+                    const res = await fetch(getApiUrl('data/local_qa_data.json'));
                     if (res.ok) {
                         localFaqData = await res.json();
                         renderCategories();
@@ -472,7 +497,7 @@
                 showTyping();
 
                 try {
-                    const response = await fetch('api/chatbot.php', {
+                    const response = await fetch(getApiUrl('chatbot.php'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -502,6 +527,8 @@
                 if (isOpen) {
                     chatWindow.classList.remove('hidden');
                     chatWindow.classList.add('visible');
+                    localStorage.setItem('ndu_chat_visibility', 'open');
+                    
                     if (chatMessages.children.length === 0 && conversationHistory.length === 0) {
                         setTimeout(() => {
                             addMessage("Salam! 👋 NDU Distant Təhsil AI köməkçisiyəm. Nəyi öyrənmək istərdiniz?", 'bot');
@@ -510,6 +537,7 @@
                 } else {
                     chatWindow.classList.add('hidden');
                     chatWindow.classList.remove('visible');
+                    localStorage.setItem('ndu_chat_visibility', 'closed');
                 }
             }
 
@@ -600,5 +628,12 @@
                     addMessage(msg.text, msg.role === 'user' ? 'user' : 'bot', false, msg.source);
                 });
             }
+
+            // Restore Chat Visibility State from LocalStorage
+            if (localStorage.getItem('ndu_chat_visibility') === 'open') {
+                toggleChat(true);
+            }
+            
         })();
     </script>
+

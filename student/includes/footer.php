@@ -13,6 +13,9 @@
         initMobileSidebar();
     }
 </script>
-</body>
 
+<!-- Chatbot Widget Integrated -->
+<?php include_once __DIR__ . '/../../api/chatbot_widget.php'; ?>
+
+</body>
 </html>
