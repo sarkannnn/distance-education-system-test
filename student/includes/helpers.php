@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Ümumi köməkçi funksiyalar
  */
@@ -74,7 +75,7 @@ function calculatePercentage($completed, $total)
  */
 function e($string)
 {
-    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
 /**

@@ -8,7 +8,12 @@ requireLogin();
 if (isset($_GET['id'])) {
     $db = Database::getInstance();
     $user = $auth->getCurrentUser();
-    $live_class_id = $_GET['id'];
+    $live_class_id = (int) $_GET['id'];
+
+    if ($live_class_id <= 0) {
+        header('Location: ../live-classes');
+        exit;
+    }
 
     try {
         // 0. Ban/Kick yoxlaması - Əgər tələbə dərsdən uzaqlaşdırılıbsa, yenidən girə bilməz
@@ -26,7 +31,8 @@ if (isset($_GET['id'])) {
 
         if ($class && !empty($class['zoom_link'])) {
             // 2. İştirakı qeyd et
-            $db->query("INSERT INTO live_class_participants (live_class_id, user_id, joined_at) 
+            $db->query(
+                "INSERT INTO live_class_participants (live_class_id, user_id, joined_at) 
                         VALUES (?, ?, CURRENT_TIMESTAMP) 
                         ON DUPLICATE KEY UPDATE joined_at = CURRENT_TIMESTAMP",
                 [$live_class_id, $user['id']]
@@ -58,7 +64,7 @@ if (isset($_GET['id'])) {
                         // Axın dərsi (Stream/Patok) məsələsi:
                         // Tələbənin hansı fənn/ixtisas üzrə qeydiyyatda olduğunu müəyyən etməliyik.
                         $targetCourseId = $class['course_id'];
-                        
+
                         if (!empty($class['is_stream']) && !empty($class['stream_course_ids'])) {
                             $streamIds = explode(',', $class['stream_course_ids']);
                             // Tələbənin bu axındakı fənlərdən hansına qeydiyyatlı olduğunu tap
@@ -118,6 +124,14 @@ if (isset($_GET['id'])) {
             // 4. Zoom Linkinə tələbə adını əlavə et
             $displayName = urlencode($user['first_name'] . ' ' . $user['last_name']);
             $zoomLink = $class['zoom_link'];
+
+            // Təhlükəsizlik: Yalnız http/https URL-lərə yönləndir (javascript: kimi sxemlərin qarşısını al)
+            $scheme = strtolower(parse_url($zoomLink, PHP_URL_SCHEME) ?? '');
+            if (!in_array($scheme, ['http', 'https'], true)) {
+                header('Location: ../live-classes?error=invalid_link');
+                exit;
+            }
+
             $separator = (strpos($zoomLink, '?') !== false) ? '&' : '?';
             $finalLink = $zoomLink . $separator . "dn=" . $displayName;
 
@@ -128,7 +142,8 @@ if (isset($_GET['id'])) {
             header('Location: ../live-classes?error=link_not_found');
         }
     } catch (Exception $e) {
-        header('Location: ../live-classes?error=' . urlencode($e->getMessage()));
+        error_log('join_live_class error: ' . $e->getMessage());
+        header('Location: ../live-classes?error=server_error');
     }
 } else {
     header('Location: ../live-classes');

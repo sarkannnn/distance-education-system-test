@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Get TURN Server Credentials
  * 
@@ -11,6 +12,32 @@
 
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, no-store, must-revalidate');
+
+// Authentication check — must be a logged-in student or instructor
+$authenticated = false;
+foreach (['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'] as $sessionName) {
+    session_name($sessionName);
+    // Set secure cookie params before starting session
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => true,
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
+    @session_start();
+    if (!empty($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+        $authenticated = true;
+        break;
+    }
+    session_write_close();
+}
+
+if (!$authenticated) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Giriş tələb olunur']);
+    exit;
+}
 
 // Load environment variables
 $envFile = __DIR__ . '/../.env';
@@ -35,7 +62,7 @@ $appDomain = getenv('METERED_DOMAIN') ?: 'ndu.metered.live'; // Fallback to gues
 if (!empty($apiKey)) {
     // Try the specific subdomain first
     $url = "https://{$appDomain}/api/v1/turn/credentials?apiKey=" . urlencode($apiKey);
-    
+
     $ch = curl_init();
     curl_setopt_array($ch, [
         CURLOPT_URL => $url,
@@ -44,7 +71,7 @@ if (!empty($apiKey)) {
         CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_HTTPHEADER => ['Accept: application/json']
     ]);
-    
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
@@ -65,10 +92,10 @@ if (!empty($apiKey)) {
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
-    
+
     if ($httpCode === 200 && $response) {
         $turnServers = json_decode($response, true);
-        
+
         if (is_array($turnServers) && count($turnServers) > 0) {
             // Build the full ICE servers array: STUN + fetched TURN servers
             $iceServers = [
@@ -76,7 +103,7 @@ if (!empty($apiKey)) {
                 ['urls' => 'stun:stun.l.google.com:19302'],
                 ['urls' => 'stun:stun1.l.google.com:19302'],
             ];
-            
+
             // Add all TURN servers from Metered
             foreach ($turnServers as $server) {
                 $entry = ['urls' => $server['urls']];
@@ -84,7 +111,7 @@ if (!empty($apiKey)) {
                 if (isset($server['credential'])) $entry['credential'] = $server['credential'];
                 $iceServers[] = $entry;
             }
-            
+
             echo json_encode([
                 'success' => true,
                 'iceServers' => $iceServers,
@@ -94,7 +121,7 @@ if (!empty($apiKey)) {
             exit;
         }
     }
-    
+
     // Metered API failed — log the issue and fall through to fallback
     error_log("TURN credential fetch failed: HTTP $httpCode, Error: $curlError");
 }

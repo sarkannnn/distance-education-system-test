@@ -1,4 +1,16 @@
 <?php
+// Admin-only maintenance script — restrict access
+session_name('DISTANT_TEACHER_SESSION');
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+ini_set('session.use_strict_mode', 1);
+ini_set('session.use_only_cookies', 1);
+session_start();
+
+if (empty($_SESSION['logged_in']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    exit('Access denied');
+}
+
 require_once 'student/config/database.php';
 $db = Database::getInstance();
 
@@ -21,13 +33,14 @@ try {
     if ($count == 0) {
         // Insert dummy records for initial busy feel
         for ($i = 0; $i < 641; $i++) {
-             // We can insert just one for now or loop (641 is not too many)
+            // We can insert just one for now or loop (641 is not too many)
         }
         // Actually, just for speed, I'll insert a batch or just let it start at 0 if preferred
         // But the user quoted 641, so I'll give them 641 start.
     }
-    
+
     echo "Table created successfully.";
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    error_log('migrate_logs error: ' . $e->getMessage());
+    echo "Error: Migration failed. Check server logs.";
 }

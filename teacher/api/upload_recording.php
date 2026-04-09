@@ -22,7 +22,7 @@ function shutdownHandler()
 
         // Try to send JSON if headers haven't been sent (though unpredictable on fatal)
         if (!headers_sent()) {
-            echo json_encode(['success' => false, 'message' => 'Critical Server Error: ' . $error['message']]);
+            echo json_encode(['success' => false, 'message' => 'Serverdə kritik xəta baş verdi']);
         }
     }
 }
@@ -76,13 +76,13 @@ if (empty($_POST) && empty($_FILES) && $contentLength > 0) {
     exit;
 }
 
-$lessonId = $_POST['lesson_id'] ?? null;
-$courseId = $_POST['course_id'] ?? null;
+$lessonId = (int) ($_POST['lesson_id'] ?? 0);
+$courseId = (int) ($_POST['course_id'] ?? 0);
 $noVideo = isset($_POST['no_video']) && $_POST['no_video'] == '1';
 $videoFile = $_FILES['video'] ?? null;
 
-if ($lessonId === null || $lessonId === '') {
-    $logData = date('Y-m-d H:i:s') . " - Error: Missing ID. lesson_id: NULL\n";
+if ($lessonId <= 0) {
+    $logData = date('Y-m-d H:i:s') . " - Error: Missing ID. lesson_id: INVALID\n";
     file_put_contents($logFile, $logData, FILE_APPEND);
     jsonResponse(['success' => false, 'message' => 'Dərs ID çatışmır']);
 }
@@ -188,7 +188,7 @@ if ($noVideo || !$videoFile || $videoFile['error'] !== UPLOAD_ERR_OK) {
 // Qovluq yoxdursa yarat
 $uploadDir = '../../uploads/videos/';
 if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
+    mkdir($uploadDir, 0750, true);
 }
 
 // Fayl adı

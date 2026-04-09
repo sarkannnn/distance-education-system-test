@@ -37,8 +37,10 @@ try {
         [$liveClassId, $userId]
     );
 
-    $peerId = $_GET['peer_id'] ?? null;
-    $action = $_GET['action'] ?? 'heartbeat';
+    // Sanitize peer_id to alphanumeric/hyphen only (PeerJS format)
+    $rawPeerId = $_GET['peer_id'] ?? null;
+    $peerId = $rawPeerId ? preg_replace('/[^a-zA-Z0-9\-_]/', '', substr($rawPeerId, 0, 64)) : null;
+    $action = in_array($_GET['action'] ?? '', ['heartbeat', 'leave']) ? ($_GET['action'] ?? 'heartbeat') : 'heartbeat';
 
     if ($activeSession) {
         if ($action === 'leave') {

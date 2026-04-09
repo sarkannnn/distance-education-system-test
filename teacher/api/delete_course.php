@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Delete Course API
  */
@@ -55,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->delete('courses', 'id = ?', [$courseId]);
 
         echo json_encode(['success' => true, 'message' => 'Dərs uğurla silindi']);
-
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Xəta baş verdi: ' . $e->getMessage()]);
+        error_log('delete_course error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Server xətası baş verdi']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Yalnız POST sorğusu qəbul edilir']);

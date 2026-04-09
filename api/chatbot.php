@@ -10,7 +10,16 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
+// Restrict CORS to the application's own origin only
+$allowedOrigins = [
+    'https://distant.ndu.edu.az',
+    'https://tmis.ndu.edu.az',
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -76,6 +85,6 @@ try {
     echo json_encode([
         'success' => false,
         'error' => 'Xidmətdə müvəqqəti problem yarandı. Zəhmət olmasa bir qədər sonra yenidən cəhd edin.',
-        'detail' => $e->getMessage()
     ]);
+}
 }

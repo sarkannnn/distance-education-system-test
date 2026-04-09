@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Get Live Attendance API
  * Returns list of attendees for a specific live class
@@ -11,7 +12,8 @@ try {
     require_once '../config/database.php';
 } catch (Exception $e) {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Include error: ' . $e->getMessage()]);
+    error_log('get_live_attendance include error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Konfiqurasiya xətası']);
     exit;
 }
 
@@ -100,7 +102,7 @@ if ($tmisToken) {
                 foreach ($details['data']['students'] as $s) {
                     $id = $s['id'] ?? ($s['student_id'] ?? 0);
                     if (!$id) continue;
-                    
+
                     // Already added (multi-major overlap prevention)
                     if (isset($roster[$id])) continue;
 
@@ -120,7 +122,7 @@ if ($tmisToken) {
                 }
             }
         } catch (Exception $e) {
-            error_log('Get Live Attendance TMIS Roster Error (Course '.$cId.'): ' . $e->getMessage());
+            error_log('Get Live Attendance TMIS Roster Error (Course ' . $cId . '): ' . $e->getMessage());
         }
     }
 }
@@ -236,4 +238,3 @@ echo json_encode([
     'total_count' => $totalEnrolled,
     'attendees' => $finalAttendees
 ]);
-?>

@@ -13,7 +13,9 @@ $auth = new Auth();
 requireInstructor();
 
 $url = $_GET['url'] ?? '';
-$filename = $_GET['filename'] ?? 'download';
+// Sanitize filename to prevent header injection (strip newlines and non-printable chars)
+$filename = preg_replace('/[\r\n\t\/\\]/', '', $_GET['filename'] ?? 'download') ?: 'download';
+$filename = mb_substr($filename, 0, 200); // Limit length
 
 if (empty($url)) {
     http_response_code(400);
@@ -21,8 +23,17 @@ if (empty($url)) {
     exit;
 }
 
+// Block non-http(s) URL schemes to prevent SSRF and javascript: injection
+$urlScheme = strtolower(parse_url($url, PHP_URL_SCHEME) ?? '');
+if (!empty($urlScheme) && !in_array($urlScheme, ['http', 'https'], true)) {
+    http_response_code(400);
+    echo 'Yalnız http/https URL-lər dəstəklənir';
+    exit;
+}
+
 // Təhlükəsizlik: Yalnız icazəli domenlərə yönləndir
-$allowedDomains = ['tmis.ndu.edu.az', 'localhost', '127.0.0.1'];
+// Only allow fetching from the TMIS domain — never from localhost to prevent SSRF
+$allowedDomains = ['tmis.ndu.edu.az'];
 $parsedUrl = parse_url($url);
 $host = $parsedUrl['host'] ?? '';
 
@@ -51,8 +62,31 @@ if ($isLocal && $localPath) {
         $filename = basename($localPath);
     }
 
+    $mime = mime_content_type($localPath);
+    // Strip any script MIME types from local files
+    $safe_mimes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'video/mp4',
+        'video/webm',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain',
+        'application/zip',
+        'application/octet-stream'
+    ];
+    if (!in_array($mime, $safe_mimes, true)) {
+        $mime = 'application/octet-stream';
+    }
+    $safeFilename = rawurlencode(basename($filename));
     header('Content-Type: ' . $mime);
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Disposition: attachment; filename="' . basename($filename) . '"; filename*=UTF-8\'\'' . $safeFilename);
     header('Content-Length: ' . $fileSize);
     header('Cache-Control: no-cache, must-revalidate');
 
@@ -109,8 +143,9 @@ curl_setopt($ch, CURLOPT_NOBODY, false);
 curl_setopt($ch, CURLOPT_HEADER, false);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
 
+$safeFilename = rawurlencode(basename($filename));
 header('Content-Type: application/octet-stream');
-header('Content-Disposition: attachment; filename="' . $filename . '"');
+header('Content-Disposition: attachment; filename="' . basename($filename) . '"; filename*=UTF-8\'\'' . $safeFilename);
 if ($contentLength > 0) {
     header('Content-Length: ' . (int) $contentLength);
 }

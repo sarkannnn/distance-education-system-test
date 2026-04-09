@@ -10,17 +10,17 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = Database::getInstance();
-    $live_class_id = $_POST['live_class_id'] ?? null;
+    $live_class_id = (int) ($_POST['live_class_id'] ?? 0);
     $action = $_POST['action'] ?? 'approve'; // approve or reject
 
-    if (!$live_class_id) {
+    if ($live_class_id <= 0) {
         echo json_encode(['success' => false, 'message' => 'Dərs ID çatışmır']);
         exit;
     }
 
     try {
         $currentUser = $auth->getCurrentUser();
-        
+
         // Verify ownership
         $classInfo = $db->fetch("SELECT lc.*, i.user_id as instructor_user_id 
                                FROM live_classes lc 
@@ -66,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             echo json_encode(['success' => true, 'message' => 'Dərs rədd edildi və tələbələrə gizli qaldı']);
         }
-
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Xəta: ' . $e->getMessage()]);
+        error_log('approve_class error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Server xətası baş verdi']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Yanlış sorğu metodu']);

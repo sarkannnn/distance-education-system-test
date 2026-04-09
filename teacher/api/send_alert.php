@@ -23,8 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_POST)) {
 
     $message = trim($_POST['message'] ?? '');
     $type = $_POST['type'] ?? 'info';
+    // Whitelist allowed types to prevent unexpected values stored in DB
+    if (!in_array($type, ['info', 'success', 'warning', 'error'], true)) {
+        $type = 'info';
+    }
     $course_id = isset($_POST['course_id']) && $_POST['course_id'] != '' ? intval($_POST['course_id']) : null;
     $duration = intval($_POST['duration'] ?? 15); // minutes
+    // Clamp duration to reasonable bounds
+    if ($duration < 1)  $duration = 1;
+    if ($duration > 1440) $duration = 1440;
 
     if (empty($message)) {
         echo json_encode(['success' => false, 'message' => 'Mesaj boş ola bilməz']);

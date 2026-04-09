@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Arxiv Video Pleyer - Watch Lesson
  */
@@ -31,8 +32,7 @@ $date = '';
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];
-$baseDir = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
-$baseUrl = $protocol . "://" . $host . $baseDir;
+$baseUrl = rtrim(getenv('DISTANT_URL') ?: ($protocol . "://" . $host), '/');
 
 try {
     if ($type === 'live') {
@@ -86,9 +86,9 @@ try {
                 // Remove leading ../ if present and append to base URL
                 $cleanUrl = preg_replace('/^(\.\.\/)+/', '', $rawUrl);
                 if (str_starts_with($rawUrl, 'http')) {
-                     $videoUrl = $rawUrl;
+                    $videoUrl = $rawUrl;
                 } else {
-                     $videoUrl = $baseUrl . '/' . $cleanUrl;
+                    $videoUrl = $baseUrl . '/' . $cleanUrl;
                 }
             }
 
@@ -219,7 +219,7 @@ require_once 'includes/header.php';
     const player = document.getElementById('player');
     let tracked = false;
 
-    player.addEventListener('play', function () {
+    player.addEventListener('play', function() {
         if (!tracked) {
             console.log('Video started playing');
             tracked = true;

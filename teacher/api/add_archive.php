@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Add Archive Material API
  */
@@ -62,10 +63,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Qovluğu yarat əgər yoxdursa
             if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
+                mkdir($upload_dir, 0750, true);
             }
 
-            $file_ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+            // Təhlükəsizlik: İcazəli fayl uzantılarını yoxla
+            $allowed_exts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'webm', 'avi', 'mkv', 'mov'];
+            $file_ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+
+            if (!in_array($file_ext, $allowed_exts, true)) {
+                header('Location: ../plan.php?error=' . urlencode('Bu fayl növünə icazə verilmir: .' . $file_ext));
+                exit;
+            }
+
+            // Təhlükəsizlik: MIME tipini yoxla
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES['file']['tmp_name']);
+            finfo_close($finfo);
+            $blocked_mimes = ['application/x-php', 'application/x-httpd-php', 'text/x-php', 'application/x-sh', 'text/x-sh'];
+            if (in_array($mime, $blocked_mimes, true) || strpos($mime, 'php') !== false) {
+                header('Location: ../plan.php?error=' . urlencode('Təhlükəli fayl məzmunu aşkarlandı.'));
+                exit;
+            }
+
             $new_filename = uniqid('archive_') . '.' . $file_ext;
             $upload_path = $upload_dir . $new_filename;
 

@@ -11,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $auth->getCurrentUser();
     $tmisToken = TmisApi::getToken();
 
-    $archive_id = $_POST['archive_id'] ?? null;
+    $archive_id = (int) ($_POST['archive_id'] ?? 0);
 
-    if (!$archive_id) {
+    if ($archive_id <= 0) {
         echo json_encode(['success' => false, 'message' => 'ID tapılmadı']);
         exit;
     }
@@ -50,11 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo json_encode(['success' => false, 'message' => 'Material tapılmadı və ya silinmə zamanı xəta baş verdi']);
         }
-
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        error_log('delete_archive error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Server xətası baş verdi']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Yanlış sorğu']);
 }
-

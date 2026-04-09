@@ -39,8 +39,7 @@ try {
          ORDER BY lc.start_time ASC"
     );
 } catch (Exception $e) {
-    if (isset($_GET['debug']))
-        echo "Today Error: " . $e->getMessage();
+    error_log('index.php todayLessons error: ' . $e->getMessage());
     $todayLessons = [];
 }
 
@@ -85,8 +84,7 @@ try {
     });
     $archivedLessons = $allArchives;
 } catch (Exception $e) {
-    if (isset($_GET['debug']))
-        echo "Archive Error: " . $e->getMessage();
+    error_log('index.php archivedLessons error: ' . $e->getMessage());
     $archivedLessons = [];
 }
 
@@ -978,7 +976,7 @@ try {
                                 $isLive = ($lesson['status'] === 'live');
                                 $startTime = date('H:i', strtotime($lesson['start_time']));
                                 $endTime = date('H:i', strtotime($lesson['start_time'] . ' +90 minutes'));
-                                ?>
+                            ?>
                                 <div
                                     class="p-6 bg-white/5 border-l-4 <?php echo $isLive ? 'border-l-red-500' : 'border-l-blue-500/30'; ?> border border-white/10 rounded-[2rem] relative group mb-2 transition-all hover:bg-white/10">
                                     <?php if ($isLive): ?>
@@ -1054,7 +1052,7 @@ try {
                         <?php else: ?>
                             <?php foreach ($archivedLessons as $archive):
                                 $searchStr = strtolower(e(($archive['topic_name'] ?? '') . ' ' . ($archive['course_title'] ?? '') . ' ' . ($archive['specialization_name'] ?? '') . ' ' . ($archive['instructor_display_name'] ?? '')));
-                                ?>
+                            ?>
                                 <div class="archive-item p-6 bg-white/5 border-l-4 border-l-blue-900 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all group"
                                     data-search="<?php echo $searchStr; ?>">
                                     <h4
@@ -1581,7 +1579,9 @@ try {
                     revealObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15 });
+        }, {
+            threshold: 0.15
+        });
 
         document.querySelectorAll('.reveal-item').forEach(el => revealObserver.observe(el));
 
@@ -1630,7 +1630,9 @@ try {
                     statObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.5 });
+        }, {
+            threshold: 0.5
+        });
 
         const statsSection = document.getElementById('stats');
         if (statsSection) statObserver.observe(statsSection);
@@ -1662,7 +1664,10 @@ try {
                     });
                 }
             });
-        }, { threshold: 0.15, rootMargin: "-80px 0px -30% 0px" });
+        }, {
+            threshold: 0.15,
+            rootMargin: "-80px 0px -30% 0px"
+        });
 
         sectionsToObserve.forEach(sec => navObserver.observe(sec));
 
@@ -1702,8 +1707,6 @@ try {
                 }
             });
         }
-
-
     </script>
 
     <!-- Chatbot Widget HTML — Gemini AI Powered -->
@@ -1784,7 +1787,7 @@ try {
 
     <script>
         // --- CHATBOT OPTIMIZED SYSTEM ---
-        (function () {
+        (function() {
             const chatToggle = document.getElementById('chat-toggle');
             const chatWindow = document.getElementById('chat-window');
             const closeChat = document.getElementById('close-chat');
@@ -1799,7 +1802,10 @@ try {
             if (!chatToggle || !chatWindow) return;
 
             let conversationHistory = JSON.parse(sessionStorage.getItem('ndu_chat_history') || '[]');
-            let localFaqData = { categories: [], faqs: [] };
+            let localFaqData = {
+                categories: [],
+                faqs: []
+            };
             let currentCategoryId = 'dersler';
             let isProcessing = false;
 
@@ -1830,7 +1836,10 @@ try {
                         renderSuggestions(cat.id);
 
                         // Reset scroll to start when category changes
-                        chatSuggestions.scrollTo({ left: 0, behavior: 'smooth' });
+                        chatSuggestions.scrollTo({
+                            left: 0,
+                            behavior: 'smooth'
+                        });
                     };
                     chatCategories.appendChild(btn);
                 });
@@ -1838,9 +1847,15 @@ try {
 
                 // Scroll discovery animation (peek)
                 setTimeout(() => {
-                    chatCategories.scrollTo({ left: 30, behavior: 'smooth' });
+                    chatCategories.scrollTo({
+                        left: 30,
+                        behavior: 'smooth'
+                    });
                     setTimeout(() => {
-                        chatCategories.scrollTo({ left: 0, behavior: 'smooth' });
+                        chatCategories.scrollTo({
+                            left: 0,
+                            behavior: 'smooth'
+                        });
                     }, 500);
                 }, 1000);
             }
@@ -1906,7 +1921,11 @@ try {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 if (save) {
-                    conversationHistory.push({ role: type === 'user' ? 'user' : 'model', text, source });
+                    conversationHistory.push({
+                        role: type === 'user' ? 'user' : 'model',
+                        text,
+                        source
+                    });
                     saveHistory();
                 }
 
@@ -1934,10 +1953,15 @@ try {
                 try {
                     const response = await fetch('api/chatbot.php', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({
                             message: message,
-                            history: conversationHistory.slice(-10).map(h => ({ role: h.role, text: h.text }))
+                            history: conversationHistory.slice(-10).map(h => ({
+                                role: h.role,
+                                text: h.text
+                            }))
                         })
                     });
 
@@ -2012,8 +2036,14 @@ try {
                 window.addEventListener('resize', updateArrows);
                 setTimeout(updateArrows, 2000); // Initial check after content loads
 
-                if (leftArrow) leftArrow.onclick = () => el.scrollBy({ left: -200, behavior: 'smooth' });
-                if (rightArrow) rightArrow.onclick = () => el.scrollBy({ left: 200, behavior: 'smooth' });
+                if (leftArrow) leftArrow.onclick = () => el.scrollBy({
+                    left: -200,
+                    behavior: 'smooth'
+                });
+                if (rightArrow) rightArrow.onclick = () => el.scrollBy({
+                    left: 200,
+                    behavior: 'smooth'
+                });
 
                 let isDown = false;
                 let startX;
@@ -2050,7 +2080,9 @@ try {
                         el.scrollLeft += e.deltaY * 1.5;
                         updateArrows();
                     }
-                }, { passive: false });
+                }, {
+                    passive: false
+                });
             });
 
             // Init

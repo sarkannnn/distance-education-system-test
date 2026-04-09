@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Delete Live Class Recording / Entry API
  */
@@ -67,9 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo json_encode(['success' => false, 'message' => 'Dərs tapılmadı və ya silinmə zamanı xəta baş verdi']);
         }
-
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Xəta baş verdi: ' . $e->getMessage()]);
+        error_log('delete_live_recording error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Server xətası baş verdi']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Yalnız POST sorğusu qəbul edilir']);

@@ -34,10 +34,14 @@ if (getenv('SSO_AUTO_LOGIN') === 'false' || $isLocal) {
 if (!$skipSso) {
     $tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
 
-    // Yönləndirmə üçün ehtimal olunan callback URL (əgər TMİS dəstəkləyirsə)
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $currentHostUrl = $protocol . '://' . $host;
-    $callbackUrl = $currentHostUrl . '/student/sso.php';
+    // Use the configured DISTANT_URL to prevent Host header injection in callback URL
+    $distantUrl = rtrim(getenv('DISTANT_URL') ?: '', '/');
+    if (empty($distantUrl)) {
+        // Fallback only if env var not set — use HTTPS and HTTP_HOST
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $distantUrl = $protocol . '://' . $host;
+    }
+    $callbackUrl = $distantUrl . '/student/sso.php';
 
     header('Location: ' . $tmisUrl . '/student/sso/auto?redirect_uri=' . urlencode($callbackUrl) . '&return_url=' . urlencode($callbackUrl));
     exit;
@@ -278,8 +282,8 @@ if (isset($_GET['expired'])) {
             position: relative;
         }
 
-        .form-input-icon > i,
-        .form-input-icon > svg {
+        .form-input-icon>i,
+        .form-input-icon>svg {
             position: absolute;
             left: 14px;
             top: 50%;
@@ -512,12 +516,12 @@ if (isset($_GET['expired'])) {
             togglePassword.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
-                
+
                 // İkonu yenilə
-                this.innerHTML = type === 'password' ? 
-                    '<i data-lucide="eye"></i>' : 
+                this.innerHTML = type === 'password' ?
+                    '<i data-lucide="eye"></i>' :
                     '<i data-lucide="eye-off"></i>';
-                
+
                 lucide.createIcons();
             });
         }

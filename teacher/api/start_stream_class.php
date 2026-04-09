@@ -37,17 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Axın dərsi üçün çoxlu kurs ID-ləri
-    $course_ids = $_POST['course_ids'] ?? [];
-    $topic_name = $_POST['title'] ?? $_POST['topic_name'] ?? null;
+    $raw_course_ids = $_POST['course_ids'] ?? [];
+    $course_ids = is_array($raw_course_ids) ? array_map('intval', array_filter($raw_course_ids)) : [];
+    $topic_name = trim($_POST['title'] ?? $_POST['topic_name'] ?? '');
     $lesson_type = $_POST['lesson_type'] ?? 'lecture';
+    if (!in_array($lesson_type, ['lecture', 'seminar', 'laboratory'], true)) {
+        $lesson_type = 'lecture';
+    }
     $course_name = $_POST['course_name'] ?? 'Fənn';
 
-    if (empty($course_ids) || !is_array($course_ids) || count($course_ids) < 2) {
+    if (empty($course_ids) || count($course_ids) < 2) {
         echo json_encode(['success' => false, 'message' => 'Ən azı 2 ixtisas seçilməlidir']);
         exit;
     }
 
-    if (!$topic_name) {
+    if (empty($topic_name)) {
         echo json_encode(['success' => false, 'message' => 'Mövzu adı daxil edilməyib']);
         exit;
     }
@@ -270,11 +274,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         */
-
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
-?>

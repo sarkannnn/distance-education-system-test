@@ -24,10 +24,10 @@ if ($role !== 'instructor' && $role !== 'admin') {
 }
 
 $db = Database::getInstance();
-$liveClassId = trim($_POST['live_class_id'] ?? $_GET['live_class_id'] ?? '');
-$targetUserId = trim($_POST['user_id'] ?? $_GET['user_id'] ?? '');
+$liveClassId = (int) trim($_POST['live_class_id'] ?? $_GET['live_class_id'] ?? '');
+$targetUserId = (int) trim($_POST['user_id'] ?? $_GET['user_id'] ?? '');
 
-if (empty($liveClassId) || empty($targetUserId)) {
+if ($liveClassId <= 0 || $targetUserId <= 0) {
     ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Missing parameters']);
     exit;
@@ -45,6 +45,7 @@ try {
     ob_end_clean();
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
-    $err = ob_get_clean();
-    echo json_encode(['success' => false, 'message' => $e->getMessage(), 'debug' => $err]);
+    ob_end_clean();
+    error_log('approve_rejoin error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Əməliyyat uğursuz oldu']);
 }

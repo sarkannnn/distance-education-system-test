@@ -1,15 +1,23 @@
 <?php
+
 /**
  * API to get teacher's current dynamic Peer ID - Robust Version
  */
+require_once '../includes/auth.php';
 require_once '../config/database.php';
 header('Content-Type: application/json');
 
-$lessonId = $_GET['id'] ?? null;
+$auth = new Auth();
+if (!$auth->isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Giriş tələb olunur']);
+    exit;
+}
 
-if ($lessonId) {
+$lessonId = (int) ($_GET['id'] ?? 0);
+
+if ($lessonId > 0) {
     $db = Database::getInstance();
-    // Yalnız ID-ə görə yoxla
     $lesson = $db->fetch("SELECT zoom_link, peer_server FROM live_classes WHERE id = ?", [$lessonId]);
 
     if ($lesson && !empty($lesson['zoom_link'])) {
