@@ -480,6 +480,18 @@
             function handleLocalResponse(faq) {
                 setProcessing(true);
                 showTyping();
+                
+                // Log local FAQ interaction in background
+                fetch(getApiUrl('log_interaction.php'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: faq.question,
+                        response: faq.answer,
+                        source: 'local_faq'
+                    })
+                }).catch(e => console.warn("Logging failed:", e));
+
                 setTimeout(() => {
                     removeTyping();
                     addMessage(faq.answer, 'bot', true, 'local');

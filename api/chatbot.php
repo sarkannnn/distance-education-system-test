@@ -37,7 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Load configurations and services
 require_once __DIR__ . '/services/fallbackManager.php';
+require_once __DIR__ . '/services/loggerService.php';
 require_once dirname(__DIR__) . '/student/config/database.php'; // Loads .env
+
+// Handle Session Detection (Supporting multiple session types)
+$sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'];
+foreach ($sessionNames as $sn) {
+    if (isset($_COOKIE[$sn])) {
+        session_name($sn);
+        session_start();
+        break;
+    }
+}
+if (session_status() === PHP_SESSION_NONE) {
+    session_start(); // Fallback to default for guests
+}
 
 // Get API Keys from environment
 $GEMINI_API_KEY = getenv('GEMINI_API_KEY');
@@ -69,6 +83,9 @@ try {
     $result = $manager->process($userMessage, $history);
     
     if ($result) {
+        // Log the interaction
+        LoggerService::log($userMessage, $result['reply'], $result['source'], $result['model'] ?? null);
+
         echo json_encode([
             'success' => true,
             'reply' => $result['reply'],
