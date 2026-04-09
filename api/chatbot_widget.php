@@ -349,6 +349,21 @@
     <script>
         // --- CHATBOT OPTIMIZED SYSTEM ---
         (function() {
+            <?php
+            // Create a unique identifier to isolate chat history per user account so data doesn't leak between users on same PC
+            $chatUserPrefix = 'guest';
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                if (isset($_SESSION['user_id'])) {
+                    $chatUserPrefix = 'usr_' . $_SESSION['user_id'];
+                } elseif (isset($_SESSION['student_id'])) {
+                    $chatUserPrefix = 'std_' . $_SESSION['student_id'];
+                } elseif (isset($_SESSION['teacher_id'])) {
+                    $chatUserPrefix = 'tch_' . $_SESSION['teacher_id'];
+                }
+            }
+            ?>
+            const STORAGE_KEY = 'ndu_chat_history_<?php echo $chatUserPrefix; ?>';
+
             const chatToggle = document.getElementById('chat-toggle');
             const chatWindow = document.getElementById('chat-window');
             const closeChat = document.getElementById('close-chat');
@@ -387,7 +402,7 @@
                 return basePath.replace(/\/+$/, '') + '/api/' + endpoint;
             };
 
-            let conversationHistory = JSON.parse(sessionStorage.getItem('ndu_chat_history') || '[]');
+            let conversationHistory = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]');
             let localFaqData = { categories: [], faqs: [] };
             let currentCategoryId = 'dersler';
             let isProcessing = false;
@@ -463,7 +478,7 @@
             }
 
             function saveHistory() {
-                sessionStorage.setItem('ndu_chat_history', JSON.stringify(conversationHistory));
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(conversationHistory));
             }
 
             function setProcessing(state) {
