@@ -1708,9 +1708,9 @@ try {
 
     <!-- Chatbot Widget HTML — Gemini AI Powered -->
     <div id="chatbot-container"
-        class="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 flex flex-col items-end gap-4 overflow-visible">
+        class="fixed bottom-4 right-4 sm:bottom-10 sm:right-10 flex flex-col items-end gap-4 z-[99999] overflow-visible">
         <div id="chat-window"
-            class="chat-window hidden w-[calc(100vw-48px)] sm:w-[400px] h-[580px] bg-[#0a1a3e]/98 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
+            class="chat-window hidden w-[calc(100vw-32px)] sm:w-[400px] h-[580px] max-h-[80vh] sm:max-h-[calc(100vh-120px)] bg-[#0a1a3e]/98 backdrop-blur-2xl border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
             <!-- Header -->
             <div
                 class="p-3 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-white/10 flex items-center justify-between">
