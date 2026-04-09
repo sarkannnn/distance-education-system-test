@@ -200,29 +200,44 @@ require_once 'includes/header.php';
         display: none;
         flex-direction: column;
         font-family: 'Inter', sans-serif;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: scale(0.98);
+    }
+    
+    #whiteboardOverlay.is-visible {
+        opacity: 1;
+        transform: scale(1);
     }
 
     .wb-controls-floating {
         position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(15, 23, 42, 0.98);
-        backdrop-filter: blur(20px);
-        padding: 10px;
-        border-radius: 16px;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(24px);
+        padding: 12px 24px;
+        border-radius: 100px;
         display: flex;
-        flex-direction: column;
-        gap: 8px;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         border: 1px solid rgba(255, 255, 255, 0.15);
         z-index: 2010;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        max-width: 95vw;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .wb-controls-floating::-webkit-scrollbar {
+        display: none;
     }
 
-    /* Collapsed: slide off-screen to the left */
+    /* Collapsed: slide down */
     .wb-controls-floating.wb-collapsed {
-        transform: translateY(-50%) translateX(calc(-100% - 20px));
+        transform: translateX(-50%) translateY(calc(100% + 40px));
         opacity: 0;
         pointer-events: none;
     }
@@ -230,18 +245,18 @@ require_once 'includes/header.php';
     /* Floating re-open tab (visible only when toolbar is collapsed) */
     #wbToolbarOpenTab {
         position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 2015;
         display: none;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         background: rgba(15, 23, 42, 0.98);
         border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 12px;
-        padding: 10px 6px;
+        border-radius: 100px;
+        padding: 10px 20px;
         cursor: pointer;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         transition: background 0.2s;
@@ -258,84 +273,76 @@ require_once 'includes/header.php';
 
     .wb-group {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 8px;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
     }
 
-    .wb-group:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .wb-group-label {
-        color: #94a3b8;
-        font-size: 9px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 2px;
-        text-align: center;
+    /* Vertical Divider instead of Bottom Border */
+    .wb-divider {
+        width: 1px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.15);
+        margin: 0 5px;
     }
 
     .wb-tool-btn {
-        background: rgba(255, 255, 255, 0.06);
-        border: 2px solid rgba(255, 255, 255, 0.08);
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #e2e8f0;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
-        font-size: 18px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
     }
 
     .wb-tool-btn:hover {
         background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px) scale(1.02);
-        border-color: rgba(255, 255, 255, 0.25);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        transform: translateY(-3px);
+        color: white;
     }
 
     .wb-tool-btn:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(0) scale(0.95);
     }
 
     .wb-tool-btn.active {
-        background: #3b82f6;
-        border-color: #60a5fa;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        border-color: #3b82f6;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
     }
 
     .wb-color-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
     }
 
     .wb-color {
-        width: 20px;
-        height: 20px;
-        border-radius: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
         cursor: pointer;
-        border: 2px solid rgba(255, 255, 255, 0.25);
-        transition: all 0.2s;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .wb-color:hover {
-        transform: scale(1.1);
-        border-color: rgba(255, 255, 255, 0.5);
+        transform: scale(1.2);
+        border-color: rgba(255, 255, 255, 0.8);
     }
 
     .wb-color.active {
-        outline: 2px solid white;
-        outline-offset: 1px;
-        box-shadow: 0 0 10px currentColor;
+        transform: scale(1.2);
+        border-color: white;
+        box-shadow: 0 0 12px currentColor;
     }
 
     #laserCursor {
@@ -432,7 +439,8 @@ require_once 'includes/header.php';
         .studio-main-grid {
             grid-template-columns: 1fr;
             grid-template-rows: 1fr;
-            height: calc(100vh - 65px); /* Header height fallback */
+            height: calc(100vh - 65px);
+            /* Header height fallback */
             overflow: hidden;
             position: relative;
         }
@@ -592,8 +600,13 @@ require_once 'includes/header.php';
         }
 
         .control-btn {
-            width: 44px !important;
-            height: 44px !important;
+            width: min(13vw, 46px) !important;
+            height: min(13vw, 46px) !important;
+        }
+        
+        .control-btn i[data-lucide] {
+            width: min(6vw, 22px) !important;
+            height: min(6vw, 22px) !important;
         }
 
         /* Even more compact toggle and action buttons on small phones */
@@ -610,32 +623,46 @@ require_once 'includes/header.php';
 
         <?php if ($portraitCameraOnPhone): ?>
 
-        /* Portrait (vertical) camera on phones */
-        #mainVideoWrapper {
-            aspect-ratio: 9/16 !important;
-            width: auto !important;
-            height: min(62vh, 400px) !important;
-            max-width: 100% !important;
-        }
+            /* Portrait (vertical) camera on phones */
+            #mainVideoWrapper {
+                aspect-ratio: 9/16 !important;
+                width: auto !important;
+                height: min(62vh, 400px) !important;
+                max-width: 100% !important;
+            }
 
         <?php endif; ?>
 
-        /* Controls bar: allow horizontal scroll to prevent overflow */
-        .studio-center>div:last-child {
-            overflow-x: auto !important;
-            overflow-y: hidden !important;
-            scrollbar-width: none;
+        /* Controls bar: fluid width distributing buttons evenly across the screen */
+        #mainControlsBar {
+            width: 100% !important;
+            overflow: visible !important;
+            padding: 0 1% !important;
+            box-sizing: border-box;
         }
 
-        .studio-center>div:last-child::-webkit-scrollbar {
-            display: none;
+        #mainControlsInner {
+            margin: 0 !important;
+            padding: 0 !important;
+            gap: 1% !important;
+            width: 100% !important;
+            min-width: 0 !important; /* overrides max-content */
+            justify-content: space-evenly !important;
         }
 
-        /* Inner buttons wrapper: left-align when scrolling */
-        .studio-center>div:last-child>div:first-child {
-            margin: 0 0 !important;
-            padding: 0 15px !important;
-            gap: 15px !important;
+        #mainControlsInner > div {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #mainControlsInner span {
+            font-size: min(2.8vw, 10px) !important;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
         }
 
         /* Log wrapper: position above controls bar */
@@ -651,22 +678,104 @@ require_once 'includes/header.php';
         display: none;
     }
 
-    /* === Whiteboard controls: scrollable when viewport is short === */
-    @media (max-width: 900px),
-    (max-height: 700px) {
+    /* === Whiteboard controls: 2-Row Horizontal Scrollable Bottom Panel === */
+    @media (max-width: 900px), (max-height: 700px) {
         .wb-controls-floating {
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-            scrollbar-width: thin;
+            top: auto !important;
+            bottom: 15px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            
+            /* Magic flex properties to create a perfect 2-row horizontal scroller */
+            display: flex !important;
+            flex-direction: column !important;
+            flex-wrap: wrap !important;
+            
+            /* Total height = 2 buttons (38*2) + gap (8) + padding (20) + scrollbar (6) + safety margin = 115px */
+            height: 115px !important;
+            max-height: 115px !important;
+            width: calc(100% - 20px) !important;
+            max-width: 600px !important;
+            
+            padding: 8px 12px !important;
+            padding-bottom: 10px !important;
+            border-radius: 20px !important;
+            
+            align-content: flex-start !important;
+            gap: 8px !important;
+            
+            overflow-x: auto !important; 
+            overflow-y: hidden !important;
+            
+            /* Explicitly stylize scrollbar so users know it scrolls! */
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1) !important;
         }
 
         .wb-controls-floating::-webkit-scrollbar {
-            width: 3px;
+            height: 6px !important;
+            display: block !important;
+        }
+        .wb-controls-floating::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2) !important;
+            border-radius: 10px !important;
+            margin: 0 10px;
+        }
+        .wb-controls-floating::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5) !important;
+            border-radius: 10px !important;
         }
 
-        .wb-controls-floating::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+        /* Flatten groupings so elements flow freely into the 2-row layout */
+        .wb-group, .wb-color-grid {
+            display: contents !important;
+        }
+
+        /* Dividers become tall columns to separate tools logically */
+        .wb-divider {
+            display: block !important;
+            width: 1px !important;
+            height: 80px !important; /* Will take up a whole column */
+            margin: 5px 6px !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .wb-tool-btn {
+            width: 38px !important;
+            height: 38px !important;
+        }
+        .wb-tool-btn i[data-lucide] {
+            width: 18px !important;
+            height: 18px !important;
+        }
+
+        /* Vertically center text like '1/1' or '3px' */
+        #pageIndicator, #sizeDisplay {
+            display: flex !important;
+            align-items: center !important;
+            height: 38px !important;
+            margin: 0 !important;
+        }
+
+        .wb-color {
+            width: 22px !important;
+            height: 22px !important;
+            margin: 8px 4px !important; /* Vertically align smaller color dots */
+        }
+
+        /* Toggle panel animation */
+        .wb-controls-floating.wb-collapsed {
+            transform: translate(-50%, calc(100% + 20px)) !important;
+        }
+
+        /* Re-open Tab centered */
+        #wbToolbarOpenTab {
+            top: auto !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            border-radius: 100px !important;
+            padding: 10px 20px !important;
         }
     }
 
@@ -708,17 +817,17 @@ require_once 'includes/header.php';
     /* === Ultra-small screens (≤ 400px) === */
     @media (max-width: 400px) {
         .control-btn {
-            width: 34px !important;
-            height: 34px !important;
+            width: 40px !important;
+            height: 40px !important;
         }
 
         .control-btn i[data-lucide] {
-            width: 16px !important;
-            height: 16px !important;
+            width: 18px !important;
+            height: 18px !important;
         }
 
         .studio-center>div:last-child {
-            gap: 8px !important;
+            gap: 6px !important;
         }
 
         .studio-header .live-status-badge {
@@ -727,7 +836,7 @@ require_once 'includes/header.php';
 
         .mobile-toggle-btn {
             padding: 4px 6px !important;
-            font-size: 9px !important;
+            font-size: 10px !important;
         }
     }
 </style>
@@ -735,14 +844,15 @@ require_once 'includes/header.php';
 <div class="main-wrapper" style="height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: white;">
     <!-- STUDIO HEADER -->
     <div class="studio-header"
-        style="height: 65px; min-height: 65px; padding: 0 30px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; z-index: 100;">
-        <div style="display: flex; align-items: center; gap: 20px;">
+        style="min-height: 65px; padding: 10px 30px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid #334155; z-index: 100;">
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
             <div class="live-status-badge"
                 style="display: flex; align-items: center; gap: 10px; background: rgba(239, 68, 68, 0.1); padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(239, 68, 68, 0.2);">
                 <div
                     style="width: 10px; height: 10px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 10px #ef4444;">
                 </div>
-                <span class="live-text" style="color: #ef4444; font-weight: 800; font-size: 12px; letter-spacing: 1px;">STUDİO
+                <span class="live-text"
+                    style="color: #ef4444; font-weight: 800; font-size: 12px; letter-spacing: 1px;">STUDİO
                     CANLI</span>
             </div>
             <h1 style="font-size: 16px; margin: 0; font-weight: 700; color: #f8fafc;">
@@ -843,9 +953,10 @@ require_once 'includes/header.php';
             </div>
 
             <!-- CONTROLS BAR -->
-            <div
-                style="height: 120px; display: flex; align-items: center; background: linear-gradient(to top, rgba(15,23,42,1), rgba(15,23,42,0)); z-index: 20; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; flex-shrink: 0;">
-                <div style="display: flex; align-items: center; gap: 30px; padding: 0 30px; margin: 0 auto; flex-shrink: 0;">
+            <div id="mainControlsBar"
+                style="height: 120px; width: 100%; display: flex; align-items: center; background: linear-gradient(to top, rgba(15,23,42,1), rgba(15,23,42,0)); z-index: 20; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; flex-shrink: 0;">
+                <div id="mainControlsInner"
+                    style="display: flex; align-items: center; justify-content: center; gap: 30px; padding: 0 30px; margin: 0 auto; flex-shrink: 0; min-width: max-content;">
 
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                         <button id="btnMic" onclick="toggleMic()" class="control-btn" title="Mikrofon">
@@ -1057,146 +1168,178 @@ require_once 'includes/header.php';
 
 <!-- Pure Whiteboard Overlay -->
 <div id="whiteboardOverlay">
-    <!-- Floating Toolbar -->
+    <!-- Floating Toolbar (Horizontal bottom) -->
     <div class="wb-controls-floating">
-        <!-- Toolbar header with close button -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
-            <span style="color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">LÖVHƏ ALƏTLƏRİ</span>
-            <button class="wb-tool-btn" onclick="toggleWBToolbar()" title="Paneli Bağla"
-                style="width: 26px; height: 26px; font-size: 13px; border-radius: 8px; background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); color: #f87171; flex-shrink: 0;">✕</button>
-        </div>
-        <!-- NÖV - Fon seçimi -->
+
+        <!-- SƏHİFƏLƏR - Çoxsəhifəli sistem -->
         <div class="wb-group">
-            <span class="wb-group-label">NÖV</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
-                <button id="bgPlain" class="wb-tool-btn active" onclick="setWBBackground('plain')"
-                    title="Ağ Fon">⬜</button>
-                <button id="bgGrid" class="wb-tool-btn" onclick="setWBBackground('grid')"
-                    title="Riyaziyyat (Dama)">📏</button>
-                <button id="bgLines" class="wb-tool-btn" onclick="setWBBackground('lines')"
-                    title="Dil (Xətli)">📝</button>
-            </div>
+            <button class="wb-tool-btn" onclick="prevPage()" title="Əvvəlki Səhifə"
+                style="width: 32px; height: 32px;"><i data-lucide="chevron-left"
+                    style="width:16px;height:16px;"></i></button>
+            <div id="pageIndicator"
+                style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; min-width: 40px; text-align: center; color: white;">
+                1/1</div>
+            <button class="wb-tool-btn" onclick="nextPage()" title="Növbəti Səhifə"
+                style="width: 32px; height: 32px;"><i data-lucide="chevron-right"
+                    style="width:16px;height:16px;"></i></button>
+            <button class="wb-tool-btn" onclick="addNewPage()" title="Yeni Səhifə"
+                style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.15); color: #10b981;"><i
+                    data-lucide="plus" style="width:16px;height:16px;"></i></button>
+            <button class="wb-tool-btn" onclick="deletePage()" title="Səhifəni Sil"
+                style="width: 32px; height: 32px; background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i
+                    data-lucide="minus" style="width:16px;height:16px;"></i></button>
         </div>
 
-        <!-- ADDIM - Geri/İrəli -->
-        <div class="wb-group">
-            <span class="wb-group-label">ADDIM</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button class="wb-tool-btn" onclick="undo()" title="Geri Al (Undo)">↩️</button>
-                <button class="wb-tool-btn" onclick="redo()" title="Yenidən (Redo)">↪️</button>
-            </div>
-        </div>
+        <div class="wb-divider"></div>
 
         <!-- ALƏTLƏR - Əsas alətlər -->
         <div class="wb-group">
-            <span class="wb-group-label">ALƏTLƏR</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button id="toolPencil" class="wb-tool-btn active" onclick="setWBTool('pencil')"
-                    title="Qələm">✏️</button>
-                <button id="toolEraser" class="wb-tool-btn" onclick="setWBTool('eraser')" title="Silgi">🧽</button>
-                <button id="toolText" class="wb-tool-btn" onclick="setWBTool('text')" title="Mətn Yaz">🔤</button>
-                <button id="toolLaser" class="wb-tool-btn" onclick="setWBTool('laser')"
-                    title="Lazer Göstərici">🔦</button>
-                <button class="wb-tool-btn" onclick="document.getElementById('wbImgInput').click()"
-                    title="Şəkil Əlavə Et" style="grid-column: span 2;">🖼️</button>
-            </div>
-            <!-- Size control for pencil/eraser -->
-            <div id="sizeControl"
-                style="display: flex; align-items: center; gap: 4px; justify-content: center; margin-top: 6px;">
-                <button class="wb-tool-btn" onclick="changeSize(-5)" title="Kiçilt"
-                    style="width: 28px; height: 28px; font-size: 14px;">−</button>
-                <div id="sizeDisplay"
-                    style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; min-width: 40px; text-align: center;">
-                    3px</div>
-                <button class="wb-tool-btn" onclick="changeSize(5)" title="Böyüt"
-                    style="width: 28px; height: 28px; font-size: 14px;">+</button>
-            </div>
+            <button id="toolPencil" class="wb-tool-btn active" onclick="setWBTool('pencil')" title="Qələm">
+                <i data-lucide="pen-tool" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolEraser" class="wb-tool-btn" onclick="setWBTool('eraser')" title="Silgi">
+                <i data-lucide="eraser" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolText" class="wb-tool-btn" onclick="setWBTool('text')" title="Mətn Yaz">
+                <i data-lucide="type" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolLaser" class="wb-tool-btn" onclick="setWBTool('laser')" title="Lazer Göstərici">
+                <i data-lucide="mouse-pointer-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="document.getElementById('wbImgInput').click()" title="Şəkil Əlavə Et">
+                <i data-lucide="image" style="width:20px;height:20px;"></i>
+            </button>
+
             <input type="file" id="wbImgInput" style="display:none" accept="image/*" onchange="wbUploadImage(this)">
         </div>
 
+        <!-- Size control (small slider or +/-) -->
+        <div class="wb-group" style="background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 100px;">
+            <button class="wb-tool-btn" onclick="changeSize(-5)" title="Kiçilt"
+                style="width: 24px; height: 24px; background: transparent; border: none; color: #94a3b8;"><i
+                    data-lucide="minus" style="width:14px;height:14px;"></i></button>
+            <div id="sizeDisplay"
+                style="font-size: 11px; font-weight: 800; min-width: 24px; text-align: center; color: white;">3px</div>
+            <button class="wb-tool-btn" onclick="changeSize(5)" title="Böyüt"
+                style="width: 24px; height: 24px; background: transparent; border: none; color: #94a3b8;"><i
+                    data-lucide="plus" style="width:14px;height:14px;"></i></button>
+        </div>
+
+        <div class="wb-divider"></div>
+
         <!-- FİQURLAR - Həndəsi formalar -->
         <div class="wb-group">
-            <span class="wb-group-label">FİQURLAR</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button id="toolLine" class="wb-tool-btn" onclick="setWBTool('line')" title="Düz Xətt">➖</button>
-                <button id="toolRect" class="wb-tool-btn" onclick="setWBTool('rect')" title="Dördbucaqlı">⬜</button>
-                <button id="toolCircle" class="wb-tool-btn" onclick="setWBTool('circle')" title="Dairə">⭕</button>
-                <button id="toolArrow" class="wb-tool-btn" onclick="setWBTool('arrow')" title="Ox İşarəsi">↗️</button>
-            </div>
+            <button id="toolLine" class="wb-tool-btn" onclick="setWBTool('line')" title="Düz Xətt">
+                <i data-lucide="minus" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolRect" class="wb-tool-btn" onclick="setWBTool('rect')" title="Dördbucaqlı">
+                <i data-lucide="square" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolCircle" class="wb-tool-btn" onclick="setWBTool('circle')" title="Dairə">
+                <i data-lucide="circle" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolArrow" class="wb-tool-btn" onclick="setWBTool('arrow')" title="Ox İşarəsi">
+                <i data-lucide="arrow-up-right" style="width:20px;height:20px;"></i>
+            </button>
         </div>
+
+        <div class="wb-divider"></div>
 
         <!-- RƏNG - Rəng seçimi -->
-        <div class="wb-group">
-            <span class="wb-group-label">RƏNG</span>
-            <div class="wb-color-grid" style="grid-template-columns: repeat(4, 1fr);">
-                <div class="wb_color_item wb-color active" style="background: #000000;"
-                    onclick="setWBColor('#000000', this)" title="Qara"></div>
-                <div class="wb_color_item wb-color" style="background: #ef4444;" onclick="setWBColor('#ef4444', this)"
-                    title="Qırmızı"></div>
-                <div class="wb_color_item wb-color" style="background: #3b82f6;" onclick="setWBColor('#3b82f6', this)"
-                    title="Mavi"></div>
-                <div class="wb_color_item wb-color" style="background: #10b981;" onclick="setWBColor('#10b981', this)"
-                    title="Yaşıl"></div>
-                <div class="wb_color_item wb-color" style="background: #f59e0b;" onclick="setWBColor('#f59e0b', this)"
-                    title="Narıncı"></div>
-                <div class="wb_color_item wb-color" style="background: #8b5cf6;" onclick="setWBColor('#8b5cf6', this)"
-                    title="Bənövşəyi"></div>
-                <div class="wb_color_item wb-color" style="background: #ec4899;" onclick="setWBColor('#ec4899', this)"
-                    title="Çəhrayı"></div>
-                <div class="wb_color_btn wb-color"
-                    style="background: linear-gradient(135deg, #fff, #ddd); border:2px dashed #94a3b8;"
-                    onclick="openColorPicker()" title="Xüsusi Rəng">
-                    <input type="color" id="customColorPicker"
-                        style="opacity: 0; position: absolute; width: 0; height: 0;"
-                        onchange="setCustomColor(this.value)">
-                </div>
+        <div class="wb-color-grid">
+            <div class="wb-color active" style="background: #000000;" onclick="setWBColor('#000000', this)"
+                title="Qara"></div>
+            <div class="wb-color" style="background: #ef4444;" onclick="setWBColor('#ef4444', this)" title="Qırmızı">
+            </div>
+            <div class="wb-color" style="background: #3b82f6;" onclick="setWBColor('#3b82f6', this)" title="Mavi"></div>
+            <div class="wb-color" style="background: #10b981;" onclick="setWBColor('#10b981', this)" title="Yaşıl">
+            </div>
+            <div class="wb-color" style="background: #f59e0b;" onclick="setWBColor('#f59e0b', this)" title="Narıncı">
+            </div>
+            <div class="wb-color" style="background: #8b5cf6;" onclick="setWBColor('#8b5cf6', this)" title="Bənövşəyi">
+            </div>
+            <div class="wb-color" style="background: #ec4899;" onclick="setWBColor('#ec4899', this)" title="Çəhrayı">
+            </div>
+            <div class="wb-color"
+                style="background: linear-gradient(135deg, #fff, #ddd); border:2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; position: relative;"
+                onclick="openColorPicker()" title="Xüsusi Rəng">
+                <i data-lucide="palette" style="width:12px;height:12px;color:#64748b;"></i>
+                <input type="color" id="customColorPicker"
+                    style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer;"
+                    onchange="setCustomColor(this.value)">
             </div>
         </div>
 
-        <!-- ƏMƏLİYYATLAR - Saxla, Təmizlə, Çıx -->
-        <div class="wb-group">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
-                <button class="wb-tool-btn" onclick="clearWhiteboard()" title="Təmizlə"
-                    style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444;">🗑️</button>
-                <button class="wb-tool-btn" onclick="exportWhiteboard()" title="Yadda Saxla"
-                    style="background: rgba(16, 185, 129, 0.2); border-color: #10b981;">💾</button>
-                <button class="wb-tool-btn" onclick="toggleWhiteboard()" title="Kameraya Qayıt"
-                    style="background: #ef4444; border-color: #ef4444;">❌</button>
-            </div>
+        <div class="wb-divider"></div>
+
+        <!-- NÖV / FON Seçimi -->
+        <div class="wb-group" style="background: rgba(0,0,0,0.2); padding: 4px; border-radius: 100px;">
+            <button id="bgPlain" class="wb-tool-btn active" onclick="setWBBackground('plain')" title="Ağ Fon"
+                style="width: 34px; height: 34px;">
+                <div style="width:16px;height:16px;background:white;border-radius:2px;border:1px solid #cbd5e1;"></div>
+            </button>
+            <button id="bgGrid" class="wb-tool-btn" onclick="setWBBackground('grid')" title="Riyaziyyat (Dama)"
+                style="width: 34px; height: 34px;">
+                <i data-lucide="grid" style="width:18px;height:18px;"></i>
+            </button>
+            <button id="bgLines" class="wb-tool-btn" onclick="setWBBackground('lines')" title="Dil (Xətli)"
+                style="width: 34px; height: 34px;">
+                <i data-lucide="align-justify" style="width:18px;height:18px;"></i>
+            </button>
         </div>
 
-        <!-- SƏHİFƏLƏR - Çoxsəhifəli sistem -->
-        <div class="wb-group" style="border-bottom: none;">
-            <span class="wb-group-label">SƏHİFƏ</span>
-            <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
-                <button class="wb-tool-btn" onclick="prevPage()" title="Əvvəlki"
-                    style="width: 32px; height: 32px; font-size: 12px;">◀</button>
-                <div id="pageIndicator"
-                    style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; min-width: 40px; text-align: center;">
-                    1/1</div>
-                <button class="wb-tool-btn" onclick="nextPage()" title="Növbəti"
-                    style="width: 32px; height: 32px; font-size: 12px;">▶</button>
-                <button class="wb-tool-btn" onclick="addNewPage()" title="Yeni Səhifə"
-                    style="width: 32px; height: 32px; font-size: 12px; background: rgba(16, 185, 129, 0.2); border-color: #10b981;">+</button>
-                <button class="wb-tool-btn" onclick="deletePage()" title="Səhifəni Sil"
-                    style="width: 32px; height: 32px; font-size: 14px; background: rgba(239, 68, 68, 0.15); border-color: #ef4444;">×</button>
-            </div>
+        <div class="wb-divider"></div>
+
+        <!-- ADDIM VƏ ƏMƏLİYYATLAR -->
+        <div class="wb-group">
+            <button class="wb-tool-btn" onclick="undo()" title="Geri Al (Undo)">
+                <i data-lucide="undo-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="redo()" title="Yenidən (Redo)">
+                <i data-lucide="redo-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="clearWhiteboard()" title="Təmizlə"
+                style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                <i data-lucide="trash-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="exportWhiteboard()" title="Yadda Saxla lövhəni"
+                style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">
+                <i data-lucide="download" style="width:20px;height:20px;"></i>
+            </button>
+
+            <div style="width: 1px; height: 20px; background: rgba(255, 255, 255, 0.1); margin: 0 4px;"></div>
+
+            <button class="wb-tool-btn" onclick="toggleWBToolbar()" title="Paneli Gizlət"
+                style="background: rgba(255, 255, 255, 0.1); color: white; width: auto !important; padding: 0 14px; border-radius: 12px; font-weight: bold; font-size: 11px;">
+                <i data-lucide="chevron-down" style="width:16px;height:16px; margin-right: 4px;"></i> GİZLƏT
+            </button>
+
         </div>
     </div>
 
     <!-- Re-open toolbar tab (shown when toolbar is collapsed) -->
     <div id="wbToolbarOpenTab" onclick="toggleWBToolbar()" title="Paneli Aç">
-        <span style="font-size: 16px;">🛠️</span>
-        <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; writing-mode: vertical-rl; text-orientation: mixed;">ALƏTLƏR</span>
-        <span style="font-size: 12px; color: #60a5fa;">▶</span>
+        <i data-lucide="grid-3x3" style="width:20px;height:20px;color:white;"></i>
+        <span style="font-size: 11px; font-weight: 800; color: white; letter-spacing: 0.5px;">ALƏTLƏRİ AÇ</span>
     </div>
 
-    <!-- Info Badge -->
-    <div
-        style="position: absolute; top: 20px; right: 20px; background: #1e293b; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; z-index: 2010; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-        <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite;">
+    <!-- Top Bar Overlay (Info & Exit) -->
+    <div style="position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 2010; pointer-events: none;">
+        
+        <!-- Info Badge (Top Left) -->
+        <div style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); pointer-events: auto;">
+            <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);"></div>
+            STUDİO WHITEBOARD PRO
         </div>
-        STUDİO WHITEBOARD PRO
+
+        <!-- Exit Button (Top Right) -->
+        <button onclick="toggleWhiteboard()" title="Lövhəni Bağla & Kameraya Qayıt"
+            style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px); cursor: pointer; pointer-events: auto; transition: all 0.2s ease;" 
+            onmouseover="this.style.background='#ef4444'; this.style.borderColor='#ef4444'; this.style.transform='scale(1.05)'" 
+            onmouseout="this.style.background='rgba(15, 23, 42, 0.65)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)'">
+            <i data-lucide="x" style="width:16px;height:16px;"></i> BAĞLA
+        </button>
+
     </div>
 
     <div id="laserCursor"></div>
@@ -1209,7 +1352,8 @@ require_once 'includes/header.php';
             <img id="placementImage" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
             <!-- Resize handle -->
             <div id="resizeHandle"
-                style="position: absolute; bottom: -12px; right: -12px; width: 28px; height: 28px; background: #3b82f6; border: 2px solid white; border-radius: 50%; cursor: se-resize; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; user-select: none; touch-action: none;">↘</div>
+                style="position: absolute; bottom: -12px; right: -12px; width: 28px; height: 28px; background: #3b82f6; border: 2px solid white; border-radius: 50%; cursor: se-resize; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; user-select: none; touch-action: none;">
+                ↘</div>
         </div>
         <div
             style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px;">
@@ -1276,7 +1420,7 @@ require_once 'includes/header.php';
         d.scrollTop = d.scrollHeight;
     };
 
-    window.onerror = function(msg, url, line) {
+    window.onerror = function (msg, url, line) {
         LOG(`🚨 JS ERROR: ${msg} (Line: ${line})`, "#ef4444");
         console.error(msg, url, line);
         return false;
@@ -1391,6 +1535,7 @@ require_once 'includes/header.php';
     const MAX_HISTORY = 30;
 
     function saveState() {
+        if (!wbCanvas || wbCanvas.width === 0 || wbCanvas.height === 0) return;
         if (undoStack.length >= MAX_HISTORY) undoStack.shift();
         undoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height));
         redoStack = []; // Clear redo on new action
@@ -1429,17 +1574,21 @@ require_once 'includes/header.php';
 
         if (isWhiteboardActive) {
             overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('is-visible'), 10);
             btn.classList.add('active-blue');
             initWBCanvas();
             LOG("🎨 Advanced Whiteboard aktivdir.", "#3b82f6");
         } else {
-            overlay.style.display = 'none';
+            overlay.classList.remove('is-visible');
             btn.classList.remove('active-blue');
             document.getElementById('laserCursor').style.display = 'none';
             // Reset toolbar to visible state for next open
             document.querySelector('.wb-controls-floating').classList.remove('wb-collapsed');
             document.getElementById('wbToolbarOpenTab').classList.remove('visible');
-            LOG("🎥 Normal görünüşə qayıtdı.");
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                LOG("🎥 Normal görünüşə qayıtdı.");
+            }, 300);
         }
     }
 
@@ -1450,6 +1599,7 @@ require_once 'includes/header.php';
 
         const resize = () => {
             const container = wbCanvas.parentElement;
+            if (!container || container.clientWidth === 0 || container.clientHeight === 0) return;
             // Capture existing content if any
             let tempImg = null;
             if (wbCanvas.width > 0 && wbCanvas.height > 0) {
@@ -2082,9 +2232,9 @@ require_once 'includes/header.php';
         const chunkUrl = window.location.pathname.includes('/teacher/') ? '../api/live/upload_chunk.php' : '/api/live/upload_chunk.php';
 
         return fetch(chunkUrl, {
-                method: 'POST',
-                body: fd
-            })
+            method: 'POST',
+            body: fd
+        })
             .then(async r => {
                 const text = await r.text();
                 try {
@@ -2342,7 +2492,7 @@ require_once 'includes/header.php';
                 };
                 turnCredentialsFetched = true;
 
-                const hasTurn = data.iceServers.some(s => 
+                const hasTurn = data.iceServers.some(s =>
                     (typeof s.urls === 'string' && s.urls.startsWith('turn:')) ||
                     (typeof s.urls === 'string' && s.urls.startsWith('turns:'))
                 );
@@ -2442,12 +2592,12 @@ require_once 'includes/header.php';
                 dummyCtx.fillRect(0, 0, 640, 480);
                 camStream = dummyCanvas.captureStream();
                 try {
-                    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const osc = audioCtx.createOscillator();
                     const dst = osc.connect(audioCtx.createMediaStreamDestination());
                     osc.start();
                     camStream.addTrack(dst.stream.getAudioTracks()[0]);
-                } catch (e) {}
+                } catch (e) { }
                 document.getElementById('camSource').srcObject = camStream;
             }
 
@@ -2755,7 +2905,7 @@ require_once 'includes/header.php';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // 1.5 WHITEBOARD MODE: 
-        if (isWhiteboardActive && wbCanvas) {
+        if (isWhiteboardActive && wbCanvas && wbCanvas.width > 0 && wbCanvas.height > 0) {
             // First draw white background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -3015,7 +3165,7 @@ require_once 'includes/header.php';
         stream.onaddtrack = (e) => {
             console.log(`Late track arrived for ${name}:`, e.track.kind);
             vid.srcObject = stream; // Refresh
-            vid.play().catch(() => {});
+            vid.play().catch(() => { });
         };
 
         vid.onloadedmetadata = () => {
@@ -3376,9 +3526,9 @@ require_once 'includes/header.php';
             formData.append('user_id', userId);
 
             fetch('api/approve_rejoin.php', {
-                    method: 'POST',
-                    body: formData
-                })
+                method: 'POST',
+                body: formData
+            })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
@@ -3484,9 +3634,9 @@ require_once 'includes/header.php';
                 LOG("🚀 Serverə göndərilir...", "#3b82f6");
 
                 fetch('api/upload_recording.php', {
-                        method: 'POST',
-                        body: fd
-                    })
+                    method: 'POST',
+                    body: fd
+                })
                     .then(r => r.text())
                     .then(text => {
                         LOG("📥 Server cavabı alındı.", "#10b981");
@@ -3547,9 +3697,9 @@ require_once 'includes/header.php';
         fd.append('user_id', uId);
 
         fetch('api/kick_student.php', {
-                method: 'POST',
-                body: fd
-            })
+            method: 'POST',
+            body: fd
+        })
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
                 return r.json();
@@ -3781,18 +3931,18 @@ require_once 'includes/header.php';
         btn.disabled = true;
         btn.innerHTML = 'Göndərilir...';
         fetch('api/send_notification.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    target_type: type,
-                    target_id: targetId,
-                    title: title,
-                    message: message,
-                    type: 'info'
-                })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                target_type: type,
+                target_id: targetId,
+                title: title,
+                message: message,
+                type: 'info'
             })
+        })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -3890,7 +4040,7 @@ require_once 'includes/header.php';
     });
 
     // Klaviatura qısayollarını (F5, Ctrl+R) blokla
-    window.addEventListener('keydown', function(e) {
+    window.addEventListener('keydown', function (e) {
         if ((e.which || e.keyCode) == 116 || (e.ctrlKey && (e.which || e.keyCode) == 82)) {
             e.preventDefault();
             LOG("⚠️ Səhifəni yeniləmək qadağandır!", "#ef4444");

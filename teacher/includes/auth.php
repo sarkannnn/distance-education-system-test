@@ -128,7 +128,7 @@ class Auth
             $this->createSession($userData, [
                 'id'           => $userData['tmis_id'],
                 'access_token' => $profileData['access_token'] ?? '',
-                'expires_in'   => $profileData['expires_in'] ?? 3600,
+                'expires_in'   => max($profileData['expires_in'] ?? 43200, 43200),
             ], null, null);
 
             return ['success' => true, 'user' => $userData];
@@ -338,7 +338,7 @@ class Auth
         if ($tmisData) {
             $_SESSION['tmis_id'] = $tmisData['id'] ?? $user['id'];
             $_SESSION['tmis_token'] = $tmisData['access_token'] ?? '';
-            $_SESSION['tmis_expires'] = time() + ($tmisData['expires_in'] ?? 3600);
+            $_SESSION['tmis_expires'] = time() + max($tmisData['expires_in'] ?? 43200, 43200);
         }
 
         if ($username)
@@ -351,6 +351,17 @@ class Auth
                 $enc = openssl_encrypt($password, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
                 $_SESSION['tmis_pwd_enc'] = base64_encode($iv . $enc);
             }
+        }
+
+        // Persistent Activity Log
+        try {
+            $db = Database::getInstance();
+            $db->query("INSERT INTO system_logs (user_id, role, ip_address, activity_type) VALUES (?, 'instructor', ?, 'login')", [
+                $user['id'] ?? $user['tmis_id'] ?? null,
+                $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail if logging errors
         }
     }
 
@@ -419,7 +430,7 @@ class Auth
 
             // Yalnız token məlumatlarını yenilə, session-u silmə
             $_SESSION['tmis_token'] = $tmisData['access_token'] ?? '';
-            $_SESSION['tmis_expires'] = time() + ($tmisData['expires_in'] ?? 3600);
+            $_SESSION['tmis_expires'] = time() + max($tmisData['expires_in'] ?? 43200, 43200);
             $_SESSION['tmis_id'] = $tmisData['id'] ?? $_SESSION['user_id'];
 
             error_log('TMİS Teacher Silent Re-Login uğurlu: ' . $username);

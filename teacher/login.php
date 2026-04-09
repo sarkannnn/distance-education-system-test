@@ -34,7 +34,7 @@ if (getenv('SSO_AUTO_LOGIN') === 'false' || $isLocal) {
 }
 
 if (!$skipSso) {
-    $tmisUrl    = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
+    $tmisUrl = rtrim(getenv('TMIS_URL') ?: 'https://tmis.ndu.edu.az', '/');
     $distantUrl = rtrim(getenv('DISTANT_URL') ?: 'https://distant.ndu.edu.az', '/');
 
     // Yönləndirmə üçün ehtimal olunan callback URL (əgər TMİS dəstəkləyirsə)
@@ -291,7 +291,8 @@ if (isset($_GET['error'])) {
             position: relative;
         }
 
-        .form-input-icon svg {
+        .form-input-icon > i,
+        .form-input-icon > svg {
             position: absolute;
             left: 14px;
             top: 50%;
@@ -304,13 +305,44 @@ if (isset($_GET['error'])) {
 
         .form-input {
             width: 100%;
-            padding: 14px 16px 14px 44px;
+            padding: 14px 48px 14px 44px;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 15px;
             color: #1e293b;
             background: #f8fafc;
             transition: all 0.3s ease;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            padding: 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 20;
+            border-radius: 8px;
+        }
+
+        .password-toggle:hover {
+            color: #1e293b;
+            background: rgba(30, 41, 59, 0.05);
+        }
+
+        .password-toggle svg {
+            position: static !important;
+            transform: none !important;
+            pointer-events: auto !important;
+            width: 18px !important;
+            height: 18px !important;
         }
 
         .form-input:focus {
@@ -448,6 +480,9 @@ if (isset($_GET['error'])) {
                         <i data-lucide="lock"></i>
                         <input type="password" id="password" name="password" class="form-input"
                             placeholder="TMİS şifrənizi daxil edin" required autocomplete="current-password">
+                        <button type="button" id="togglePassword" class="password-toggle" tabindex="-1">
+                            <i data-lucide="eye"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -475,12 +510,30 @@ if (isset($_GET['error'])) {
         lucide.createIcons();
 
         // Form submit zamanı loading göstər
-        document.getElementById('loginForm').addEventListener('submit', function() {
+        document.getElementById('loginForm').addEventListener('submit', function () {
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"></circle><path d="M4 12a8 8 0 0 1 8-8"></path></svg> Yoxlanılır...';
             btn.style.opacity = '0.8';
         });
+
+        // Şifrə görünürlüyünü idarə et
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // İkonu yenilə
+                this.innerHTML = type === 'password' ? 
+                    '<i data-lucide="eye"></i>' : 
+                    '<i data-lucide="eye-off"></i>';
+                
+                lucide.createIcons();
+            });
+        }
     </script>
 </body>
 

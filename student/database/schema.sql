@@ -354,6 +354,18 @@ CREATE TABLE IF NOT EXISTS subjects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tez-tez soruşulan suallar (FAQs)
+CREATE TABLE IF NOT EXISTS faqs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    question VARCHAR(500) NOT NULL,
+    answer TEXT NOT NULL,
+    category VARCHAR(100),
+    order_index INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- ============================================================
 -- NÜMUNƏ VERİLƏNLƏR (Test məqsədi ilə)
 -- ============================================================
@@ -363,6 +375,21 @@ INSERT INTO categories (name, description) VALUES
 ('Texnologiya', 'Texnologiya və proqramlaşdırma kursları'),
 ('Riyaziyyat', 'Riyaziyyat və analiz kursları'),
 ('Dillər', 'Xarici dil kursları');
+
+-- Tez-tez soruşulan suallar
+INSERT INTO faqs (question, answer, category, order_index, is_active) VALUES
+('Platformaya necə girmə ola bilər?', 'Platform sapasında <b>Tələbə Girişi</b> və <b>Müəllim Girişi</b> düymələri mövcuddur. Öz kimlik nömrə və şifrenizi istifadə edərək daxil olun. Sistem TMİS SSO vahid giriş infrastrukturu ilə işləyir.', 'Giriş', 1, TRUE),
+('Canlı dərslərə qoşulmağa necə başlamaq olar?', 'Kabinetə daxil olduqdan sonra sol menyudakı <b>Canlı Dərslər</b> bölməsini seçin. Siz qoşula biləcəyiniz bütün dərsləri görəcəksiniz. Dərsi seçdikdən sonra <b>Qoşul</b> düyməsini basın.', 'Canlı Dərslər', 2, TRUE),
+('Canlı dərsdə audio/video problemi yaşayırsam nə etməyim lazımdır?', 'Audio/video problemləri ilə qarşılaşarsanız: 1) Webcam və mikrofonunuzun icazəsini kontrol edin 2) Brauzerinizi təzələyin 3) Başqa bir tarayıcı cəhd edin 4) Wi-Fi bağlantınızı kontrol edin. Problem davam edirsə, <b>Texniki Dəstək</b> ilə əlaqə saxlayın.', 'Canlı Dərslər', 3, TRUE),
+('Arxiv dərslərinə necə daxil ola bilər?', 'Sol menyudakı <b>Arxiv və Resurslar</b> bölməsini seçin. Burada bütün keçmiş dərslərin video yazılarını tapmaq olar. İstədiyiniz dərsi seçib izləyə bilərsiz.', 'Arxiv', 4, TRUE),
+('Video dərsləri yükləyə bilər mim?', 'Hələlik video dərsləri birbaşa yükləmə seçənəyi olmasa da, siz bütün video məziyyətini onlayn izləyə bilərsiz. Hər hans bir problemə qarşılaşarsanız, dəstək komandası ilə əlaqə saxlayın.', 'Arxiv', 5, TRUE),
+('Tapşırıqları necə göndərmə ola bilər?', 'Kabinetə daxil olun, <b>Tapşırıqlar</b> bölməsini seçin. Görmək istədiyiniz tapşırığı seçin. Cavablarınızı yazıb və ya fayl yükləməklə <b>Göndər</b> düyməsini basın.', 'Tapşırıqlar', 6, TRUE),
+('Tapşırıq müddəti keçibsə nə ola bilər?', 'Müddəti keçmiş tapşırıqlar sistemə yüklənə bilmir. Əgər müddət keçmişdirsə, müəllim ilə əlaqə saxlayıb uzadış istəyə bilərsiz.', 'Tapşırıqlar', 7, TRUE),
+('Şifrəmi unutmusam nə etməyim lazımdır?', 'Bu platforma TMİS SSO sistemi ilə inteqrasiya olunub. Şifrənizi unutmusunuzsa, zəhmət olmasa rəsmi <b>TMİS portalına</b> daxil olub <b>Şifrəmi unutdum</b> bölməsindən istifadə edin.', 'Giriş', 8, TRUE),
+('Davamiyyətim necə zərurətli tutulur?', 'Canlı dərsə qoşulduqdan sonra sistem avtomatik olaraq davamiyyətinizi qeyd edir. Dərsdən kəsilsən belə, sistem sonra əlaqə açıldıqda yenidən qeyd edir.', 'Canlı Dərslər', 9, TRUE),
+('Statistikalar necə baxa bilər?', 'Kabinetlə daxil olun, <b>Statistika</b> bölməsini seçin. Orada öz fəaliyyətinə dair statistika, ortalama xal, tamamlanmış tapşırıq sayı və digər məlumatları görəcəksiniz.', 'Statistika', 10, TRUE),
+('Texniki dəstəkə necə müraciət edə bilər?', '<b>Email:</b> distant@ndu.edu.az<br><b>Telefon:</b> +994 (36) 544 08 61<br>Mərkəzimiz Universitet şəhərciyində yerləşir.', 'Dəstək', 11, TRUE),
+('Kurstaki material nə qədər müddət ərizasi?', 'Bütün kurs materialları, dərslər və arxiv dərsləri sizdən platformaya giriş etdiyiniz müddətdə təqdim edilir. Material silinməsi halında, əvvəlcədən xəbərdar ediləcəksiniz.', 'Kurslar', 12, TRUE);
 
 -- Müəllimlər
 INSERT INTO instructors (title, name, email, department) VALUES

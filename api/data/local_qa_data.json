@@ -1,0 +1,342 @@
+{
+  "categories": [
+    {
+      "id": "dersler",
+      "name": "Canlı Dərslər",
+      "icon": "video",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "hesab",
+      "name": "Hesab / Giriş",
+      "icon": "user",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "arxiv",
+      "name": "Arxiv və Resurslar",
+      "icon": "folder-archive",
+      "color": "#10b981"
+    },
+    {
+      "id": "texniki",
+      "name": "Texniki Problemlər",
+      "icon": "wrench",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "muellim",
+      "name": "Müəllim Funksiyaları",
+      "icon": "presentation",
+      "color": "#ef4444"
+    },
+    {
+      "id": "telebe",
+      "name": "Tələbə Funksiyaları",
+      "icon": "graduation-cap",
+      "color": "#06b6d4"
+    },
+    {
+      "id": "umumi",
+      "name": "Ümumi / Əlaqə",
+      "icon": "info",
+      "color": "#64748b"
+    }
+  ],
+  "faqs": [
+    {
+      "id": 1,
+      "category": "dersler",
+      "question": "Canlı dərsə necə qoşula bilərəm?",
+      "answer": "<b>Canlı dərsə qoşulma:</b><br>1️⃣ Tələbə panelinə daxil olun<br>2️⃣ Sol menyudan <b>\"Canlı Dərslər\"</b> bölməsini seçin<br>3️⃣ Aktiv (yaşıl rəngli) dərsləri görəcəksiniz<br>4️⃣ <b>\"Canlı Dərsə Qoşul\"</b> düyməsinə klikləyin<br><br>💡 Dərs saatında həmin bölmədə avtomatik dərs görünəcəkdir.",
+      "keywords": ["canlı", "dərs", "qoşul", "bağlan", "live", "yayım", "neçə", "necə"]
+    },
+    {
+      "id": 2,
+      "category": "dersler",
+      "question": "Canlı dərs nə vaxt başlayır?",
+      "answer": "<b>Dərs cədvəli:</b><br>Hər fənnin canlı dərs vaxtları əvvəlcədən müəyyən edilir.<br><br>📅 Cədvəlinizi görmək üçün:<br>• <b>Canlı Dərslər</b> səhifəsindəki <b>\"Gələcək Dərslər\"</b> bölməsinə baxın<br>• Orada gün, saat və müəllim məlumatları göstərilir<br><br>💡 Dərs başlamazdan əvvəl sistemdə bildiriş alacaqsınız.",
+      "keywords": ["nə vaxt", "başlayır", "cədvəl", "saat", "gün", "tarix", "vaxt"]
+    },
+    {
+      "id": 3,
+      "category": "dersler",
+      "question": "Canlı dərsdə kamera və mikrofon necə işləyir?",
+      "answer": "<b>Kamera və mikrofon:</b><br>Canlı dərsə qoşulduqda brauzeriniz <b>kamera və mikrofon icazəsi</b> istəyəcək.<br><br>🎥 <b>İcazə verin</b>: Brauzerdəki \"İcazə ver\" düyməsinə klikləyin<br>🔇 Dərsdə mikrofonunuz <b>susturulmuş</b> olacaq, müəllim icazə verdikdə açıla bilər<br>📹 Kameranız müəllimin idarəetməsinə bağlıdır<br><br>⚠️ İcazə verməsəniz, dərsə qoşula bilməzsiniz.",
+      "keywords": ["kamera", "mikrofon", "audio", "video", "yayım", "səs", "icazə"]
+    },
+    {
+      "id": 4,
+      "category": "dersler",
+      "question": "Canlı dərsdə sual vermək mümkündürmü?",
+      "answer": "<b>Canlı dərsdə sual vermə:</b><br>Bəli! Canlı dərs zamanı:<br><br>💬 <b>Chat bölməsi</b>: Sağ paneldəki çat vasitəsilə yazılı sual göndərə bilərsiniz<br>🎤 <b>Mikrofon</b>: Müəllim icazə verdikdə mikrofonunuzu açıb şifahi sual verə bilərsiniz<br>✋ <b>Əl qaldırma</b>: Müəllim bunun üçün xüsusi düymə aktivləşdirə bilər<br><br>💡 Müəllim bütün sualları real vaxtda görə bilir.",
+      "keywords": ["sual", "soruş", "chat", "çat", "yazmaq", "əl qaldır"]
+    },
+    {
+      "id": 5,
+      "category": "dersler",
+      "question": "Dərs başladı amma mən qoşula bilmirəm, nə edim?",
+      "answer": "<b>Dərsə qoşula bilmədikdə:</b><br><br>1️⃣ <b>İnternet bağlantınızı</b> yoxlayın<br>2️⃣ <b>Səhifəni yeniləyin</b> (F5 düyməsi)<br>3️⃣ <b>Brauzerinizi</b> yoxlayın — Chrome və ya Firefox tövsiyə olunur<br>4️⃣ <b>\"Canlı Dərslər\"</b> səhifəsini yenidən açın<br>5️⃣ Problem davam edərsə <b>distant@ndu.edu.az</b> ünvanına yazın<br><br>⚠️ Mobil cihazlarda VPN istifadə edirsinizsə söndürün.",
+      "keywords": ["qoşula bilmirəm", "girə bilmirəm", "problem", "xəta", "işləmir", "bağlanmır"]
+    },
+    {
+      "id": 6,
+      "category": "dersler",
+      "question": "Bir dərsi qaçırdım, onu sonra izləyə bilərəm?",
+      "answer": "<b>Qaçırılmış dərsləri izləmə:</b><br>Bəli! Müəllimin icazəsi ilə canlı dərslər avtomatik qeydə alınır.<br><br>📂 Qaçırılmış dərsi izləmək üçün:<br>• Sol menyudan <b>\"Arxiv və Resurslar\"</b> bölməsinə keçin<br>• Fənn adı və ya tarix üzrə axtarış edin<br>• <b>\"İzlə\"</b> düyməsinə klikləyin<br><br>💡 Müəllim dərsi hələ təsdiqləməyibsə, arxivdə görünməyəcək.",
+      "keywords": ["qaçırdım", "izlə", "sonra", "təkrar", "bax", "yazı", "qeyd"]
+    },
+    {
+      "id": 7,
+      "category": "hesab",
+      "question": "Sistemə necə daxil ola bilərəm?",
+      "answer": "<b>Sistemə giriş:</b><br><br>🔐 Bu platforma <b>TMİS</b> vahid giriş sistemi ilə işləyir.<br><br>📱 <b>Tələbə girişi:</b><br>• Əsas səhifədən <b>\"Tələbə Girişi\"</b> düyməsinə klikləyin<br>• TMİS istifadəçi adı və şifrəsi ilə daxil olun<br><br>👨‍🏫 <b>Müəllim girişi:</b><br>• <b>\"Müəllim Girişi\"</b> düyməsinə klikləyin<br>• TMİS hesab məlumatlarını daxil edin<br><br>💡 TMİS-ə giriş edibsinizsə, SSO ilə avtomatik daxil olacaqsınız.",
+      "keywords": ["giriş", "daxil", "login", "sistemə", "portal", "keçid", "necə"]
+    },
+    {
+      "id": 8,
+      "category": "hesab",
+      "question": "Şifrəmi unutmuşam, nə edim?",
+      "answer": "<b>Şifrə bərpası:</b><br><br>Bu sistem TMİS ilə inteqrasiya olunduğundan, şifrə bərpası <b>TMİS portalı</b> üzərindən aparılır:<br><br>1️⃣ <b>tmis.ndu.edu.az</b> saytına daxil olun<br>2️⃣ <b>\"Şifrəmi unutdum\"</b> linkini klikləyin<br>3️⃣ Göstərişlərə əməl edin<br><br>🆘 Problem həll olmazsa, <b>fakültə tyutorunuza</b> və ya universitetin TMİS şöbəsinə müraciət edin.",
+      "keywords": ["şifrə", "parol", "unutdum", "bərpa", "dəyiş", "sıfırla", "girmir"]
+    },
+    {
+      "id": 9,
+      "category": "hesab",
+      "question": "TMİS nədir və niyə onunla daxil oluram?",
+      "answer": "<b>TMİS haqqında:</b><br><br>🏫 <b>TMİS</b> (Tədris Müəssisələrinin İdarəetmə Sistemi) — Naxçıvan Dövlət Universitetinin vahid tədris platformasıdır.<br><br>Distant Təhsil sistemi TMİS ilə inteqrasiya olunub, yəni:<br>• Ayrıca qeydiyyat tələb olunmur<br>• TMİS hesabınız ilə avtomatik daxil olursunuz<br>• Fənn və cədvəl məlumatları TMİS-dən gəlir<br><br>🔗 TMİS portalı: <b>tmis.ndu.edu.az</b>",
+      "keywords": ["tmis", "tmiş", "nədir", "vahid", "sso", "qeydiyyat", "portal"]
+    },
+    {
+      "id": 10,
+      "category": "hesab",
+      "question": "Giriş zamanı 'Sessiya müddəti bitib' xətası alıram",
+      "answer": "<b>Sessiya xətası həlli:</b><br><br>Bu xəta TMİS sessiyasının vaxtının bitdiyini bildirir.<br><br>🔄 <b>Həll yolu:</b><br>1️⃣ Səhifəni yeniləyin<br>2️⃣ Yenidən <b>TMİS hesab məlumatları</b> ilə daxil olun<br>3️⃣ Brauzer cookie-lərini təmizləyib yenidən cəhd edin<br><br>💡 Bu normal davranışdır — təhlükəsizlik üçün sessiyalar müəyyən müddətdən sonra bitir.",
+      "keywords": ["sessiya", "bitib", "xəta", "müddət", "expired", "token"]
+    },
+    {
+      "id": 11,
+      "category": "hesab",
+      "question": "Müəllim portalına keçid necə edilir?",
+      "answer": "<b>Müəllim portalı:</b><br><br>👨‍🏫 Müəllim portalına keçid etmək üçün:<br><br>1️⃣ Əsas səhifədə <b>\"Müəllim Girişi\"</b> düyməsinə klikləyin<br>2️⃣ TMİS hesab məlumatlarınızı daxil edin<br>3️⃣ Avtomatik olaraq müəllim panelinə yönlənəcəksiniz<br><br>📌 Müəllim panelində: Canlı Dərslər, Arxiv, Analitika bölmələri mövcuddur.",
+      "keywords": ["müəllim", "portal", "keçid", "teacher", "panel", "öyrətmən"]
+    },
+    {
+      "id": 12,
+      "category": "arxiv",
+      "question": "Arxiv materiallarını necə izləyə bilərəm?",
+      "answer": "<b>Arxiv materialları:</b><br><br>📂 Keçmiş dərslərin video yazılarını izləmək üçün:<br><br>1️⃣ Tələbə panelinə daxil olun<br>2️⃣ Sol menyudan <b>\"Arxiv və Resurslar\"</b> seçin<br>3️⃣ Fənn, tarix və ya ad üzrə <b>axtarış edin</b><br>4️⃣ <b>\"İzlə\"</b> düyməsinə klikləyin<br><br>🎬 Video materiallar online izlənilir, bəzi materialları <b>yükləmək</b> də mümkündür.",
+      "keywords": ["arxiv", "material", "izlə", "video", "yazı", "keçmiş", "resurs"]
+    },
+    {
+      "id": 13,
+      "category": "arxiv",
+      "question": "PDF materialları necə yükləyə bilərəm?",
+      "answer": "<b>PDF materialların yüklənməsi:</b><br><br>📄 Müəllimlərin yüklədiyi PDF materialları əldə etmək üçün:<br><br>1️⃣ <b>\"Arxiv və Resurslar\"</b> bölməsinə keçin<br>2️⃣ Yuxarıdakı filtrlərdən <b>PDF</b> tipini seçin<br>3️⃣ Material kartında <b>\"Yüklə\" (↓)</b> düyməsinə klikləyin<br><br>💡 PDF materiallar birbaşa brauzerinizdə açıla və ya kompüterinizə yüklənə bilər.",
+      "keywords": ["pdf", "yüklə", "endir", "material", "fayl", "sənəd", "download"]
+    },
+    {
+      "id": 14,
+      "category": "arxiv",
+      "question": "Arxivdə videoları fənnə görə necə süzə bilərəm?",
+      "answer": "<b>Arxiv filtrasiyası:</b><br><br>🔍 Arxiv materiallarını rahat tapmaq üçün:<br><br>• <b>Axtarış sahəsi:</b> Dərs adı, fənn və ya müəllim adı yazın<br>• <b>Fənn filtri:</b> Dropdown menyudan fənni seçin<br>• <b>Tip filtri:</b> Video, PDF və ya Hamısı seçin<br><br>Bu filtrlər birlikdə işləyir — məsələn, yalnız Riyaziyyat fənninin PDF materiallarını görə bilərsiniz.",
+      "keywords": ["filtr", "süz", "axtarış", "fənn", "tap", "göstər", "seç"]
+    },
+    {
+      "id": 15,
+      "category": "arxiv",
+      "question": "Dərs videosunu endirmək olurmu?",
+      "answer": "<b>Video endirmə:</b><br><br>⬇️ Bəli, müəllimin icazə verdiyi videolar yüklənə bilər.<br><br>Video kartında <b>\"↓\" (Yüklə)</b> düyməsi görünürsə, onu klikləyərək kompüterinizə saxlaya bilərsiniz.<br><br>⚠️ Bəzi videolar müəllim tərəfindən yüklənmə üçün bağlanmış ola bilər — bu halda yalnız onlayn izləyə bilərsiniz.",
+      "keywords": ["endir", "yüklə", "saxla", "download", "video", "fayl"]
+    },
+    {
+      "id": 16,
+      "category": "texniki",
+      "question": "Səs gəlmir və ya video oynanmır",
+      "answer": "<b>Audio/Video problemləri:</b><br><br>🔧 Bu problemləri həll etmək üçün:<br><br>1️⃣ <b>Brauzerinizi yeniləyin</b> — Chrome və ya Firefox son versiyası tövsiyə olunur<br>2️⃣ <b>Səs həcmini</b> yoxlayın (sistem + brauzer)<br>3️⃣ Səhifəni <b>F5</b> ilə yeniləyin<br>4️⃣ Başqa brauzer sınayın<br>5️⃣ <b>VPN söndürün</b> (varsa)<br><br>⚠️ Problem davam edərsə <b>distant@ndu.edu.az</b> ünvanına yazın.",
+      "keywords": ["səs", "audio", "video", "oynanmır", "gəlmir", "eşitmirəm", "görünmür"]
+    },
+    {
+      "id": 17,
+      "category": "texniki",
+      "question": "Hansı brauzer istifadə etməliyəm?",
+      "answer": "<b>Brauzer tələbləri:</b><br><br>🌐 Optimal təcrübə üçün aşağıdakı brauzerlər tövsiyə olunur:<br><br>✅ <b>Google Chrome</b> (son versiya) — Ən yaxşı dəstək<br>✅ <b>Mozilla Firefox</b> (son versiya)<br>✅ <b>Microsoft Edge</b> (Chromium əsaslı)<br><br>❌ Internet Explorer dəstəklənmir<br>⚠️ Safari-də bəzi WebRTC funksiyaları məhdud ola bilər<br><br>📱 Mobil cihazlarda Chrome Mobile tövsiyə olunur.",
+      "keywords": ["brauzer", "browser", "chrome", "firefox", "safari", "edge", "hansı"]
+    },
+    {
+      "id": 18,
+      "category": "texniki",
+      "question": "Səhifə çox yavaş yüklənir",
+      "answer": "<b>Yüklənmə problemləri:</b><br><br>🐌 Yavaş yüklənmənin mümkün səbəbləri:<br><br>1️⃣ <b>İnternet sürətinizi</b> yoxlayın (speedtest.net)<br>2️⃣ Brauzer <b>keşini təmizləyin</b> (Ctrl+Shift+Delete)<br>3️⃣ Başqa tab-ları bağlayın<br>4️⃣ <b>VPN istifadə</b> edirsinizsə söndürün<br>5️⃣ WiFi əvəzinə <b>kabel bağlantısını</b> sınayın<br><br>💡 Canlı dərslər üçün minimum 5 Mbps internet sürəti tələb olunur.",
+      "keywords": ["yavaş", "yüklənmir", "gec", "sürət", "internet", "lag", "donur"]
+    },
+    {
+      "id": 19,
+      "category": "texniki",
+      "question": "Mobil telefondan istifadə edə bilərəm?",
+      "answer": "<b>Mobil dəstək:</b><br><br>📱 Bəli! Sistem mobil cihazlar üçün optimallaşdırılıb.<br><br>• <b>Tələbə paneli:</b> Tam responsive dizayn — telefon və tabletdən rahat istifadə<br>• <b>Canlı dərslər:</b> Mobil brauzerdən qoşula bilərsiniz<br>• <b>Arxiv:</b> Video və PDF materialları mobil cihazdan izləyə bilərsiniz<br><br>💡 <b>Chrome Mobile</b> tövsiyə olunur. Bəzi cihazlarda kamera/mikrofon icazəsi tələb oluna bilər.",
+      "keywords": ["mobil", "telefon", "tablet", "android", "iphone", "ios", "responsive"]
+    },
+    {
+      "id": 20,
+      "category": "texniki",
+      "question": "Ekranım dondu, nə edim?",
+      "answer": "<b>Ekran donması problemi:</b><br><br>❄️ Bu, adətən internet bağlantısı və ya brauzer problemidir.<br><br>🔄 <b>Həll yolları:</b><br>1️⃣ Səhifəni <b>F5</b> ilə yeniləyin<br>2️⃣ <b>Ctrl+Shift+Delete</b> ilə brauzer keşini təmizləyin<br>3️⃣ Brauzeri bağlayıb yenidən açın<br>4️⃣ Əgər canlı dərsdəsinizsə, çıxıb yenidən qoşulun<br><br>⚠️ VPN donma problemlərinin ən çox yayılmış səbəbidir.",
+      "keywords": ["dondu", "freeze", "tıxandı", "cavab vermir", "açılmır", "yuklənmir"]
+    },
+    {
+      "id": 21,
+      "category": "muellim",
+      "question": "Canlı dərsi necə başlada bilərəm?",
+      "answer": "<b>Canlı dərs başlatma (Müəllim):</b><br><br>🎥 Müəllim panelindən canlı dərs başlatmaq üçün:<br><br>1️⃣ Sol menyudan <b>\"Canlı Dərslər\"</b> seçin<br>2️⃣ Bugünkü cədvəlinizi görəcəksiniz<br>3️⃣ Dərsin yanındakı <b>\"Dərsi Başlat\"</b> düyməsinə klikləyin<br>4️⃣ <b>Canlı Studio</b> avtomatik açılacaq<br>5️⃣ Kamera və mikrofon icazəsini verin<br><br>💡 Dərsi başlatmadan əvvəl tələbələrə <b>canlı bildiriş</b> göndərə bilərsiniz.",
+      "keywords": ["başlat", "start", "yayıma", "studio", "aç", "müəllim", "dərs"]
+    },
+    {
+      "id": 22,
+      "category": "muellim",
+      "question": "Canlı yayımda ağ lövhəni (whiteboard) necə istifadə edim?",
+      "answer": "<b>Ağ Lövhə (Whiteboard):</b><br><br>🖊️ Canlı Studio-da ağ lövhə aracı mövcuddur:<br><br>1️⃣ Studioda aşağıdakı panel düymələrindən <b>\"Ağ Lövhə\"</b> seçin<br>2️⃣ <b>Qələm, silgi, mətn</b> alətlərindən istifadə edin<br>3️⃣ <b>Rəng və ölçü</b> seçimləri mövcuddur<br>4️⃣ Çoxsəhifəli dəstək var — yeni səhifə əlavə edə bilərsiniz<br>5️⃣ Tələbələr ağ lövhəni real vaxtda görürlər<br><br>💡 Ağ lövhəni bağlayanda avtomatik kameraya qayıdır.",
+      "keywords": ["whiteboard", "lövhə", "ağ", "çiz", "qələm", "yazı", "şəkil"]
+    },
+    {
+      "id": 23,
+      "category": "muellim",
+      "question": "Tələbələrə bildiriş necə göndərirəm?",
+      "answer": "<b>Canlı Bildiriş Yayınlama:</b><br><br>📢 Müəllim panelinin <b>\"Canlı Dərslər\"</b> səhifəsində:<br><br>1️⃣ <b>\"Canlı Bildiriş Yayınla\"</b> formasını tapın<br>2️⃣ Mesaj mətninizi yazın<br>3️⃣ <b>Hədəf fənn</b> seçin (və ya bütün tələbələr)<br>4️⃣ <b>Bildiriş tipini</b> seçin (Məlumat, Xəbərdarlıq, Təcili)<br>5️⃣ Görünmə müddəti təyin edin (dəqiqə ilə)<br>6️⃣ <b>\"İndi Yayınla\"</b> düyməsinə klikləyin<br><br>💡 Bildirişlər tələbələrin ekranında popup şəklində görünəcək.",
+      "keywords": ["bildiriş", "göndər", "yayınla", "xəbər", "alert", "mesaj", "tələbə"]
+    },
+    {
+      "id": 24,
+      "category": "muellim",
+      "question": "Arxivə material necə yükləyirəm?",
+      "answer": "<b>Material yükləmə (Müəllim):</b><br><br>📤 Arxiv bölməsindən:<br><br>1️⃣ Müəllim panelindən <b>\"Arxiv və Resurslar\"</b> açın<br>2️⃣ Sağ yuxarıdakı <b>\"Yeni Arxiv\"</b> düyməsinə klikləyin<br>3️⃣ Fənn, başlıq, tarix seçin<br>4️⃣ <b>Video və/ya PDF</b> faylları yükləyin<br>5️⃣ <b>\"Saxla\"</b> düyməsinə klikləyin<br><br>💡 Yüklənən materiallar avtomatik olaraq qeydiyyatda olan tələbələrə görünəcək.",
+      "keywords": ["yüklə", "upload", "material", "əlavə", "pdf", "video", "fayl"]
+    },
+    {
+      "id": 25,
+      "category": "muellim",
+      "question": "Analitika və statistika necə işləyir?",
+      "answer": "<b>Analitika paneli (Müəllim):</b><br><br>📊 Sol menyudan <b>\"Analitika\"</b> bölməsinə keçin:<br><br>• <b>Aktiv Dərslər:</b> Ümumi keçirilmiş dərs sayı<br>• <b>Arxiv Materialları:</b> Video və PDF sayı<br>• <b>Ortalama Davamiyyət:</b> Tələbə iştirak faizi<br>• <b>Ümumi Baxışlar:</b> Material baxış sayı<br><br>📈 Həftəlik qrafik və fənn üzrə detallı cədvəl mövcuddur.<br>📎 <b>\"Hesabatı yüklə\"</b> düyməsi ilə Excel formatında yükləyə bilərsiniz.",
+      "keywords": ["analitika", "statistika", "hesabat", "performans", "qrafik", "rəqəm"]
+    },
+    {
+      "id": 26,
+      "category": "muellim",
+      "question": "Dərsi bitirdikdən sonra yazını necə təsdiqləyirəm?",
+      "answer": "<b>Dərs yazısının təsdiqi:</b><br><br>✅ Canlı dərs bitdikdən sonra:<br><br>1️⃣ <b>\"Canlı Dərslər\"</b> səhifəsinə keçin<br>2️⃣ <b>\"Təsdiq Gözləyən Dərslər\"</b> bölməsini görəcəksiniz<br>3️⃣ Dərsin kartında <b>\"Təsdiqlə\"</b> düyməsinə klikləyin<br>4️⃣ Təsdiqlədikdən sonra video tələbələrin arxivində görünəcək<br><br>⚠️ Təsdiq etməsəniz, tələbələr dərs yazısını izləyə bilməzlər.",
+      "keywords": ["təsdiq", "approve", "yazı", "bitir", "qeyd", "pending", "gözləyən"]
+    },
+    {
+      "id": 27,
+      "category": "muellim",
+      "question": "Fənlərim barədə məlumatı haradan görə bilərəm?",
+      "answer": "<b>Fənn məlumatları:</b><br><br>📚 Müəllim panelindən:<br><br>• <b>\"Canlı Dərslər\"</b> → <b>\"Fənlərim\"</b> sekmesini seçin<br>• Hər fənn üçün: fənn adı, ixtisas, kurs, tələbə sayı, keçirilmiş dərs sayı görünür<br>• Fənn kartına klikləyərək detallı məlumat əldə edin<br>• <b>\"Dərsi Başlat\"</b> düyməsi ilə birbaşa canlı dərs başlada bilərsiniz<br><br>💡 TMİS-dən gələn fənn məlumatları avtomatik sinxronlaşdırılır.",
+      "keywords": ["fənn", "kurs", "mövzu", "subject", "ixtisas", "predmet"]
+    },
+    {
+      "id": 28,
+      "category": "telebe",
+      "question": "İdarəetmə panelində nə göstərilir?",
+      "answer": "<b>Tələbə İdarəetmə Paneli (Dashboard):</b><br><br>🏠 Panelə daxil olduqda aşağıdakıları görəcəksiniz:<br><br>📺 <b>Canlı Dərslər:</b> Hazırda aktiv olan dərsləriniz<br>📊 <b>Statistika:</b> Həftəlik və aylıq tədris statistikanız<br>📂 <b>Son Arxivlər:</b> Yeni əlavə olunmuş materiallar<br>🔔 <b>Bildirişlər:</b> Müəllimlərdən gələn bildirişlər<br><br>💡 Sol menyudan digər bölmələrə keçə bilərsiniz.",
+      "keywords": ["dashboard", "panel", "ana", "əsas", "səhifə", "idarəetmə", "kabinet"]
+    },
+    {
+      "id": 29,
+      "category": "telebe",
+      "question": "Keçmiş dərslərin arxivini haradan tapam?",
+      "answer": "<b>Arxiv bölməsi:</b><br><br>📂 Keçmiş dərsləri tapmaq üçün:<br><br>1️⃣ Sol menyudan <b>\"Arxiv və Resurslar\"</b> seçin<br>2️⃣ Yuxarıdakı <b>statistika kartlarında</b> ümumi dərs, video, PDF sayını görün<br>3️⃣ <b>Axtarış</b> sahəsinə fənn və ya müəllim adı yazın<br>4️⃣ <b>Fənn filtri</b> ilə xüsusi fənni seçin<br>5️⃣ <b>Tip filtri</b> ilə yalnız Video və ya PDF göstərin<br><br>💡 Materiallar tarixə görə (ən yenidən köhnəyə) sıralanır.",
+      "keywords": ["arxiv", "keçmiş", "tap", "haradan", "bul", "resurs", "material"]
+    },
+    {
+      "id": 30,
+      "category": "telebe",
+      "question": "Statistikamı necə görə bilərəm?",
+      "answer": "<b>Tələbə statistikası:</b><br><br>📈 İdarəetmə panelinizin əsas səhifəsində:<br><br>• <b>Həftəlik statistika:</b> Bu həftəki dərs iştirakınız<br>• <b>Aylıq statistika:</b> Son 30 gündəki aktivlik<br>• <b>Canlı dərs sayı:</b> İştirak etdiyiniz dərs sayı<br>• <b>Arxiv baxışları:</b> Neçə material izlədiyiniz<br><br>💡 Bu məlumatlar TMİS ilə sinxronlaşdırılır.",
+      "keywords": ["statistika", "stat", "nəticə", "aktivlik", "bax", "hesabat", "göstərici"]
+    },
+    {
+      "id": 31,
+      "category": "telebe",
+      "question": "Fənlərim səhifəsində nə var?",
+      "answer": "<b>Fənlərim bölməsi:</b><br><br>📚 <b>\"Canlı Dərslər\"</b> → <b>\"Fənlərim\"</b> sekmesindən:<br><br>• Qeydiyyatda olduğunuz bütün fənləri görürsünüz<br>• Hər fənn üçün: fənn adı, müəllim, kurs<br>• Həftəlik dərs cədvəli<br>• Bir fənn üçün olan bütün arxiv materialları<br><br>💡 Bu siyahı TMİS-dəki qeydiyyatınıza əsasən tərtib olunur.",
+      "keywords": ["fənlərim", "kurslar", "qeydiyyat", "enrolled", "fənn siyahı"]
+    },
+    {
+      "id": 32,
+      "category": "umumi",
+      "question": "NDU Distant Təhsil sistemi nədir?",
+      "answer": "<b>NDU Distant Təhsil Sistemi:</b><br><br>🎓 Bu, <b>Naxçıvan Dövlət Universitetinin</b> rəsmi distant (onlayn) tədris platformasıdır.<br><br>🔑 <b>Əsas xüsusiyyətlər:</b><br>• 🎥 WebRTC texnologiyası ilə <b>canlı dərslər</b><br>• 📂 Video və PDF <b>arxiv sistemi</b><br>• 📊 Tələbə <b>davamiyyət izləmə</b><br>• 🖊️ Real vaxt <b>ağ lövhə</b> dəstəyi<br>• 💬 Canlı <b>chat</b> funksiyası<br>• 🔗 TMİS ilə tam <b>inteqrasiya</b>",
+      "keywords": ["nədir", "haqqında", "distant", "sistem", "platform", "ndu", "universitet"]
+    },
+    {
+      "id": 33,
+      "category": "umumi",
+      "question": "Texniki dəstək üçün əlaqə məlumatları",
+      "answer": "<b>Əlaqə məlumatları:</b><br><br>🏫 <b>NDU Distant Təhsil Mərkəzi</b><br><br>📧 Email: <b>distant@ndu.edu.az</b><br>📞 Telefon: <b>+994 (36) 544 08 61</b><br>📍 Ünvan: Naxçıvan Dövlət Universiteti, Universitet şəhərciyi<br><br>🕐 İş saatları: Bazar ertəsi — Cümə, 09:00 — 18:00<br><br>💡 Ən sürətli cavab üçün email göndərin.",
+      "keywords": ["əlaqə", "telefon", "email", "ünvan", "nömrə", "zəng", "müraciət", "dəstək"]
+    },
+    {
+      "id": 34,
+      "category": "umumi",
+      "question": "Platformadan istifadə pulludurmu?",
+      "answer": "<b>Platform ödənişi:</b><br><br>✅ <b>Xeyr!</b> NDU Distant Təhsil platforması universitetin tələbə və müəllimləri üçün <b>tamamilə pulsuzdur</b>.<br><br>Platformadan istifadə üçün yalnız:<br>• NDU tələbəsi və ya müəllimi olmaq<br>• Aktiv TMİS hesabına malik olmaq tələb olunur.<br><br>📌 Heç bir əlavə ödəniş yoxdur.",
+      "keywords": ["pul", "ödəniş", "qiymət", "pulsuz", "subscription", "abunə"]
+    },
+    {
+      "id": 35,
+      "category": "umumi",
+      "question": "Salam, kömək edə bilərsən?",
+      "answer": "Salam! 👋 <b>NDU Distant Təhsil Asistenti</b> olaraq sizə kömək etməyə hazıram.<br><br>Aşağıdakı mövzularda suallarınıza cavab verə bilərəm:<br><br>📺 <b>Canlı Dərslər</b> — qoşulma, cədvəl<br>🔐 <b>Giriş/Hesab</b> — TMİS, şifrə bərpası<br>📂 <b>Arxiv</b> — keçmiş dərslər, materiallar<br>🔧 <b>Texniki</b> — brauzer, audio/video<br>👨‍🏫 <b>Müəllim</b> — studio, analitika<br>🎓 <b>Tələbə</b> — panel, statistika<br><br>Nə ilə maraqlanırsınız?",
+      "keywords": ["salam", "hi", "hello", "hey", "kömək", "yardım", "dəstək"]
+    },
+    {
+      "id": 36,
+      "category": "dersler",
+      "question": "Dərs vaxtı dəyişib, haradan öyrənə bilərəm?",
+      "answer": "<b>Dərs vaxtı dəyişikliyi:</b><br><br>📅 Dərs vaxtları TMİS cədvəlinə əsasən tərtib olunur.<br><br>Dəyişiklikləri öyrənmək üçün:<br>1️⃣ <b>\"Canlı Dərslər\"</b> səhifəsindəki <b>\"Gələcək Dərslər\"</b> bölməsinə baxın<br>2️⃣ Müəllimin göndərdiyi <b>bildirişləri</b> yoxlayın<br>3️⃣ TMİS portalından rəsmi cədvəlinizi yoxlayın<br><br>💡 Dərs vaxtı dəyişdikdə müəllim adətən bildiriş göndərir.",
+      "keywords": ["vaxt", "dəyiş", "cədvəl", "schedule", "tarix", "saat"]
+    },
+    {
+      "id": 37,
+      "category": "muellim",
+      "question": "Davamiyyət hesabatını necə yükləyə bilərəm?",
+      "answer": "<b>Davamiyyət hesabatı:</b><br><br>📋 Müəllim panelindən:<br><br>1️⃣ <b>\"Analitika\"</b> bölməsinə keçin<br>2️⃣ Fənn üzrə detallı cədvəli görəcəksiniz<br>3️⃣ <b>\"Hesabatı yüklə\"</b> düyməsinə klikləyin<br>4️⃣ Excel formatında hesabat yüklənəcək<br><br>📊 Hesabatda: fənn adı, tələbə sayı, dərs sayı, davamiyyət faizi göstərilir.",
+      "keywords": ["davamiyyət", "hesabat", "yüklə", "excel", "report", "attendance"]
+    },
+    {
+      "id": 38,
+      "category": "muellim",
+      "question": "Axın (stream) dərsi nədir?",
+      "answer": "<b>Axın dərsləri:</b><br><br>🔗 Axın (Stream) dərsi — bir canlı yayımın <b>bir neçə fənnə eyni anda</b> yayımlanmasıdır.<br><br>📌 Müəllim bir dərsi başlatdıqda birdən çox fənni seçə bilər<br>📌 Bütün seçilmiş fənlərin tələbələri eyni yayıma qoşulur<br>📌 Axın dərsləri <b>\"🔗 Axın\"</b> etiketi ilə göstərilir<br><br>💡 Bu xüsusiyyət eyni mövzunu müxtəlif qruplara öyrətmək üçün əlverişlidir.",
+      "keywords": ["axın", "stream", "çoxlu", "birləş", "eyni", "yayım"]
+    },
+    {
+      "id": 39,
+      "category": "texniki",
+      "question": "Kamera icazəsini necə aktivləşdirə bilərəm?",
+      "answer": "<b>Kamera icazəsi:</b><br><br>🎥 Brauzerdə kamera icazəsinin verilməsi:<br><br><b>Chrome:</b><br>1️⃣ Ünvan çubuğundakı 🔒 ikonuna klikləyin<br>2️⃣ <b>\"Kamera\"</b> və <b>\"Mikrofon\"</b> yanında \"İcazə ver\" seçin<br>3️⃣ Səhifəni yeniləyin<br><br><b>Firefox:</b><br>1️⃣ Ünvan çubuğundakı kamera ikonuna klikləyin<br>2️⃣ \"Daimi icazə ver\" seçin<br><br>⚠️ Kamera başqa tətbiqdə açıqdırsa, bağlayın.",
+      "keywords": ["kamera", "icazə", "permission", "aktivləşdir", "açılmır", "görünmür"]
+    },
+    {
+      "id": 40,
+      "category": "telebe",
+      "question": "Canlı dərsdə iştirak etdiyim qeyd olunurmu?",
+      "answer": "<b>Davamiyyət izləmə:</b><br><br>✅ Bəli! Canlı dərsə qoşulduqda <b>avtomatik olaraq</b> davamiyyətiniz qeyd olunur.<br><br>📋 Sistem qeyd edir:<br>• Dərsə nə vaxt qoşulduğunuzu<br>• Neçə dəqiqə izlədiyinizi<br>• Hansı dərslərə iştirak etdiyinizi<br><br>💡 Müəllimlər davamiyyət hesabatına <b>\"Analitika\"</b> bölməsindən baxa bilərlər.",
+      "keywords": ["davamiyyət", "qeyd", "izlə", "track", "iştirak", "attendance"]
+    },
+    {
+      "id": 41,
+      "category": "hesab",
+      "question": "İki cihazdan eyni anda istifadə edə bilərəm?",
+      "answer": "<b>Çoxlu cihaz istifadəsi:</b><br><br>📱💻 Bəli, sistemi <b>eyni anda bir neçə cihazdan</b> istifadə edə bilərsiniz.<br><br>Lakin canlı dərslər üçün tövsiyə:<br>• <b>Bir cihazdan</b> canlı dərsə qoşulun<br>• İkinci cihazdan arxiv və ya materialları izləyə bilərsiniz<br><br>⚠️ Eyni canlı dərsə iki cihazdan qoşulma <b>sessiyanı sıfırlaya bilər</b>.",
+      "keywords": ["cihaz", "iki", "eyni", "device", "kompüter", "telefon"]
+    },
+    {
+      "id": 42,
+      "category": "umumi",
+      "question": "Tətbiq yükləmək lazımdır?",
+      "answer": "<b>Tətbiq tələbi:</b><br><br>📲 <b>Xeyr!</b> Heç bir tətbiq yükləməyə ehtiyac yoxdur.<br><br>NDU Distant Təhsil sistemi <b>brauzer əsaslıdır</b>:<br>• Kompüterdən: Chrome, Firefox, Edge<br>• Telefon/Tabletdən: Chrome Mobile, Safari<br><br>💡 Sadəcə <b>distant.ndu.edu.az</b> saytına daxil olun — heç bir quraşdırma tələb olunmur.",
+      "keywords": ["tətbiq", "yüklə", "app", "install", "quraşdır", "proqram"]
+    }
+  ]
+}
