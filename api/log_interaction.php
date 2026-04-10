@@ -11,20 +11,36 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once __DIR__ . '/services/loggerService.php';
 
+// Get input safely (read once)
+$input = json_decode(file_get_contents('php://input'), true);
+
+$portalHint = $input['portal'] ?? 'guest';
+
 // Handle Session Detection
-$sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'];
-foreach ($sessionNames as $sn) {
-    if (isset($_COOKIE[$sn])) {
-        session_name($sn);
-        session_start();
-        break;
-    }
-}
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+$sessionNames = ['DISTANT_TEACHER_SESSION', 'DISTANT_STUDENT_SESSION'];
+if ($portalHint === 'student') {
+    $sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'];
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
+$sessionFound = false;
+
+foreach ($sessionNames as $sn) {
+    if (isset($_COOKIE[$sn])) {
+        @session_name($sn);
+        if (@session_start()) {
+            if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+                $sessionFound = true;
+                break;
+            }
+            @session_write_close();
+        }
+    }
+}
+
+if (!$sessionFound && session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
+
 $query = $input['query'] ?? '';
 $response = $input['response'] ?? '';
 $source = $input['source'] ?? 'local_faq';

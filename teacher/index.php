@@ -173,7 +173,7 @@ try {
             'group' => $groupName,
             'course_level' => $courseLevel,
             'course' => $courseName,
-            'lesson_type' => ($item['lesson_type'] === 'lecture' ? 'Mühazirə' : ($item['lesson_type'] === 'seminar' ? 'Seminar' : 'Laboratoriya')),
+            'lesson_type' => match($item['lesson_type']) { 'lecture' => 'Mühazirə', 'seminar' => 'Seminar', 'laboratory' => 'Laboratoriya', 'consultation' => 'Məsləhət saatı', 'practice' => 'Praktika', default => ucfirst($item['lesson_type'] ?? 'Dərs') },
             'topic' => $item['topic'],
             'date' => $item['date']
         ];

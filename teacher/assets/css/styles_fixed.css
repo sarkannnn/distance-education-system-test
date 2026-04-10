@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Distant TÉ™hsil Sistemi - CSS Styles
  * Modern, Premium Design
  */
@@ -2329,6 +2329,7 @@ input:checked+.toggle-slider::before {
 
     .main-content {
         padding: 16px;
+        padding-top: calc(var(--header-height) + 24px);
     }
 
     .top-header {
@@ -2353,7 +2354,7 @@ input:checked+.toggle-slider::before {
 /* Telefon (landscape) */
 @media (max-width: 768px) {
     :root {
-        --header-height: 60px;
+        --header-height: 70px;
     }
 
     .search-container {
@@ -2361,7 +2362,11 @@ input:checked+.toggle-slider::before {
     }
 
     .user-name {
-        display: none;
+        display: block;
+        max-width: none;
+        overflow: visible;
+        white-space: nowrap;
+        font-size: 13px;
     }
 
     .user-info {

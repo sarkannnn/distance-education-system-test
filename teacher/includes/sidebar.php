@@ -8,6 +8,7 @@ $menuItems = [
     ['id' => 'live', 'label' => 'Canlı Dərslər', 'icon' => 'video', 'url' => 'live-lessons.php'],
     ['id' => 'plan', 'label' => 'Arxiv və Resurslar', 'icon' => 'folder-archive', 'url' => 'plan.php'],
     ['id' => 'analytics', 'label' => 'Analitika', 'icon' => 'bar-chart-3', 'url' => 'analytics.php'],
+    ['id' => 'chatbot_analytics', 'label' => 'Chatbot Analitikası', 'icon' => 'bot', 'url' => 'chatbot_analytics.php'],
 ];
 
 $currentPage = $currentPage ?? 'dashboard';
@@ -26,6 +27,12 @@ $currentPage = $currentPage ?? 'dashboard';
 
     <nav class="sidebar-nav">
         <?php foreach ($menuItems as $item): ?>
+            <?php 
+                // Skip sensitive items for non-admins
+                if ($item['id'] === 'chatbot_analytics' && ($_SESSION['user_role'] ?? 'guest') !== 'admin') {
+                    continue;
+                }
+            ?>
             <a href="<?php echo $item['url']; ?>"
                 class="nav-item <?php echo $currentPage === $item['id'] ? 'active' : ''; ?>">
                 <?php if ($currentPage === $item['id']): ?>
@@ -38,4 +45,12 @@ $currentPage = $currentPage ?? 'dashboard';
             </a>
         <?php endforeach; ?>
     </nav>
+
+    <div class="sidebar-footer">
+        <!-- Logout Item (Visible only on mobile) -->
+        <a href="logout.php?action=exit" class="nav-item sidebar-logout-item">
+            <i data-lucide="log-out"></i>
+            <span>Distant təhsildən çıx</span>
+        </a>
+    </div>
 </aside>

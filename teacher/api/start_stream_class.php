@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $course_ids = is_array($raw_course_ids) ? array_map('intval', array_filter($raw_course_ids)) : [];
     $topic_name = trim($_POST['title'] ?? $_POST['topic_name'] ?? '');
     $lesson_type = $_POST['lesson_type'] ?? 'lecture';
-    if (!in_array($lesson_type, ['lecture', 'seminar', 'laboratory'], true)) {
+    if (!in_array($lesson_type, ['lecture', 'seminar', 'laboratory', 'consultation', 'practice'], true)) {
         $lesson_type = 'lecture';
     }
     $course_name = $_POST['course_name'] ?? 'Fənn';

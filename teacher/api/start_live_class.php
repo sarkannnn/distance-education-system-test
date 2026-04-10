@@ -40,9 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $course_id = (int) ($_POST['course_id'] ?? 0);
     $topic_name = trim($_POST['title'] ?? $_POST['topic_name'] ?? '');
-    $lesson_type = $_POST['lesson_type'] ?? 'lecture'; // lecture, seminar, or laboratory
+    $lesson_type = $_POST['lesson_type'] ?? 'lecture'; // lecture, seminar, laboratory, or consultation
     // Whitelist lesson type
-    if (!in_array($lesson_type, ['lecture', 'seminar', 'laboratory'], true)) {
+    if (!in_array($lesson_type, ['lecture', 'seminar', 'laboratory', 'consultation'], true)) {
         $lesson_type = 'lecture';
     }
 

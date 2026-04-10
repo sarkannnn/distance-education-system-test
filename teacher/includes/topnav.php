@@ -37,7 +37,7 @@
             </div>
         </div>
 
-        <a href="logout.php?action=exit" class="header-btn" id="exit-distant-btn"
+        <a href="logout.php?action=exit" class="header-btn hide-on-mobile" id="exit-distant-btn"
             style="width: auto; padding: 0 16px; border-radius: 12px; font-size: 14px; font-weight: 500; text-decoration: none; display: flex; align-items: center; color: var(--text-primary);">
             Distant təhsildən çıx
         </a>

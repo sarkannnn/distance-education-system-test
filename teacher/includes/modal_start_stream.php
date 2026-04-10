@@ -89,6 +89,12 @@
                         <span style="display: block; font-weight: 700; color: #718096; font-size: 14px;">Laboratoriya</span>
                         <input type="radio" name="stream_lesson_type" value="laboratory" style="display: none;">
                     </div>
+                    <div id="stream_card_consultation" class="lesson-type-card stream-type-card" onclick="selectStreamLessonType('consultation')"
+                        style="border: 2px solid #EDF2F7; background: #F7FAFC; cursor: pointer; padding: 15px 10px; border-radius: 20px; text-align: center; transition: all 0.2s;">
+                        <i data-lucide="message-circle" style="width: 24px; height: 24px; margin: 0 auto 10px; display: block; color: #A0AEC0;"></i>
+                        <span style="display: block; font-weight: 700; color: #718096; font-size: 14px;">Məsləhət saatı</span>
+                        <input type="radio" name="stream_lesson_type" value="consultation" style="display: none;">
+                    </div>
                 </div>
             </div>
 
@@ -282,7 +288,8 @@
         const cards = {
             'lecture': document.getElementById('stream_card_lecture'),
             'seminar': document.getElementById('stream_card_seminar'),
-            'laboratory': document.getElementById('stream_card_laboratory')
+            'laboratory': document.getElementById('stream_card_laboratory'),
+            'consultation': document.getElementById('stream_card_consultation')
         };
 
         Object.keys(cards).forEach(key => {

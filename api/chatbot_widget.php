@@ -412,6 +412,13 @@
                 return basePath.replace(/\/+$/, '') + '/api/' + endpoint;
             };
 
+            let currentPortal = 'guest';
+            if (window.location.pathname.includes('/student')) {
+                currentPortal = 'student';
+            } else if (window.location.pathname.includes('/teacher')) {
+                currentPortal = 'teacher';
+            }
+
             let conversationHistory = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]');
             let localFaqData = { categories: [], faqs: [] };
             let currentCategoryId = 'dersler';
@@ -488,7 +495,8 @@
                     body: JSON.stringify({
                         query: faq.question,
                         response: faq.answer,
-                        source: 'local_faq'
+                        source: 'local_faq',
+                        portal: currentPortal
                     })
                 }).catch(e => console.warn("Logging failed:", e));
 
@@ -563,7 +571,8 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             message: message,
-                            history: conversationHistory.slice(-10).map(h => ({role: h.role, text: h.text}))
+                            history: conversationHistory.slice(-10).map(h => ({role: h.role, text: h.text})),
+                            portal: currentPortal
                         })
                     });
 

@@ -84,7 +84,8 @@ try {
             COUNT(*) as total_lessons,
             COUNT(CASE WHEN lc.lesson_type = 'lecture' THEN 1 END) as lecture_count,
             COUNT(CASE WHEN lc.lesson_type = 'seminar' THEN 1 END) as seminar_count,
-            COUNT(CASE WHEN lc.lesson_type = 'laboratory' THEN 1 END) as lab_count
+            COUNT(CASE WHEN lc.lesson_type = 'laboratory' THEN 1 END) as lab_count,
+            COUNT(CASE WHEN lc.lesson_type = 'consultation' THEN 1 END) as consultation_count
         FROM live_classes lc
         WHERE {$whereLP}
         GROUP BY lc.course_id

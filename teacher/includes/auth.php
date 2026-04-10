@@ -83,6 +83,30 @@ class Auth
         return ['success' => true, 'user' => $userData];
     }
 
+    public function loginLocal(string $email, string $password): array
+    {
+        try {
+            $db = Database::getInstance();
+            $user = $db->fetch("SELECT * FROM users WHERE email = ? AND is_active = 1", [$email]);
+
+            if (!$user) {
+                return ['success' => false, 'message' => 'İstifadəçi tapılmadı.'];
+            }
+
+            if (!password_verify($password, $user['password'])) {
+                return ['success' => false, 'message' => 'Şifrə yalnışdır.'];
+            }
+
+            // Create local session (no TMIS data)
+            $this->createSession($user, null, $email, $password);
+
+            return ['success' => true, 'user' => $user];
+        } catch (\Exception $e) {
+            error_log('Local Login xətası: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Giriş zamanı sistem xətası baş verdi.'];
+        }
+    }
+
     public function loginViaSso(array $profileData): array
     {
         // Yüklənmiş JSON məlumatlarını sistemin obyekt strukturuna uyğunlaşdırırıq
@@ -456,6 +480,15 @@ function requireInstructor()
     requireLogin();
     if (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'instructor' && $_SESSION['user_role'] !== 'admin') {
         (new Auth())->logout();
+        header('Location: login.php?error=access_denied');
+        exit;
+    }
+}
+
+function requireAdmin()
+{
+    requireLogin();
+    if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
         header('Location: login.php?error=access_denied');
         exit;
     }

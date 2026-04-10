@@ -35,7 +35,7 @@
                 <label
                     style="font-size: 13px; font-weight: 600; color: #718096; margin-bottom: 12px; display: block;">Dərs
                     Növü</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); md:grid-template-columns: repeat(4, 1fr); gap: 12px;" class="lesson-type-grid">
                     <div id="card_lecture" class="lesson-type-card" onclick="selectLessonType('lecture')"
                         style="border: 2px solid #EDF2F7; background: #F7FAFC; cursor: pointer; padding: 15px 10px; border-radius: 20px; text-align: center; transition: all 0.2s;">
                         <i data-lucide="book-open"
@@ -61,6 +61,15 @@
                         <span
                             style="display: block; font-weight: 700; color: #718096; font-size: 14px; margin-bottom: 4px;">Laboratoriya</span>
                         <input type="radio" name="modal_lesson_type" value="laboratory" style="display: none;">
+                    </div>
+
+                    <div id="card_consultation" class="lesson-type-card" onclick="selectLessonType('consultation')"
+                        style="border: 2px solid #EDF2F7; background: #F7FAFC; cursor: pointer; padding: 15px 10px; border-radius: 20px; text-align: center; transition: all 0.2s;">
+                        <i data-lucide="help-circle"
+                            style="width: 24px; height: 24px; margin: 0 auto 10px; display: block; color: #A0AEC0;"></i>
+                        <span
+                            style="display: block; font-weight: 700; color: #718096; font-size: 14px; margin-bottom: 4px;">Məsləhət Saatı</span>
+                        <input type="radio" name="modal_lesson_type" value="consultation" style="display: none;">
                     </div>
                 </div>
             </div>
@@ -125,6 +134,12 @@
         border-color: #0E5995 !important;
         box-shadow: 0 0 0 3px rgba(14, 89, 149, 0.05);
     }
+
+    @media (min-width: 768px) {
+        .lesson-type-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+        }
+    }
 </style>
 
 <script>
@@ -162,7 +177,8 @@
         const cards = {
             'lecture': document.getElementById('card_lecture'),
             'seminar': document.getElementById('card_seminar'),
-            'laboratory': document.getElementById('card_laboratory')
+            'laboratory': document.getElementById('card_laboratory'),
+            'consultation': document.getElementById('card_consultation')
         };
 
         Object.keys(cards).forEach(key => {

@@ -459,6 +459,14 @@ img {
     transform: translateX(4px);
 }
 
+.sidebar-logout-item {
+    display: none;
+}
+
+.sidebar-footer {
+    display: none;
+}
+
 .nav-item.active {
     background: var(--primary);
     color: var(--text-white);
@@ -2339,6 +2347,7 @@ input:checked+.toggle-slider::before {
 
     .main-content {
         padding: 16px;
+        padding-top: calc(var(--header-height) + 24px);
     }
 
     .top-header {
@@ -2363,7 +2372,7 @@ input:checked+.toggle-slider::before {
 /* Telefon (landscape) */
 @media (max-width: 768px) {
     :root {
-        --header-height: 60px;
+        --header-height: 70px;
     }
 
     .search-container {
@@ -2372,15 +2381,28 @@ input:checked+.toggle-slider::before {
 
     .user-name {
         display: block;
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        max-width: none !important;
+        overflow: visible;
         white-space: nowrap;
         font-size: 13px;
     }
 
     .hide-on-mobile {
         display: none !important;
+    }
+
+    /* Show logout in sidebar on mobile */
+    .sidebar-footer {
+        display: block !important;
+        margin-top: auto;
+        padding: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .sidebar-logout-item {
+        display: flex !important;
+        color: var(--error) !important;
+        margin-bottom: 0;
     }
 
     .user-info {

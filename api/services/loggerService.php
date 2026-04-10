@@ -25,15 +25,15 @@ class LoggerService
             $userRole = 'guest';
             $sessionId = session_id();
 
-            // Check Student Session
-            if (isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['user_role'] === 'student') {
-                $userId = $_SESSION['user_id'];
-                $userRole = 'student';
-            } 
-            // Check Teacher Session
-            else if (isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['user_role'] === 'instructor') {
+            // Check Teacher Session (Prioritize instructor over student)
+            if (isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['user_role'] === 'instructor') {
                 $userId = $_SESSION['user_id'];
                 $userRole = 'instructor';
+            }
+            // Check Student Session
+            else if (isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['user_role'] === 'student') {
+                $userId = $_SESSION['user_id'];
+                $userRole = 'student';
             }
             
             $data = [

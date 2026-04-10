@@ -40,17 +40,41 @@ require_once __DIR__ . '/services/fallbackManager.php';
 require_once __DIR__ . '/services/loggerService.php';
 require_once dirname(__DIR__) . '/student/config/database.php'; // Loads .env
 
+// Get input safely (read once)
+$input = json_decode(file_get_contents('php://input'), true);
+if (!$input) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Etibarsız JSON girişi.']);
+    exit;
+}
+
+$portalHint = $input['portal'] ?? 'guest';
+
 // Handle Session Detection (Supporting multiple session types)
-$sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'];
+$sessionNames = ['DISTANT_TEACHER_SESSION', 'DISTANT_STUDENT_SESSION'];
+if ($portalHint === 'student') {
+    $sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'];
+}
+
+$sessionFound = false;
+
+// Silence warnings for session handling to prevent breaking JSON output
 foreach ($sessionNames as $sn) {
     if (isset($_COOKIE[$sn])) {
-        session_name($sn);
-        session_start();
-        break;
+        @session_name($sn);
+        if (@session_start()) {
+            // Validate if this session is actually logged in
+            if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+                $sessionFound = true;
+                break; 
+            }
+            @session_write_close();
+        }
     }
 }
-if (session_status() === PHP_SESSION_NONE) {
-    session_start(); // Fallback to default for guests
+
+if (!$sessionFound && session_status() === PHP_SESSION_NONE) {
+    @session_start(); // Fallback for guests
 }
 
 // Get API Keys from environment
@@ -64,14 +88,13 @@ Platformada canlı dərslər, video arxiv və elektron resurslar mövcuddur. Tə
 Həmişə Azərbaycan dilində, professional və dostcasına cavab ver. Markdown istifadə etmə, yalnız HTML (<b>, <br>) istifadə et.
 PROMPT;
 
-// Get input
-$input = json_decode(file_get_contents('php://input'), true);
+// Use pre-read input
 $userMessage = trim($input['message'] ?? '');
 $history = $input['history'] ?? [];
 
 if (empty($userMessage)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Mesaj boşdur.']);
+    echo json_encode(['success' => false, 'error' => 'Mesaj boşdur.']);
     exit;
 }
 

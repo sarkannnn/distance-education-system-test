@@ -1711,44 +1711,7 @@ try {
 
     <!-- Chatbot Widget Integrated -->
     <?php include_once __DIR__ . '/api/chatbot_widget.php'; ?>
-                    isDown = false;
-                });
 
-                el.addEventListener('mouseup', () => {
-                    isDown = false;
-                    el.style.cursor = 'grab';
-                });
-
-                el.addEventListener('mousemove', (e) => {
-                    if (!isDown) return;
-                    e.preventDefault();
-                    const x = e.pageX - el.offsetLeft;
-                    const walk = (x - startX) * 2;
-                    el.scrollLeft = scrollLeft - walk;
-                });
-
-                // Mouse wheel support
-                el.addEventListener('wheel', (e) => {
-                    if (e.deltaY !== 0) {
-                        e.preventDefault();
-                        el.scrollLeft += e.deltaY * 1.5;
-                        updateArrows();
-                    }
-                }, {
-                    passive: false
-                });
-            });
-
-            // Init
-            loadLocalFaq();
-            if (conversationHistory.length > 0) {
-                conversationHistory.forEach(msg => {
-                    addMessage(msg.text, msg.role === 'user' ? 'user' : 'bot', false, msg.source);
-                });
-            }
-        })();
-    </script>
->>>>>>> f48289a41d704b942cd2a4ca8de9c26bd260c273
 </body>
 
 </html>

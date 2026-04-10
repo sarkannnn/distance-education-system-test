@@ -494,7 +494,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     fputcsv($output, ['İxtisas:', $lesson['specialization_name']]);
     fputcsv($output, ['Kurs:', $lesson['course_level']]);
     fputcsv($output, ['Dərs mövzusu:', $lesson['title']]);
-    $typeAz = ($lesson['lesson_type'] == 'seminar') ? 'Seminar' : 'Mühazirə';
+    $typeAz = match($lesson['lesson_type'] ?? 'lecture') { 'lecture' => 'Mühazirə', 'seminar' => 'Seminar', 'laboratory' => 'Laboratoriya', 'consultation' => 'Məsləhət saatı', 'practice' => 'Praktika', default => 'Mühazirə' };
     fputcsv($output, ['Dərs Növü:', $typeAz]);
     fputcsv($output, ['Tarix:', date('d.m.Y', strtotime($lesson['created_at']))]);
     fputcsv($output, ['Başlama Vaxtı:', date('H:i', strtotime($lesson['started_at'] ?? $lesson['start_time']))]);
@@ -644,7 +644,7 @@ require_once 'includes/header.php';
                         <div style="display: table-cell; padding: 6px 12px; border: 1pt solid #000;"><strong>Kurs:</strong><br><?php echo e($lesson['course_level'] ?? 'Təyin edilməyib'); ?></div>
                     </div>
                     <div style="display: table-row;">
-                        <div style="display: table-cell; padding: 6px 12px; border: 1pt solid #000;"><strong>Dərs Növü:</strong><br><?php echo (($lesson['lesson_type'] ?? '') == 'seminar') ? 'Seminar' : 'Mühazirə'; ?></div>
+                        <div style="display: table-cell; padding: 6px 12px; border: 1pt solid #000;"><strong>Dərs Növü:</strong><br><?php echo match($lesson['lesson_type'] ?? 'lecture') { 'lecture' => 'Mühazirə', 'seminar' => 'Seminar', 'laboratory' => 'Laboratoriya', 'consultation' => 'Məsləhət saatı', 'practice' => 'Praktika', default => 'Mühazirə' }; ?></div>
                         <div style="display: table-cell; padding: 6px 12px; border: 1pt solid #000;"><strong>Tarix:</strong><br><?php echo date('d.m.Y', strtotime($lesson['created_at'])); ?></div>
                     </div>
                     <div style="display: table-row;">

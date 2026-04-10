@@ -100,6 +100,15 @@
                             style="display: block; font-weight: 700; color: #718096; font-size: 14px;">Laboratoriya</span>
                         <input type="radio" name="stream_lesson_type" value="laboratory" style="display: none;">
                     </div>
+                    <div id="stream_card_consultation" class="stream-type-card"
+                        onclick="selectStreamLessonType('consultation')"
+                        style="border: 2px solid #EDF2F7; background: #F7FAFC; cursor: pointer; padding: 15px 10px; border-radius: 20px; text-align: center; transition: all 0.2s;">
+                        <i data-lucide="message-circle"
+                            style="width: 24px; height: 24px; margin: 0 auto 10px; display: block; color: #A0AEC0;"></i>
+                        <span
+                            style="display: block; font-weight: 700; color: #718096; font-size: 14px;">Məsləhət saatı</span>
+                        <input type="radio" name="stream_lesson_type" value="consultation" style="display: none;">
+                    </div>
                 </div>
             </div>
             <!-- Step 4: Topic -->
@@ -284,9 +293,10 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     function selectStreamLessonType(type) {
-        const types = ['lecture', 'seminar', 'laboratory'];
+        const types = ['lecture', 'seminar', 'laboratory', 'consultation'];
         types.forEach(t => {
             const card = document.getElementById('stream_card_' + t);
+            if (!card) return;
             const radio = card.querySelector('input[type="radio"]');
             if (t === type) {
                 card.classList.add('active');

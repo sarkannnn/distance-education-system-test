@@ -57,13 +57,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (empty($username) || empty($password)) {
         $error = 'İstifadəçi adı və şifrəni daxil edin';
     } else {
-        $result = $auth->loginViaTmis($username, $password);
+        // Try local login first (for Super Admins)
+        $result = $auth->loginLocal($username, $password);
 
         if ($result['success']) {
             header('Location: ./');
             exit;
         } else {
-            $error = $result['message'];
+            // Fallback to TMIS if local not found or fails
+            $result = $auth->loginViaTmis($username, $password);
+
+            if ($result['success']) {
+                header('Location: ./');
+                exit;
+            } else {
+                $error = $result['message'];
+            }
         }
     }
 }
