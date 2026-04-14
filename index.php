@@ -746,6 +746,21 @@ try {
                                         SİSTEMƏ GİRİŞ</p>
                                 </div>
                             </a>
+
+                            <div class="h-px bg-white/5 my-1"></div>
+
+                            <a href="webinar/index.php"
+                                class="flex items-center gap-4 p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition-all group">
+                                <div
+                                    class="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform group-hover:scale-110">
+                                    <i data-lucide="video" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">Vebinar Portalı</p>
+                                    <p class="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">
+                                        MƏRKƏZİ SİSTEM</p>
+                                </div>
+                            </a>
                         </div>
                         <div class="bg-black/20 p-4 text-center border-t border-white/5">
                             <p class="text-[9px] text-white/30 font-bold uppercase tracking-[0.3em]">NDU DİSTANT TƏHSİL
@@ -787,6 +802,10 @@ try {
             <a href="teacher/login.php"
                 class="flex items-center justify-center gap-3 py-5 bg-white/10 border border-white/20 text-white rounded-2xl font-bold">
                 <i data-lucide="user-circle" class="w-5 h-5"></i> Müəllim Girişi
+            </a>
+            <a href="webinar/index.php"
+                class="flex items-center justify-center gap-3 py-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl font-bold">
+                <i data-lucide="video" class="w-5 h-5"></i> Vebinar Portalı
             </a>
         </div>
     </div>
