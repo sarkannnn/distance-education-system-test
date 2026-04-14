@@ -155,20 +155,12 @@ require_once 'includes/header.php';
                                     <?php endif; ?>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-x-10 gap-y-3">
-                                    <div class="flex items-center gap-3 text-sm text-white/40 font-bold uppercase tracking-widest">
+                                    <div class="flex items-center gap-3 text-sm text-white/40 font-bold uppercase tracking-widest pl-10 border-l border-white/5">
                                         <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
                                             <i data-lucide="user" class="w-4 h-4 text-emerald-500"></i>
                                         </div>
                                         <?php echo e($w['teacher_name']); ?>
                                     </div>
-                                    <div class="flex items-center gap-3 text-sm text-white/40 font-bold uppercase tracking-widest pl-10 border-l border-white/5">
-                                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                                            <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>
-                                        </div>
-                                        <?php echo date('d M, Y • H:i', strtotime($w['scheduled_at'])); ?>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         
@@ -228,7 +220,7 @@ require_once 'includes/header.php';
     <?php endif; ?>
 </div>
 
-<!-- Create Modal (Müəllim üçün) -->
+<!-- Create Modal (Mühazirəçi üçün) -->
 <?php if ($user['role'] === 'teacher'): ?>
 <div id="createModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300">
     <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[3.5rem] border border-white/10 p-12 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
@@ -240,7 +232,7 @@ require_once 'includes/header.php';
 
         <div class="mb-12">
             <h3 class="text-3xl font-black italic tracking-tighter mb-2">Yeni Vebinar <span class="text-emerald-500">Planla</span></h3>
-            <p class="text-white/40 text-sm font-medium">Tələbələr üçün yeni bir tədris seansını burada yarada bilərsiniz.</p>
+            <p class="text-white/40 text-sm font-medium">İştirakçılar üçün yeni bir tədris seansını burada yarada bilərsiniz.</p>
         </div>
         
         <form action="api/create_webinar.php" method="POST" class="space-y-8">
@@ -269,7 +261,7 @@ require_once 'includes/header.php';
                 <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Dərs Haqda Qısa Qeyd</label>
                 <textarea name="description" rows="3"
                           class="w-full bg-white/5 border border-white/10 rounded-3xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium placeholder:text-white/10"
-                          placeholder="Tələbələrin öncədən bilməsi vacib olan məlumatlar..."></textarea>
+                          placeholder="İştirakçıların öncədən bilməsi vacib olan məlumatlar..."></textarea>
             </div>
 
             <button type="submit" 
@@ -288,7 +280,7 @@ require_once 'includes/header.php';
 </div>
 <?php endif; ?>
 
-<!-- Edit Modal (Müəllim üçün) -->
+<!-- Edit Modal (Mühazirəçi üçün) -->
 <?php if ($user['role'] === 'teacher'): ?>
 <div id="editModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300">
     <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[3.5rem] border border-white/10 p-12 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
@@ -331,7 +323,7 @@ require_once 'includes/header.php';
                 <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Dərs Haqda Qısa Qeyd</label>
                 <textarea id="edit_description" name="description" rows="3"
                           class="w-full bg-white/5 border border-white/10 rounded-3xl px-8 py-5 text-sm focus:outline-none focus:border-blue-400/50 transition-all font-medium placeholder:text-white/10"
-                          placeholder="Tələbələrin öncədən bilməsi vacib olan məlumatlar..."></textarea>
+                          placeholder="İştirakçıların öncədən bilməsi vacib olan məlumatlar..."></textarea>
             </div>
 
             <button type="submit" 

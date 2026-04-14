@@ -97,7 +97,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
             </div>
             <div class="min-w-0 truncate">
                 <h1 class="text-xs sm:text-sm font-bold leading-tight truncate"><?php echo e($webinar['title']); ?></h1>
-                <p class="text-[9px] sm:text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5 truncate">Müəllim:
+                <p class="text-[9px] sm:text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5 truncate">Mühazirəçi:
                     <?php echo e($webinar['teacher_name']); ?>
                 </p>
             </div>
@@ -133,7 +133,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
         <!-- Main Stage -->
         <div class="video-section">
             <div class="main-video-container">
-                <!-- Hidden Source Elements for Student Studio -->
+                <!-- Hidden Source Elements for Participant Studio -->
                 <canvas id="studentOutputCanvas" class="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none"></canvas>
                 <video id="camSource" autoplay playsinline muted class="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none"></video>
                 <video id="screenSource" autoplay playsinline muted class="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none"></video>
@@ -340,7 +340,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                 <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i data-lucide="megaphone" class="w-10 h-10 text-emerald-400"></i>
                 </div>
-                <h3 class="text-xl font-black text-white mb-2 uppercase tracking-widest">Müəllim Elanı</h3>
+                <h3 class="text-xl font-black text-white mb-2 uppercase tracking-widest">Mühazirəçi Elanı</h3>
                 <p id="announcementText" class="text-white/70 leading-relaxed mb-8">Elan mətni bura gələcək...</p>
                 <button onclick="document.getElementById('announcementModal').classList.add('hidden')"
                     class="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-emerald-500/20">
@@ -435,7 +435,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
         function init() {
             initWebinarTimer();
             if (!teacherPeerId) {
-                alert("Müəllim hələ yayıma başlamayıb.");
+                alert("Mühazirəçi hələ yayıma başlamayıb.");
                 window.location.href = 'dashboard.php';
                 return;
             }
@@ -456,7 +456,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                 LOG("❌ Qoşulma Xətası: " + err.type, "#ef4444");
                 console.error("PeerJS Error:", err);
                 if (err.type === 'peer-unavailable') {
-                    LOG("⚠️ Müəllim tapılmadı. Gözləyin, yenidən yoxlanılır...");
+                    LOG("⚠️ Mühazirəçi tapılmadı. Gözləyin, yenidən yoxlanılır...");
                     setTimeout(checkTeacherPeer, 3000);
                 }
             });
@@ -469,10 +469,16 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
             });
 
             dataConn.on('open', () => {
-                appendChat('Sistem', 'Müəllimə qoşuldu!', '#94a3b8');
+                appendChat('Sistem', 'Mühazirəçiyə qoşuldu!', '#94a3b8');
             });
 
             dataConn.on('data', (data) => {
+                if (data.type === 'stage_request') {
+                    LOG("🔔 Səhnə paylaşımı tələbi göndərildi");
+                }
+                if (data.type === 'stage_ended') {
+                    LOG("🔌 İştirakçı səhnədən çıxdı");
+                }
                 if (data.type === 'chat') {
                     appendChat(data.sender, data.message);
                 } else if (data.type === 'stage_ended') {
@@ -492,16 +498,16 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                         document.getElementById('announcementText').innerText = data.message;
                         modal.classList.remove('hidden');
                     }
-                    appendChat('Müəllim Elanı', data.message, '#f59e0b');
+                    appendChat('Mühazirəçi Elanı', data.message, '#f59e0b');
                 } else if (data.type === 'end_webinar') {
-                    alert("Vebinar müəllim tərəfindən bitirildi.");
+                    alert("Vebinar mühazirəçi tərəfindən bitirildi.");
                     window.location.href = 'dashboard.php';
                 }
             });
 
             dataConn.on('close', () => {
                 LOG("Bağlantı kəsildi.", "red");
-                alert("Vebinar başa çatdı və ya müəllim ayrıldı.");
+                alert("Vebinar başa çatdı və ya mühazirəçi ayrıldı.");
                 window.location.href = 'dashboard.php';
             });
 
@@ -524,7 +530,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                     return;
                 }
 
-                LOG("📡 Müəllim stream-i alındı! Tracks: " + stream.getTracks().length);
+                LOG("📡 Mühazirəçi stream-i alındı! Tracks: " + stream.getTracks().length);
                 remoteStream = stream;
                 updateVideoElements();
 
@@ -697,7 +703,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                     sideVidMobile.classList.remove('scale-x-[-1]');
                 }
                 
-                sideLabel.innerText = "MÜƏLLİM";
+                sideLabel.innerText = "MÜHAZİRƏÇİ";
             } else {
                 mainVid.srcObject = remoteStream;
                 mainVid.classList.remove('scale-x-[-1]');
@@ -718,7 +724,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
             if (!isOnStage) return;
             isViewSwapped = !isViewSwapped;
             updateVideoElements();
-            LOG(`🔄 Ekran yerləri dəyişdirildi: ${isViewSwapped ? 'Lokal Əsasda' : 'Müəllim Əsasda'}`);
+            LOG(`🔄 Ekran yerləri dəyişdirildi: ${isViewSwapped ? 'Lokal Əsasda' : 'Mühazirəçi Əsasda'}`);
         }
 
         // === STUDENT STUDIO ENGINE (Symmetric with Teacher) ===
@@ -813,7 +819,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                 btn.classList.add('active-green');
                 initWBCanvas();
                 setTimeout(() => { if(window.wbResize) window.wbResize(); }, 50);
-                LOG("🎨 Tələbə Lövhəsi aktivdir", "#10b981");
+                LOG("🎨 İştirakçı Lövhəsi aktivdir", "#10b981");
             } else {
                 overlay.classList.add('hidden');
                 btn.classList.remove('active-green');
@@ -1155,7 +1161,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                 const resp = await fetch(`api/get_webinar_peer.php?id=${wID}`);
                 const data = await resp.json();
                 if (data.success && data.peer_id && data.peer_id !== teacherPeerId) {
-                    LOG("🔄 Yeni müəllim ID-si tapıldı. Səhifə yenilənir...");
+                    LOG("🔄 Yeni mühazirəçi ID-si tapıldı. Səhifə yenilənir...");
                     setTimeout(() => location.reload(), 1000);
                 }
             } catch (e) { }

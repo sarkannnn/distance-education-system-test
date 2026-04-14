@@ -55,7 +55,7 @@ require_once 'includes/header.php';
                             <i data-lucide="user" class="w-4 h-4 text-emerald-500"></i>
                         </div>
                         <div>
-                            <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-0.5">Müəllim</p>
+                            <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-0.5">Mühazirəçi</p>
                             <p class="text-xs font-bold text-white/80"><?php echo e($w['teacher_name']); ?></p>
                         </div>
                     </div>

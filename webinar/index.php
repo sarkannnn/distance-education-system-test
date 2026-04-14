@@ -15,6 +15,18 @@ require_once 'includes/header.php';
 ?>
 
 <div class="max-w-7xl mx-auto py-12 px-4">
+    <?php if (isset($_SESSION['system_success'])): ?>
+        <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-6 rounded-3xl mb-12 flex items-start justify-center gap-4 animate-in slide-in-from-top-10 duration-700 max-w-2xl mx-auto text-center relative shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]">
+            <i data-lucide="check-circle" class="w-6 h-6 shrink-0 mt-0.5 relative z-10 text-emerald-500"></i>
+            <div class="relative z-10">
+                <h4 class="font-black uppercase tracking-widest text-sm mb-1 text-emerald-500">UĞURLU ƏMƏLİYYAT</h4>
+                <p class="text-sm font-medium text-emerald-400/80"><?php echo e($_SESSION['system_success']); ?></p>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/5 to-transparent rounded-3xl"></div>
+        </div>
+        <?php unset($_SESSION['system_success']); ?>
+    <?php endif; ?>
+
     <!-- Premium Header -->
     <div class="text-center mb-16 space-y-4">
         <h2 class="text-5xl font-black italic tracking-tighter text-white">
@@ -49,11 +61,11 @@ require_once 'includes/header.php';
                 <div class="grid grid-cols-2 gap-4">
                     <a href="login.php?faculty=<?php echo $f['slug']; ?>&role=teacher" 
                        class="flex items-center justify-center py-4 bg-white/5 hover:bg-emerald-500 text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 group/btn border border-white/5">
-                        Müəllim
+                        Mühazirəçi
                     </a>
                     <a href="login.php?faculty=<?php echo $f['slug']; ?>&role=student" 
                        class="flex items-center justify-center py-4 bg-emerald-500/10 hover:bg-white text-emerald-400 hover:text-black rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-emerald-500/20 hover:border-white">
-                        Tələbə
+                        İştirakçı
                     </a>
                 </div>
             </div>

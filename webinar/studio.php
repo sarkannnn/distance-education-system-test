@@ -65,7 +65,7 @@ $pageTitle = "Studio: " . $webinar['title'];
         <div class="flex lg:hidden items-center justify-center">
             <div class="flex bg-white/5 border border-white/10 rounded-full p-1 gap-1">
                 <button onclick="toggleMobilePanel('left')" class="px-3 py-1.5 rounded-full text-[10px] font-bold text-white/60 hover:text-white transition-all flex items-center gap-1.5">
-                    <i data-lucide="users" class="w-3 h-3"></i> Tələbələr
+                    <i data-lucide="users" class="w-3 h-3"></i> İştirakçılar
                 </button>
                 <button onclick="toggleMobilePanel('right')" class="px-3 py-1.5 rounded-full bg-white/10 text-[10px] font-bold text-white transition-all flex items-center gap-1.5">
                     <i data-lucide="message-square" class="w-3 h-3"></i> Çat
@@ -277,7 +277,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 <div class="mb-3 flex items-center justify-between">
                     <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-2">
                         <span id="sideStageDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="sideStageLabel">TƏLƏBƏ CANLIDA</span>
+                        <span id="sideStageLabel">İŞTİRAKÇI CANLIDA</span>
                     </h3>
                     <div class="flex items-center gap-2">
                         <button id="btnSideSwap" onclick="toggleStudentMain()" class="hidden w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all" title="Yayımı Dəyişdir">
@@ -310,7 +310,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Çat
                 </button>
                 <button onclick="switchSidebarTab('students')" id="tabBtnStudents" class="flex-1 p-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b-2 border-transparent hover:text-white/60 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="users" class="w-3.5 h-3.5"></i> Tələbələr
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i> İştirakçılar
                 </button>
             </div>
 
@@ -343,11 +343,11 @@ $pageTitle = "Studio: " . $webinar['title'];
             <!-- Students Tab Content -->
             <div id="tabContentStudents" class="hidden flex-1 flex flex-col min-h-0">
                 <div class="p-6 border-b border-white/5 flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online Tələbələr</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online İştirakçılar</span>
                     <span id="studentCountBadge" class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full">0</span>
                 </div>
                 <div id="studentListContainer" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                    <div class="text-center py-10 opacity-20 text-[10px] font-bold uppercase tracking-widest italic">Tələbə yoxdur</div>
+                    <div class="text-center py-10 opacity-20 text-[10px] font-bold uppercase tracking-widest italic">İştirakçı yoxdur</div>
                 </div>
             </div>
         </aside>
@@ -361,7 +361,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             <div class="absolute top-8 right-8 flex items-center gap-4">
                 <div class="flex items-center gap-3 px-6 py-3 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl">
                     <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
-                    <span class="text-[11px] font-black text-white uppercase tracking-[0.2em]">Tələbə ilə Fərdi Seans</span>
+                    <span class="text-[11px] font-black text-white uppercase tracking-[0.2em]">İştirakçı ilə Fərdi Seans</span>
                 </div>
                 <button onclick="toggleStudentExpand()" class="w-12 h-12 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-xl text-white flex items-center justify-center transition-all group shadow-2xl border border-white/10">
                     <i data-lucide="minimize-2" class="w-5 h-5 group-hover:scale-110 transition-transform text-white/80 group-hover:text-white"></i>
@@ -566,7 +566,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     allDataConns.push(conn);
                     updateViewerCount();
                     renderStudentList();
-                    LOG(`👤 Tələbə qoşuldu: ${conn.metadata.name || 'Naməlum'}`, "#60a5fa");
+                    LOG(`👤 İştirakçı qoşuldu: ${conn.metadata.name || 'Naməlum'}`, "#60a5fa");
                     
                     conn.on('data', (data) => {
                         if (data.type === 'chat') {
@@ -579,7 +579,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                         allDataConns = allDataConns.filter(c => c.peer !== conn.peer);
                         updateViewerCount();
                         renderStudentList();
-                        LOG("👤 Tələbə ayrıldı", "#94a3b8");
+                        LOG("👤 İştirakçı ayrıldı", "#94a3b8");
                     });
                 });
 
@@ -600,7 +600,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     call.on('stream', (remoteStream) => {
                         // If the stream has video, it's a student joining the stage
                         if (remoteStream.getVideoTracks().length > 0) {
-                            LOG("👤 Tələbə səhnəyə qoşuldu!", "#10b981");
+                            LOG("👤 İştirakçı səhnəyə qoşuldu!", "#10b981");
                             activeStudentCall = call;
                             
                             const vSource = document.getElementById('studentSource');
@@ -847,7 +847,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             const msg = input.value.trim();
             if (!msg) return;
 
-            const data = { type: 'chat', sender: 'Müəllim', message: msg };
+            const data = { type: 'chat', sender: 'Mühazirəçi', message: msg };
             broadcast(data);
             appendChat('Mən', msg, '#10b981');
             input.value = '';
@@ -876,12 +876,12 @@ $pageTitle = "Studio: " . $webinar['title'];
             countBadge.innerText = allDataConns.length;
 
             if (allDataConns.length === 0) {
-                container.innerHTML = '<div class="text-center py-10 opacity-20 text-[10px] font-bold uppercase tracking-widest">Tələbə yoxdur</div>';
+                container.innerHTML = '<div class="text-center py-10 opacity-20 text-[10px] font-bold uppercase tracking-widest">İştirakçı yoxdur</div>';
                 return;
             }
 
             allDataConns.forEach(conn => {
-                const sName = (conn.metadata && conn.metadata.name) ? conn.metadata.name : 'Naməlum Tələbə';
+                const sName = (conn.metadata && conn.metadata.name) ? conn.metadata.name : 'Naməlum İştirakçı';
                 const initial = sName.charAt(0).toUpperCase();
                 const div = document.createElement('div');
                 div.className = 'group flex items-center justify-between p-3 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all';
@@ -890,7 +890,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                         <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-xs">${initial}</div>
                         <div>
                             <div class="text-[11px] font-bold text-white/80">${sName}</div>
-                            <div class="text-[9px] font-bold text-white/20 uppercase tracking-widest">Tələbə • Online</div>
+                            <div class="text-[9px] font-bold text-white/20 uppercase tracking-widest">İştirakçı • Online</div>
                         </div>
                     </div>
                 `;
@@ -900,7 +900,7 @@ $pageTitle = "Studio: " . $webinar['title'];
         }
 
         function sendAnnouncement() {
-            const msg = prompt("Bütün tələbələrə elan göndərin:");
+            const msg = prompt("Bütün iştirakçılara elan göndərin:");
             if (msg) {
                 broadcast({ type: 'announcement', message: msg });
                 LOG("📣 Elan göndərildi: " + msg, "#10b981");
@@ -1385,7 +1385,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 // LOCAL SWAP: Showing STUDENT in MAIN stage, TEACHER in SIDEBAR
                 // (But broadcast canvas still shows Teacher in background)
                 
-                // Sidebar: Show Teacher
+                // Sidebar: Show Lecturer
                 video.srcObject = camStream;
                 video.classList.add('scale-x-[-1]');
                 label.innerText = "MƏNİM KAMERAM";
@@ -1395,25 +1395,25 @@ $pageTitle = "Studio: " . $webinar['title'];
                 btnSwap.classList.add('bg-emerald-500/80');
                 overlay.classList.add('hidden');
                 
-                // Main Stage: Show Student (Locally)
+                // Main Stage: Show Participant (Locally)
                 mainCanvas.classList.add('hidden'); // Hide broadcast preview
                 localMainVid.classList.remove('hidden'); // Show student direct feed
                 localMainVid.srcObject = studentVid.srcObject;
                 localMainVid.classList.remove('scale-x-[-1]');
             } else if (activeStudentCall) {
-                // NORMAL: Showing TEACHER in MAIN stage, STUDENT in SIDEBAR
+                // NORMAL: Showing LECTURER in MAIN stage, PARTICIPANT in SIDEBAR
                 
-                // Sidebar: Show Student
+                // Sidebar: Show Participant
                 video.srcObject = studentVid.srcObject;
                 video.classList.remove('scale-x-[-1]');
-                label.innerText = "TƏLƏBƏ CANLIDA";
+                label.innerText = "İŞTİRAKÇI CANLIDA";
                 container.classList.add('bg-emerald-500/5');
                 label.classList.add('text-emerald-400');
                 dot.classList.add('bg-emerald-500', 'animate-pulse');
                 btnSwap.classList.remove('bg-emerald-500/80');
                 overlay.classList.remove('hidden');
                 
-                // Main Stage: Show Teacher (Broadcast Preview)
+                // Main Stage: Show Lecturer (Broadcast Preview)
                 mainCanvas.classList.remove('hidden');
                 mainCanvas.classList.add('mirrored-canvas');
                 localMainVid.classList.add('hidden');
@@ -1438,7 +1438,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             const overlay = document.getElementById('largeStudentStageOverlay');
             if (isStudentExpanded) {
                 overlay.classList.remove('hidden');
-                LOG("🔍 Tələbə görüntüsü böyüdüldü");
+                LOG("🔍 İştirakçı görüntüsü böyüdüldü");
             } else {
                 overlay.classList.add('hidden');
             }
@@ -1450,9 +1450,9 @@ $pageTitle = "Studio: " . $webinar['title'];
             updateSideStage();
             
             if (isStudentMain) {
-                LOG("🌟 Tələbə əsas yayım səhnəsinə çıxarıldı!", "#10b981");
+                LOG("🌟 İştirakçı əsas yayım səhnəsinə çıxarıldı!", "#10b981");
             } else {
-                LOG("📺 Müəllim kamerasına qayıdıldı");
+                LOG("📺 Mühazirəçi kamerasına qayıdıldı");
             }
         }
 
@@ -1472,7 +1472,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             document.getElementById('studentRemoteVidLarge').srcObject = null;
 
             if (notify) {
-                LOG("🔌 Tələbə səhnədən çıxarıldı", "#ef4444");
+                LOG("🔌 İştirakçı səhnədən çıxarıldı", "#ef4444");
                 broadcast({ type: 'stage_ended' });
             }
         }

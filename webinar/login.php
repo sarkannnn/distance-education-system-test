@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = ($role === 'teacher' ? 'Müəllim' : 'Tələbə') . " Girişi - " . $faculty['name'];
+$pageTitle = ($role === 'teacher' ? 'Mühazirəçi' : 'İştirakçı') . " Girişi - " . $faculty['name'];
 require_once 'includes/header.php';
 ?>
 
@@ -59,7 +59,7 @@ require_once 'includes/header.php';
             <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl <?php echo $role === 'teacher' ? 'bg-slate-700' : 'bg-blue-600'; ?> mb-6 shadow-2xl">
                 <i data-lucide="<?php echo $role === 'teacher' ? 'user-circle' : 'graduation-cap'; ?>" class="w-10 h-10 text-white"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-1 uppercase tracking-tight"><?php echo $role === 'teacher' ? 'Müəllim' : 'Tələbə'; ?> Girişi</h2>
+            <h2 class="text-2xl font-bold mb-1 uppercase tracking-tight"><?php echo $role === 'teacher' ? 'Mühazirəçi' : 'İştirakçı'; ?> Girişi</h2>
             <p class="text-white/40 text-xs font-bold uppercase tracking-widest"><?php echo e($faculty['name']); ?></p>
         </div>
 
@@ -79,9 +79,14 @@ require_once 'includes/header.php';
 
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-4">Şifrə</label>
-                <input type="password" name="password" required 
-                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium"
-                       placeholder="••••••••">
+                <div class="relative">
+                    <input type="password" name="password" id="login_password" required 
+                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 pr-12 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium"
+                           placeholder="••••••••">
+                    <button type="button" onclick="toggleLoginPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer p-1">
+                        <i data-lucide="eye" id="eye_login_password" class="w-5 h-5"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" 
@@ -98,5 +103,22 @@ require_once 'includes/header.php';
         </div>
     </div>
 </div>
+
+<script>
+function toggleLoginPassword() {
+    const input = document.getElementById('login_password');
+    const icon = document.getElementById('eye_login_password');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+    } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+    }
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+</script>
 
 <?php require_once 'includes/footer.php'; ?>
