@@ -56,7 +56,7 @@ require_once 'includes/header.php';
                     </div>
                 </div>
 
-                <h3 class="text-xl font-bold mb-8 leading-tight h-14 overflow-hidden"><?php echo e($f['name']); ?></h3>
+                <h3 class="text-xl font-bold mb-8 leading-tight min-h-[80px]"><?php echo e($f['name']); ?></h3>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <a href="login.php?faculty=<?php echo $f['slug']; ?>&role=teacher" 
