@@ -6,27 +6,27 @@
 ?>
 <!-- Stream Lesson Modal -->
 <div id="streamLiveModal" class="modal"
-    style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; backdrop-filter: blur(4px);">
+    style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; backdrop-filter: blur(4px); padding: 20px; box-sizing: border-box;">
     <div class="modal-content"
-        style="background: white; width: 90%; max-width: 600px; border-radius: 28px; border: none; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.3); animation: modalSpring 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);">
+        style="background: white; width: 100%; max-width: 600px; max-height: 95vh; border-radius: 28px; border: none; overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.3); animation: modalSpring 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; flex-direction: column;">
         <div class="modal-header"
-            style="padding: 24px 30px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
+            style="padding: 20px 25px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-bottom: none; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <i data-lucide="radio" style="width: 22px; height: 22px; color: white;"></i>
                 </div>
                 <div>
-                    <h2 style="font-size: 20px; font-weight: 700; color: white; margin: 0;">Axın Dərsi Yarat</h2>
-                    <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin: 0;">Çoxlu ixtisas — Bir dərs</p>
+                    <h2 style="font-size: 18px; font-weight: 700; color: white; margin: 0;">Axın Dərsi Yarat</h2>
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.7); margin: 0;">Çoxlu ixtisas — Bir dərs</p>
                 </div>
             </div>
             <button class="modal-close" onclick="closeStreamModal()"
-                style="background: rgba(255,255,255,0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white;">
-                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
             </button>
         </div>
 
-        <div class="modal-body" style="padding: 30px; background: white;">
+        <div class="modal-body" style="padding: 25px; background: white; overflow-y: auto; flex: 1; scrollbar-width: thin;">
             <input type="hidden" id="stream_course_level">
 
             <!-- Step 1: Fənn seçimi -->
@@ -70,7 +70,7 @@
                 <label style="font-size: 13px; font-weight: 600; color: #718096; margin-bottom: 12px; display: block;">
                     Dərs Növü
                 </label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
                     <div id="stream_card_lecture" class="lesson-type-card stream-type-card" onclick="selectStreamLessonType('lecture')"
                         style="border: 2px solid #EDF2F7; background: #F7FAFC; cursor: pointer; padding: 15px 10px; border-radius: 20px; text-align: center; transition: all 0.2s;">
                         <i data-lucide="book-open" style="width: 24px; height: 24px; margin: 0 auto 10px; display: block; color: #A0AEC0;"></i>
@@ -111,13 +111,13 @@
         </div>
 
         <div class="modal-footer"
-            style="padding: 24px 30px; background: white; border-top: 1px solid #f1f5f9; display: flex; gap: 16px;">
+            style="padding: 20px 25px; background: white; border-top: 1px solid #f1f5f9; display: flex; gap: 12px; flex-shrink: 0;">
             <button type="button" onclick="closeStreamModal()"
-                style="flex: 1; background: #F7FAFC; border: none; color: #4A5568; font-weight: 700; border-radius: 14px; padding: 14px; cursor: pointer; transition: background 0.2s;">
+                style="flex: 1; background: #F7FAFC; border: none; color: #4A5568; font-weight: 700; border-radius: 14px; padding: 12px; cursor: pointer; transition: background 0.2s; font-size: 14px;">
                 Ləğv et
             </button>
             <button type="button" id="streamStartBtn" onclick="startStreamClass()"
-                style="flex: 2; background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; color: white; font-weight: 700; border-radius: 14px; padding: 14px; cursor: pointer; box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                style="flex: 2; background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; color: white; font-weight: 700; border-radius: 14px; padding: 12px; cursor: pointer; box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;">
                 <i data-lucide="radio" style="width: 18px; height: 18px;"></i>
                 Axın Dərsini Başlat
             </button>

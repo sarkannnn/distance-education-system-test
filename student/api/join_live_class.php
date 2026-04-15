@@ -49,15 +49,14 @@ if (isset($_GET['id'])) {
                     $studentColumn = null;
                     $studentValue = null;
 
-                    if (in_array('student_id', $columnNames)) {
-                        $student = $db->fetch("SELECT id FROM students WHERE user_id = ?", [$user['id']]);
-                        if ($student) {
-                            $studentColumn = 'student_id';
-                            $studentValue = $student['id'];
-                        }
-                    } elseif (in_array('user_id', $columnNames)) {
+                    // Use user_id from the users table (enrollments always uses user_id, not student_id)
+                    if (in_array('user_id', $columnNames)) {
                         $studentColumn = 'user_id';
                         $studentValue = $user['id'];
+                    } elseif (in_array('student_id', $columnNames)) {
+                        // Fallback if somehow student_id is used (use TMIS ID from users.student_id)
+                        $studentColumn = 'student_id';
+                        $studentValue = $user['student_id'] ?? null;
                     }
 
                     if ($studentColumn && $studentValue) {

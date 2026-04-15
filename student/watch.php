@@ -36,14 +36,15 @@ $baseUrl = rtrim(getenv('DISTANT_URL') ?: ($protocol . "://" . $host), '/');
 
 try {
     if ($type === 'live') {
-        // Canlı dərs yazısı — redundant metadata istifadə et
+        // Canlı dərs yazısı
         $lesson = $db->fetch(
             "SELECT lc.* FROM live_classes lc WHERE lc.id = ?",
             [$id]
         );
 
         if ($lesson && $lesson['recording_path']) {
-            $videoUrl = $baseUrl . '/uploads/videos/' . $lesson['recording_path'];
+            // Use relative path for better reliability across different environments
+            $videoUrl = '../uploads/videos/' . $lesson['recording_path'];
             $title = $lesson['title'] ?: ($lesson['subject_name'] ?? 'Canlı Dərs');
             $course = $lesson['subject_name'] ?? 'Fənn';
             $instructor = trim($lesson['instructor_name'] ?? 'Müəllim');
@@ -53,43 +54,32 @@ try {
 
             // Increment views
             $db->query("UPDATE live_classes SET views = IFNULL(views, 0) + 1 WHERE id = ?", [$id]);
-            try {
-                tmis_post('/student/archive/' . $id . '/view', ['archive_id' => intval($id), 'viewed_at' => date('Y-m-d H:i:s')]);
-            } catch (Exception $e) {
-            }
         }
     } else {
-        // Arxiv materialı — redundant metadata istifadə et (JOIN-sız)
+        // Arxiv materialı
         $lesson = $db->fetch(
             "SELECT al.* FROM archived_lessons al WHERE al.id = ?",
             [$id]
         );
 
         if ($lesson && $lesson['video_url']) {
-            // Video URL-ni lokal yola çevir
             $rawUrl = $lesson['video_url'];
+            
             if (str_starts_with($rawUrl, 'http')) {
-                // Xarici URL — lokal faylla əvəz et
+                // If it's a full URL, check if it's local first
                 $filename = basename(parse_url($rawUrl, PHP_URL_PATH));
-                $localDir = __DIR__ . '/../teacher/uploads/archive/';
-                if (file_exists($localDir . $filename)) {
-                    $videoUrl = $baseUrl . '/teacher/uploads/archive/' . $filename;
+                if (file_exists(__DIR__ . '/../teacher/uploads/archive/' . $filename)) {
+                    $videoUrl = '../teacher/uploads/archive/' . $filename;
                 } else {
-                    // Faylın adını yoxla, yoxsa raw URL istifadə et
-                    $videoUrl = $baseUrl . '/teacher/uploads/archive/' . $filename;
+                    $videoUrl = $rawUrl;
                 }
             } elseif (str_starts_with($rawUrl, 'teacher/')) {
-                $videoUrl = $baseUrl . '/' . $rawUrl;
-            } elseif (!str_starts_with($rawUrl, '../') && !str_starts_with($rawUrl, 'http')) {
-                $videoUrl = $baseUrl . '/teacher/uploads/archive/' . $rawUrl;
+                $videoUrl = '../' . $rawUrl;
+            } elseif (!str_starts_with($rawUrl, '../')) {
+                // Assume it's in teacher/uploads/archive/ if not specified
+                $videoUrl = '../teacher/uploads/archive/' . $rawUrl;
             } else {
-                // Remove leading ../ if present and append to base URL
-                $cleanUrl = preg_replace('/^(\.\.\/)+/', '', $rawUrl);
-                if (str_starts_with($rawUrl, 'http')) {
-                    $videoUrl = $rawUrl;
-                } else {
-                    $videoUrl = $baseUrl . '/' . $cleanUrl;
-                }
+                $videoUrl = $rawUrl;
             }
 
             $title = $lesson['title'];
@@ -101,10 +91,6 @@ try {
 
             // Increment views
             $db->query("UPDATE archived_lessons SET views = IFNULL(views, 0) + 1 WHERE id = ?", [$id]);
-            try {
-                tmis_post('/student/archive/' . $id . '/view', ['archive_id' => intval($id), 'viewed_at' => date('Y-m-d H:i:s')]);
-            } catch (Exception $e) {
-            }
         }
     }
 } catch (Exception $e) {

@@ -63,36 +63,21 @@ try {
 }
 $studentSubjectIds = array_unique(array_filter($studentSubjectIds));
 
-// Lokal live_classes cədvəlindən birbaşa oxu (redundant metadata istifadə, JOIN lazım deyil)
-// Axın dərsləri dəstəyi: stream_course_ids sütununda FIND_IN_SET ilə axtarış
+// Lokal live_classes cədvəlindən birbaşa oxu
+// Students can see all public live classes and will be auto-enrolled when they join
 try {
-    if (!empty($studentSubjectIds)) {
-        $placeholders = implode(',', array_fill(0, count($studentSubjectIds), '?'));
-        $params = array_merge($studentSubjectIds, $studentSubjectIds);
-
-        // Axın dərsləri üçün FIND_IN_SET şərtlərini əlavə et
-        $streamConditions = [];
-        foreach ($studentSubjectIds as $sid) {
-            $streamConditions[] = "FIND_IN_SET(?, lc.stream_course_ids) > 0";
-            $params[] = $sid;
-        }
-        $streamSQL = !empty($streamConditions) ? ' OR (' . implode(' OR ', $streamConditions) . ')' : '';
-
-        $dbLive = $db->fetchAll(
-            "SELECT lc.* FROM live_classes lc 
-             WHERE lc.status IN ('live', 'starting-soon', 'ending-soon')
-             AND (lc.course_id IN ($placeholders) OR lc.tmis_subject_id IN ($placeholders){$streamSQL})
-             ORDER BY lc.start_time ASC",
-            $params
-        );
-    } else {
-        // Fənn filteri yoxdur — bütün aktiv canlı dərsləri göstər
-        $dbLive = $db->fetchAll(
-            "SELECT lc.* FROM live_classes lc 
-             WHERE lc.status IN ('live', 'starting-soon', 'ending-soon')
-             ORDER BY lc.start_time ASC"
-        );
-    }
+    // Show all visible active live classes
+    // Auto-enrollment in live-view.php handles course enrollment
+    $dbLive = $db->fetchAll(
+        "SELECT lc.* FROM live_classes lc 
+         WHERE lc.status IN ('live', 'starting-soon', 'ending-soon')
+         AND lc.is_visible = TRUE
+         ORDER BY lc.start_time ASC"
+    );
+} catch (Exception $e) {
+    error_log("Error fetching live classes: " . $e->getMessage());
+    $dbLive = [];
+}
 
     // TMIS nəticələri ilə birləşdir, dublikatları yoxla
     $existingIds = array_column($liveClasses, 'id');
@@ -127,10 +112,6 @@ try {
 
     // Yenidən siyahıya çevir
     $liveClasses = array_values($courseMap);
-} catch (Exception $e) {
-    // Fail silently
-}
-
 // =========================================================================
 //  2. GƏLƏCƏK DƏRSLƏR
 //     API: GET /api/student/schedule/upcoming

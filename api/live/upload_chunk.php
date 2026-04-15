@@ -40,10 +40,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Gelen parçanı mövcud fayla APPEND et
     $tempFile = $_FILES['video_blob']['tmp_name'];
     $chunkData = file_get_contents($tempFile);
+    $isFirstChunk = ($_POST['is_first_chunk'] ?? '0') === '1';
 
     if ($chunkData === false || strlen($chunkData) === 0) {
         echo json_encode(['success' => false, 'message' => 'Empty chunk data']);
         exit;
+    }
+
+    // Əgər fayl artıq mövcuddursa və bu yeni sessiyanın ilk parçasıdırsa (məs: müəllim refresh edib),
+    // WebM/EBML header-ini silib yalnız Cluster-ləri append etməliyik ki, pleyer donmasın.
+    if ($isFirstChunk && file_exists($filePath) && filesize($filePath) > 100) {
+        // WebM Cluster ID: 1F 43 B6 75
+        $clusterPos = strpos($chunkData, "\x1F\x43\xB6\x75");
+        if ($clusterPos !== false) {
+            $chunkData = substr($chunkData, $clusterPos);
+        }
     }
 
     if (file_put_contents($filePath, $chunkData, FILE_APPEND | LOCK_EX)) {

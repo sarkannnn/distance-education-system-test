@@ -15,22 +15,21 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 
 // Authentication check — must be a logged-in student or instructor
 $authenticated = false;
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
+}
+
 foreach (['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'] as $sessionName) {
     session_name($sessionName);
-    // Set secure cookie params before starting session
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path'     => '/',
-        'secure'   => true,
-        'httponly' => true,
-        'samesite' => 'Strict',
-    ]);
     @session_start();
     if (!empty($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
         $authenticated = true;
+        session_write_close();
         break;
     }
-    session_write_close();
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
 }
 
 if (!$authenticated) {
@@ -133,10 +132,12 @@ echo json_encode([
         ['urls' => 'stun:stun.l.google.com:19302'],
         ['urls' => 'stun:stun1.l.google.com:19302'],
         ['urls' => 'stun:stun2.l.google.com:19302'],
-        ['urls' => 'stun:stun3.l.google.com:19302'],
-        ['urls' => 'stun:stun4.l.google.com:19302'],
+        ['urls' => 'stun:stun.voiparound.com'],
+        ['urls' => 'stun:stun.voipbuster.com'],
+        ['urls' => 'stun:stun.voipstunt.com'],
     ],
     'source' => 'fallback_stun_only',
     'warning' => 'No TURN server configured. Mobile/LTE connections will fail. Set METERED_API_KEY in .env',
     'ttl' => 3600
 ]);
+

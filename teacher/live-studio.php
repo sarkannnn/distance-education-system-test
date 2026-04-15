@@ -86,7 +86,8 @@ require_once 'includes/header.php';
     /* Studio tam ekran: sidebar və top header gizlə */
     .sidebar,
     aside.sidebar,
-    .top-header {
+    .top-header,
+    #chatbot-container {
         display: none !important;
     }
 
@@ -571,22 +572,25 @@ require_once 'includes/header.php';
         }
 
         .studio-center>div:last-child {
-            height: 85px !important;
-            padding: 0 15px !important;
-            gap: 12px !important;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            height: 90px !important;
+            padding: 0 10px !important;
+            gap: 15px !important;
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
 
         .studio-center>div:last-child span {
-            font-size: 9px !important;
-            letter-spacing: 0.5px;
+            font-size: 8px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px !important;
+            opacity: 0.7;
         }
 
         /* Hide the divider line in controls on mobile to save space */
         .studio-center>div:last-child>div[style*="width: 1px"] {
-            display: none !important;
+            height: 30px !important;
+            background: rgba(255,255,255,0.05) !important;
         }
     }
 
@@ -636,33 +640,38 @@ require_once 'includes/header.php';
         /* Controls bar: fluid width distributing buttons evenly across the screen */
         #mainControlsBar {
             width: 100% !important;
-            overflow: visible !important;
-            padding: 0 1% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            padding: 0 10px !important;
             box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.98) !important;
+            scrollbar-width: none;
         }
 
         #mainControlsInner {
-            margin: 0 !important;
-            padding: 0 !important;
-            gap: 1% !important;
-            width: 100% !important;
-            min-width: 0 !important; /* overrides max-content */
-            justify-content: space-evenly !important;
+            margin: 0 auto !important;
+            padding: 0 10px !important;
+            gap: 15px !important;
+            width: auto !important;
+            min-width: max-content !important;
+            justify-content: center !important;
         }
 
         #mainControlsInner > div {
-            flex: 1 1 auto;
-            min-width: 0;
+            flex: 0 0 auto !important;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px !important;
         }
 
         #mainControlsInner span {
-            font-size: min(2.8vw, 10px) !important;
+            font-size: 8px !important;
             white-space: nowrap;
-            letter-spacing: -0.5px;
+            letter-spacing: 0.2px !important;
+            font-weight: 800 !important;
+            color: #94a3b8 !important;
+            margin-top: 2px;
         }
 
         /* Log wrapper: position above controls bar */
@@ -991,6 +1000,23 @@ require_once 'includes/header.php';
                     </div>
 
                     <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1); margin: 0 10px;"></div>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <button id="btnModeNormal" onclick="setQualityMode('normal')" class="control-btn active-green" style="width: 50px; border-radius: 50%;" title="Standart Keyfiyyət">
+                            <i data-lucide="zap" style="width: 22px; height: 22px;"></i>
+                        </button>
+                        <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">NORMAL</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <button id="btnModeEco" onclick="setQualityMode('eco')" class="control-btn" style="width: 50px; border-radius: 50%;" title="Eco Mode (Zəif İnternet)">
+                            <i data-lucide="leaf" style="width: 22px; height: 22px;"></i>
+                        </button>
+                        <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">ECO</span>
+                    </div>
+
+                    <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1); margin: 0 10px;"></div>
+
 
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                         <button
@@ -1430,6 +1456,7 @@ require_once 'includes/header.php';
     var camStream = null;
     var screenStream = null;
     var allDataConns = [];
+    const activePeerCalls = new Map();
     const lID = "<?php echo $lessonId ?? '0'; ?>";
     const courseId = "<?php echo $lesson['course_id'] ?? '0'; ?>";
     var isScreenSharing = false;
@@ -1579,6 +1606,8 @@ require_once 'includes/header.php';
             initWBCanvas();
             LOG("🎨 Advanced Whiteboard aktivdir.", "#3b82f6");
         } else {
+            // Close instantly on student side without waiting video stream teardown.
+            broadcastData({ type: 'whiteboard_force_stop' });
             overlay.classList.remove('is-visible');
             btn.classList.remove('active-blue');
             document.getElementById('laserCursor').style.display = 'none';
@@ -2197,13 +2226,20 @@ require_once 'includes/header.php';
     // Compositing (Canvas)
     let mediaRecorder;
     let recordedChunks = [];
+    let recordingStartTime = 0;
+    let recordingDurationMs = 0;
     let canvas, ctx;
     let canvasLoopId;
     let destStream;
     let chunkFlushInterval = null;
     let isFlushingChunks = false;
     let isFirstChunkSent = false;
-    const recordingSessionId = "sess_" + Math.random().toString(36).substr(2, 9);
+    let isFirstChunkRecorded = true; // Tracks if this is the very first chunk of a recorder session
+    let recordingSessionId = sessionStorage.getItem('active_recording_session_' + lID);
+    if (!recordingSessionId) {
+        recordingSessionId = "sess_" + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem('active_recording_session_' + lID, recordingSessionId);
+    }
 
     // ============================================================
     // Periodic Chunk Flush — hər 30 saniyədən bir parçaları serverə göndər
@@ -2225,6 +2261,12 @@ require_once 'includes/header.php';
         });
         const fd = new FormData();
         fd.append('lesson_id', lID);
+        // Track if this is the first chunk of a recorder session (to help server strip redundant headers)
+        fd.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
+        if (isFirstChunkRecorded) {
+            isFirstChunkRecorded = false; 
+            console.log("🎬 Session Header Chunk sent");
+        }
         fd.append('video_blob', blob);
         fd.append('session_id', recordingSessionId);
 
@@ -2233,7 +2275,8 @@ require_once 'includes/header.php';
 
         return fetch(chunkUrl, {
             method: 'POST',
-            body: fd
+            body: fd,
+            credentials: 'include'
         })
             .then(async r => {
                 const text = await r.text();
@@ -2249,6 +2292,9 @@ require_once 'includes/header.php';
                 } else {
                     recordedChunks = chunksToSend.concat(recordedChunks);
                     LOG(`⚠️ Parça yazılmadı: ${data.message}`, "#f59e0b");
+                    if (data.message.toLowerCase().includes('authorized') || data.message.toLowerCase().includes('login')) {
+                        console.warn("Session lost during chunk upload. User may need to re-login.");
+                    }
                     console.error('Server error upload_chunk:', data);
                 }
                 isFlushingChunks = false;
@@ -2290,14 +2336,18 @@ require_once 'includes/header.php';
     }
 
     function flushChunksBeacon() {
-        if (recordedChunks.length === 0) return;
+        if (!recordedChunks || recordedChunks.length === 0) return;
         const blob = new Blob(recordedChunks, {
             type: 'video/webm'
         });
         const fd = new FormData();
         fd.append('lesson_id', lID);
         fd.append('video_blob', blob);
-        navigator.sendBeacon('../api/live/upload_chunk.php', fd);
+        fd.append('session_id', recordingSessionId);
+        fd.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
+        
+        const chunkUrl = window.location.pathname.includes('/teacher/') ? '../api/live/upload_chunk.php' : '/api/live/upload_chunk.php';
+        navigator.sendBeacon(chunkUrl, fd);
         recordedChunks = [];
     }
 
@@ -2416,9 +2466,18 @@ require_once 'includes/header.php';
     }
 
     function broadcastData(data, excludePeerId = null) {
+        const alive = [];
         allDataConns.forEach(conn => {
-            if (conn.open && conn.peer !== excludePeerId) conn.send(data);
+            if (!conn || !conn.open) return;
+            alive.push(conn);
+            if (conn.peer === excludePeerId) return;
+            try {
+                conn.send(data);
+            } catch (e) {
+                // connection may close between open-check and send
+            }
         });
+        allDataConns = alive;
     }
 
     function showMicRequestModal(senderName, conn) {
@@ -2481,7 +2540,7 @@ require_once 'includes/header.php';
     async function fetchTurnCredentials() {
         try {
             LOG("🔑 TURN server məlumatları yüklənir...", "#3b82f6");
-            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now());
+            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now(), { credentials: 'include' });
             const data = await resp.json();
 
             if (data.success && data.iceServers && data.iceServers.length > 0) {
@@ -2644,7 +2703,7 @@ require_once 'includes/header.php';
                 peer.on('open', (id) => {
                     LOG(useCloud ? "🚀 Bulud serverinə qoşuldu!" : "🚀 Lokal server hazır!", "#10b981");
                     const serverType = useCloud ? 'cloud' : 'local';
-                    fetch(`api/update_peer_id.php?live_class_id=${lID}&peer_id=${id}&server=${serverType}&t=${Date.now()}`)
+                    fetch(`api/update_peer_id.php?live_class_id=${lID}&peer_id=${id}&server=${serverType}&t=${Date.now()}`, { credentials: 'include' })
                         .then(r => r.json()).catch(e => console.error("DB Update Error"));
                     trackAttendance('join');
                 });
@@ -2667,6 +2726,12 @@ require_once 'includes/header.php';
                         return;
                     }
                     allDataConns.push(conn);
+                    const removeConn = () => {
+                        const idx = allDataConns.findIndex(c => c.peer === conn.peer);
+                        if (idx > -1) allDataConns.splice(idx, 1);
+                    };
+                    conn.on('close', removeConn);
+                    conn.on('error', removeConn);
                     conn.on('data', (d) => {
                         if (d.type === 'chat' || d.type === 'file') {
                             const isPrivate = d.isPrivate || false;
@@ -2697,6 +2762,7 @@ require_once 'includes/header.php';
                     const name = meta.name || "Tələbə";
                     const sid = meta.userId || meta.id || meta.student_id;
                     const isScreenShare = meta.type === 'screen_share';
+                    let incomingHandled = false;
 
                     // Force stop spotlight if student calling again with normal stream
                     if (!isScreenShare && call.peer === spotlightPeerId) {
@@ -2711,6 +2777,26 @@ require_once 'includes/header.php';
                         LOG("⚠️ DİQQƏT: Zəngə cavab verilərkən stream tapılmadı!", "#ef4444");
                     }
                     call.answer(stream);
+
+                    // --- PERFORMANCE: Apply Bitrate Limit ---
+                    setTimeout(() => {
+                        if (call.peerConnection) {
+                            applyBitrateLimit(call.peerConnection, currentBitrateLimit);
+                        }
+                    }, 1000);
+                    trackActiveCall(call);
+
+                    const handleIncomingStream = (rem) => {
+                        if (!rem || incomingHandled) return;
+                        incomingHandled = true;
+                        if (isScreenShare) {
+                            LOG(`🖥️ ${name} ekran paylaşımına başladı.`, "#3b82f6");
+                            startStudentSpotlight(call.peer, rem, name);
+                        } else {
+                            addStudentVideo(call.peer, rem, name, sid);
+                        }
+                    };
+
 
                     if (sid) {
                         const existing = document.querySelector(`.student-card[data-student-id='${sid}']`);
@@ -2727,15 +2813,19 @@ require_once 'includes/header.php';
                         }
                     }
 
-                    call.on('stream', (rem) => {
-                        if (isScreenShare) {
-                            LOG(`🖥️ ${name} ekran paylaşımına başladı.`, "#3b82f6");
-                            startStudentSpotlight(call.peer, rem, name);
-                        } else {
-                            addStudentVideo(call.peer, rem, name, sid);
-                        }
-                    });
+                    call.on('stream', handleIncomingStream);
+                    if (call.peerConnection) {
+                        const trackStream = new MediaStream();
+                        call.peerConnection.ontrack = (ev) => {
+                            if (ev.track) trackStream.addTrack(ev.track);
+                            if (trackStream.getTracks().length > 0) {
+                                handleIncomingStream(trackStream);
+                            }
+                        };
+                    }
                     call.on('close', () => {
+                        untrackActiveCall(call.peer);
+                        incomingHandled = false;
                         if (isScreenShare) {
                             if (call.peer === spotlightPeerId) stopStudentSpotlight();
                             LOG(`${name} ekran paylaşımını bitirdi.`, "#3b82f6");
@@ -2744,10 +2834,14 @@ require_once 'includes/header.php';
                             LOG(`${name} yayımı dayandırdı.`, "#f59e0b");
                         }
                     });
+                    call.on('error', () => {
+                        untrackActiveCall(call.peer);
+                    });
                 });
             }
 
             startPeer(true); // Default to cloud for stability
+            startAdaptiveQualityMonitor();
             startLessonTimer();
 
         } catch (e) {
@@ -2756,6 +2850,132 @@ require_once 'includes/header.php';
         }
     }
 
+    // --- NEW PERFORMANCE HELPERS ---
+    let currentBitrateLimit = 1500; // Default 1.5 Mbps
+    let adaptiveQualityInterval = null;
+    let poorNetworkStreak = 0;
+    let goodNetworkStreak = 0;
+
+    function trackActiveCall(call) {
+        if (!call || !call.peer) return;
+        activePeerCalls.set(call.peer, call);
+    }
+
+    function untrackActiveCall(peerId) {
+        if (!peerId) return;
+        activePeerCalls.delete(peerId);
+    }
+
+    function applyBitrateLimit(pc, maxKbps) {
+        if (!pc || !pc.getSenders) return;
+        pc.getSenders().forEach(sender => {
+            if (sender.track && sender.track.kind === 'video') {
+                const parameters = sender.getParameters();
+                if (!parameters.encodings || parameters.encodings.length === 0) {
+                    parameters.encodings = [{}];
+                }
+                parameters.encodings[0].maxBitrate = maxKbps * 1000;
+                sender.setParameters(parameters).catch(e => console.warn("Bitrate control not supported/blocked:", e));
+            }
+        });
+    }
+
+    function applyBitrateLimitToActiveCalls(maxKbps) {
+        activePeerCalls.forEach((call) => {
+            if (call && call.peerConnection) {
+                applyBitrateLimit(call.peerConnection, maxKbps);
+            }
+        });
+    }
+
+    async function getCallNetworkMetrics(call) {
+        try {
+            if (!call || !call.peerConnection || !call.peerConnection.getStats) return null;
+            const stats = await call.peerConnection.getStats();
+            let rttMs = null;
+            let packetsLost = 0;
+            let packetsSent = 0;
+
+            stats.forEach(report => {
+                if (report.type === 'candidate-pair' && report.state === 'succeeded' && report.nominated && typeof report.currentRoundTripTime === 'number') {
+                    rttMs = Math.round(report.currentRoundTripTime * 1000);
+                }
+                if (report.type === 'outbound-rtp' && report.kind === 'video') {
+                    packetsLost += report.packetsLost || 0;
+                    packetsSent += report.packetsSent || 0;
+                }
+            });
+
+            const lossPercent = packetsSent > 0 ? (packetsLost / packetsSent) * 100 : 0;
+            return { rttMs, lossPercent };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function evaluateAdaptiveQuality() {
+        if (activePeerCalls.size === 0) return;
+
+        const checks = await Promise.all(Array.from(activePeerCalls.values()).map(getCallNetworkMetrics));
+        const valid = checks.filter(Boolean);
+        if (valid.length === 0) return;
+
+        const avgRtt = valid.reduce((sum, item) => sum + (item.rttMs || 0), 0) / valid.length;
+        const maxLoss = Math.max(...valid.map(item => item.lossPercent || 0));
+        const hasPoorSignal = avgRtt >= 450 || maxLoss >= 8;
+        const hasGoodSignal = avgRtt > 0 && avgRtt <= 220 && maxLoss < 3;
+
+        if (hasPoorSignal) {
+            poorNetworkStreak++;
+            goodNetworkStreak = 0;
+            if (poorNetworkStreak >= 2 && currentBitrateLimit !== 800) {
+                setQualityMode('eco', true);
+                LOG(`📉 Auto Eco: RTT ${Math.round(avgRtt)}ms, itki ${maxLoss.toFixed(1)}%`, "#f59e0b");
+            }
+            return;
+        }
+
+        if (hasGoodSignal) {
+            goodNetworkStreak++;
+            poorNetworkStreak = 0;
+            if (goodNetworkStreak >= 3 && currentBitrateLimit !== 1500) {
+                setQualityMode('normal', true);
+                LOG(`📈 Auto Normal: RTT ${Math.round(avgRtt)}ms, itki ${maxLoss.toFixed(1)}%`, "#10b981");
+            }
+            return;
+        }
+
+        poorNetworkStreak = 0;
+        goodNetworkStreak = 0;
+    }
+
+    function startAdaptiveQualityMonitor() {
+        if (adaptiveQualityInterval) clearInterval(adaptiveQualityInterval);
+        adaptiveQualityInterval = setInterval(() => {
+            evaluateAdaptiveQuality().catch(() => { });
+        }, 8000);
+    }
+
+    function setQualityMode(mode, isAutomatic = false) {
+        const btnNormal = document.getElementById('btnModeNormal');
+        const btnEco = document.getElementById('btnModeEco');
+
+        if (mode === 'eco') {
+            currentBitrateLimit = 800; // 800 kbps
+            if (btnEco) btnEco.classList.add('active-green');
+            if (btnNormal) btnNormal.classList.remove('active-green');
+            if (!isAutomatic) LOG("🍃 Eco rejim aktivləşdirildi (Aşağı trafik)", "#10b981");
+        } else {
+            currentBitrateLimit = 1500; // 1.5 mbps
+            if (btnNormal) btnNormal.classList.add('active-green');
+            if (btnEco) btnEco.classList.remove('active-green');
+            if (!isAutomatic) LOG("📺 Standart rejim aktivləşdirildi", "#3b82f6");
+        }
+
+        applyBitrateLimitToActiveCalls(currentBitrateLimit);
+    }
+
+
     function startCanvasCompositing() {
         canvas = document.createElement('canvas');
         canvas.width = 1280;
@@ -2763,7 +2983,8 @@ require_once 'includes/header.php';
         ctx = canvas.getContext('2d');
         drawToCanvas();
 
-        const canvasStream = canvas.captureStream(30);
+        const canvasStream = canvas.captureStream(20); // Reduced from 30 to 20 for performance
+
         // Add audio track from camera stream
         if (camStream && camStream.getAudioTracks().length > 0) {
             canvasStream.addTrack(camStream.getAudioTracks()[0]);
@@ -2794,20 +3015,22 @@ require_once 'includes/header.php';
                         setTimeout(flushChunksToServer, 100);
                     }
 
-                    // Əgər recordedChunks həcmi 1MB-dan çoxdursa, dərhal göndər
+                    // Əgər recordedChunks həcmi 256KB-dan çoxdursa, dərhal göndər (Limit 1MB-dan 256KB-a düşürüldü)
                     const currentSize = recordedChunks.reduce((acc, c) => acc + c.size, 0);
-                    if (currentSize > 1024 * 1024) {
+                    if (currentSize > 256 * 1024) {
                         flushChunksToServer();
                     }
                 }
             };
 
             mediaRecorder.start(1000);
+            recordingStartTime = Date.now();
             LOG(`Arxiv qeydiyyatı aktivdir. 🔴`, "#ef4444");
 
             // Start the rendering loop only after canvas/ctx are ready
             if (canvasLoopId) clearInterval(canvasLoopId);
-            canvasLoopId = setInterval(drawToCanvas, 33);
+            canvasLoopId = setInterval(drawToCanvas, 50); // 20 FPS (50ms) instead of 30 FPS (33ms)
+
         } catch (e) {
             LOG("MediaRecorder Xətası", "#ef4444");
         }
@@ -3408,11 +3631,22 @@ require_once 'includes/header.php';
         spotlightPeerId = peerId;
         spotlightName = name;
 
-        // Create a hidden video element to feed the canvas
+        // Ensure we have a hidden container for spotlight videos
+        let hiddenContainer = document.getElementById('hiddenSpotlightContainer');
+        if (!hiddenContainer) {
+            hiddenContainer = document.createElement('div');
+            hiddenContainer.id = 'hiddenSpotlightContainer';
+            hiddenContainer.style.display = 'none';
+            document.body.appendChild(hiddenContainer);
+        }
+
+        // Create a video element to feed the canvas
         studentScreenVidElement = document.createElement('video');
         studentScreenVidElement.srcObject = screenStream;
         studentScreenVidElement.muted = true;
         studentScreenVidElement.playsInline = true;
+        hiddenContainer.appendChild(studentScreenVidElement); // MUST BE IN DOM for some browsers to update state
+
 
         studentScreenVidElement.onloadedmetadata = () => {
             console.log(`[SPOTLIGHT] Video Loaded: ${studentScreenVidElement.videoWidth}x${studentScreenVidElement.videoHeight}`);
@@ -3442,21 +3676,24 @@ require_once 'includes/header.php';
             stopBtn.id = 'btnStopSpotlight';
             stopBtn.innerHTML = "⏹️ Tələbə Paylaşımını Dayandır";
             stopBtn.style = "position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#ef4444; color:white; border:none; padding:12px 25px; border-radius:12px; font-weight:800; z-index:5000; cursor:pointer; box-shadow:0 10px 30px rgba(239, 68, 68, 0.4); animation: slideUp 0.3s ease-out;";
-            stopBtn.onclick = stopStudentSpotlight;
+            stopBtn.onclick = () => stopStudentSpotlight('teacher');
             document.body.appendChild(stopBtn);
         }
 
         LOG(`✨ ${name} spotlight sorğusu qəbul edildi.`, "#3b82f6");
     }
 
-    function stopStudentSpotlight() {
+    function stopStudentSpotlight(reason = 'auto') {
         if (spotlightPeerId) {
             const conn = allDataConns.find(c => c.peer === spotlightPeerId && c.open);
             if (conn) {
                 conn.send({
-                    type: 'whiteboard_force_stop'
+                    type: 'whiteboard_force_stop',
+                    reason: reason
                 });
-                LOG("🛑 Tələbəyə lövhəni dayandırmaq əmri göndərildi.", "#f59e0b");
+                if (reason === 'teacher') {
+                    LOG("🛑 Tələbəyə lövhəni dayandırmaq əmri göndərildi.", "#f59e0b");
+                }
             }
         }
 
@@ -3464,6 +3701,9 @@ require_once 'includes/header.php';
         spotlightPeerId = null;
         if (studentScreenVidElement) {
             studentScreenVidElement.srcObject = null;
+            if (studentScreenVidElement.parentNode) {
+                studentScreenVidElement.parentNode.removeChild(studentScreenVidElement);
+            }
             studentScreenVidElement = null;
         }
         studentCamVidElement = null;
@@ -3527,7 +3767,8 @@ require_once 'includes/header.php';
 
             fetch('api/approve_rejoin.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'include'
             })
                 .then(r => r.json())
                 .then(data => {
@@ -3575,22 +3816,42 @@ require_once 'includes/header.php';
     function startLessonTimer() {
         if (!document.getElementById('timerDisplay')) return;
 
+        const MAX_DURATION = 3 * 3600; // 3 hours in seconds
+        let hasWarned = false;
+
         setInterval(() => {
             const now = Date.now();
             const diff = Math.floor((now - lessonStartedAt) / 1000);
-
-            // Show absolute duration since started_at
             const totalSeconds = Math.max(0, diff);
-            const m = Math.floor(totalSeconds / 60);
+
+            // AUTO-TERMINATE CHECK
+            if (totalSeconds >= MAX_DURATION) {
+                LOG("⌛ Maksimum dərs müddəti (3 saat) tamamlandı. Dərs avtomatik bitirilir.", "#ef4444");
+                stopAndUpload(true); // Call with isAuto = true
+                return;
+            }
+
+            // 5-MINUTE WARNING
+            if (totalSeconds >= (MAX_DURATION - 300) && !hasWarned) {
+                hasWarned = true;
+                LOG("⚠️ Diqqət: Dərsin bitməsinə 5 dəqiqə qalıb (Maksimum 3 saat).", "#f59e0b");
+                alert("DİQQƏT: Maksimum dərs müddəti (3 saat) dolmaq üzrədir! 5 dəqiqə sonra dərs avtomatik kəsiləcək. Xahiş olunur dərsi yekunlaşdırın.");
+            }
+
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
             const s = totalSeconds % 60;
 
-            document.getElementById('timerDisplay').innerText =
-                (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+            let timeStr = "";
+            if (h > 0) timeStr += (h < 10 ? '0' + h : h) + ':';
+            timeStr += (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+
+            document.getElementById('timerDisplay').innerText = timeStr;
         }, 1000);
     }
 
-    function stopAndUpload() {
-        if (!confirm("Dərsi bitirmək və arxivləmək istəyirsiniz?")) return;
+    function stopAndUpload(isAuto = false) {
+        if (!isAuto && !confirm("Dərsi bitirmək və arxivləmək istəyirsiniz?")) return;
 
         LOG("🏁 Dərs bitirilir...", "#f59e0b");
         broadcastData({
@@ -3606,6 +3867,7 @@ require_once 'includes/header.php';
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             LOG("🎥 Yazı dayandırılır...", "#f59e0b");
             mediaRecorder.stop();
+            recordingDurationMs = Date.now() - recordingStartTime;
         }
 
         LOG("⏳ Video emal olunur, xahiş olunur gözləyin...", "#3b82f6");
@@ -3619,6 +3881,7 @@ require_once 'includes/header.php';
                 fd.append('lesson_id', lID);
                 fd.append('course_id', '<?php echo $lesson['course_id']; ?>');
                 fd.append('has_chunks', '1'); // Serverə pre-saved parçalar olduğunu bildir
+                fd.append('duration_ms', recordingDurationMs);
 
                 if (recordedChunks.length === 0) {
                     // Bütün parçalar artıq serverə göndərilib, əlavə video yoxdur
@@ -3635,7 +3898,8 @@ require_once 'includes/header.php';
 
                 fetch('api/upload_recording.php', {
                     method: 'POST',
-                    body: fd
+                    body: fd,
+                    credentials: 'include'
                 })
                     .then(r => r.text())
                     .then(text => {
@@ -3644,6 +3908,7 @@ require_once 'includes/header.php';
                             const d = JSON.parse(text);
                             if (d.success) {
                                 LOG("✅ Dərs uğurla tamamlandı!", "#10b981");
+                                sessionStorage.removeItem('active_recording_session_' + lID);
                                 alert(d.message || "Dərs uğurla bitirildi!");
                                 window.location.href = 'live-lessons.php';
                             } else {
@@ -3698,7 +3963,8 @@ require_once 'includes/header.php';
 
         fetch('api/kick_student.php', {
             method: 'POST',
-            body: fd
+            body: fd,
+            credentials: 'include'
         })
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
@@ -3745,7 +4011,7 @@ require_once 'includes/header.php';
     function approveStudentRejoin(uId, name) {
         LOG(`✅ ${name} (ID: ${uId}) üçün yenidən giriş icazəsi təsdiqlənir...`, "#f59e0b");
 
-        fetch(`../student/api/unkick_student.php?live_class_id=${lID}&user_id=${uId}&t=${Date.now()}`)
+        fetch(`../student/api/unkick_student.php?live_class_id=${lID}&user_id=${uId}&t=${Date.now()}`, { credentials: 'include' })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
@@ -3819,7 +4085,7 @@ require_once 'includes/header.php';
 
     function refreshLiveAttendance() {
         LOG("🔄 Canlı iştirak yenilənir...", "#60a5fa");
-        fetch('api/get_live_attendance.php?id=' + lID + '&subject_id=' + courseId)
+        fetch('api/get_live_attendance.php?id=' + lID + '&subject_id=' + courseId, { credentials: 'include' })
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -3827,8 +4093,8 @@ require_once 'includes/header.php';
                 return res.json();
             })
             .then(data => {
-                LOG(`✅ İştirak məlumatı alındı: ${data.online_count}/${data.total_count}`, "#10b981");
                 if (data.success) {
+                    LOG(`✅ İştirak məlumatı alındı: ${data.online_count}/${data.total_count}`, "#10b981");
                     document.getElementById('liveAttendanceCount').innerText = data.online_count + ' / ' + data.total_count;
                     const list = document.getElementById('liveAttendanceList');
                     if (data.attendees.length === 0) {
@@ -3867,12 +4133,16 @@ require_once 'includes/header.php';
                                     onmouseout="this.style.background='transparent'; this.style.color='#94a3b8'">
                                     ⋮
                                 </button>
-                            </div>
-                        `;
+                            </div>`;
                         }).join('');
                     }
                 } else {
-                    LOG("⚠️ API xətası: " + (data.message || 'Unknown'), "#ef4444");
+                    LOG(`⚠️ API xətası: ${data.message}`, "#facc15");
+                    if (data.message.toLowerCase().includes('unauthorized')) {
+                        document.getElementById('liveAttendanceList').innerHTML = 
+                            '<div style="padding:20px; text-align:center; color:#ef4444; font-size:12px;">' +
+                            'Sessiya itirilib. Lütfən yenidən daxil olun.</div>';
+                    }
                 }
             })
             .catch(err => {
@@ -3941,7 +4211,8 @@ require_once 'includes/header.php';
                 title: title,
                 message: message,
                 type: 'info'
-            })
+            }),
+            credentials: 'include'
         })
             .then(res => res.json())
             .then(data => {

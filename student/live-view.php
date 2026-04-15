@@ -30,6 +30,28 @@ if (!$lesson) {
     die("Dərs tapılmadı.");
 }
 
+// AUTO-ENROLL STUDENT IF NOT ALREADY ENROLLED IN THE COURSE
+if ($currentUser['role'] === 'student') {
+    try {
+        $alreadyEnrolled = $db->fetch(
+            "SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?",
+            [$currentUser['id'], $lesson['course_id']]
+        );
+        
+        if (!$alreadyEnrolled) {
+            // Auto-enroll the student
+            $db->query(
+                "INSERT INTO enrollments (user_id, course_id, status) VALUES (?, ?, 'active')",
+                [$currentUser['id'], $lesson['course_id']]
+            );
+            error_log("✅ Auto-enrolled user {$currentUser['id']} in course {$lesson['course_id']} for live class {$lessonId}");
+        }
+    } catch (Exception $e) {
+        error_log("⚠️ Auto-enrollment in live-view failed: " . $e->getMessage());
+        // Don't block access, just log the error
+    }
+}
+
 
 require_once 'includes/header.php';
 ?>
@@ -39,13 +61,18 @@ require_once 'includes/header.php';
     html {
         margin: 0;
         padding: 0;
-        min-height: 100vh;
+        height: 100vh;
+        height: 100dvh;
         overflow: hidden;
         background: #0f172a;
     }
 
     .main-wrapper {
         padding-left: 0 !important;
+    }
+
+    #chatbot-container {
+        display: none !important;
     }
 
     @keyframes blink {
@@ -150,48 +177,121 @@ require_once 'includes/header.php';
         display: none;
         flex-direction: column;
         font-family: 'Inter', sans-serif;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: scale(0.98);
+    }
+    
+    #whiteboardOverlay.is-visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Redesigned TOP HEADER */
+    .wb-top-bar {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 2100;
+        pointer-events: none;
+    }
+
+    .wb-badge-whiteboard {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(8px);
+        padding: 8px 16px;
+        border-radius: 100px;
+        color: white;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .wb-badge-whiteboard .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        animation: blink 1s infinite;
+        box-shadow: 0 0 8px #ef4444;
+    }
+
+    .wb-close-whiteboard {
+        background: #1e293b;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 100px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        pointer-events: auto;
+        transition: all 0.2s;
+    }
+
+    .wb-close-whiteboard:hover {
+        background: #ef4444;
+        border-color: #ef4444;
     }
 
     .wb-controls-floating {
         position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(15, 23, 42, 0.98);
-        backdrop-filter: blur(20px);
-        padding: 10px;
-        border-radius: 16px;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(24px);
+        padding: 12px 24px;
+        border-radius: 100px;
         display: flex;
-        flex-direction: column;
-        gap: 8px;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         border: 1px solid rgba(255, 255, 255, 0.15);
         z-index: 2010;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        max-width: 95vw;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .wb-controls-floating::-webkit-scrollbar {
+        display: none;
     }
 
-    /* Collapsed: slide off to the left */
+    /* Collapsed: slide down */
     .wb-controls-floating.wb-collapsed {
-        transform: translateY(-50%) translateX(calc(-100% - 20px));
+        transform: translateX(-50%) translateY(calc(100% + 40px));
         opacity: 0;
         pointer-events: none;
     }
 
-    /* Floating re-open tab */
+    /* Floating re-open tab (visible only when toolbar is collapsed) */
     #wbToolbarOpenTab {
         position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 2015;
         display: none;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         background: rgba(15, 23, 42, 0.98);
         border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 12px;
-        padding: 10px 6px;
+        border-radius: 100px;
+        padding: 10px 20px;
         cursor: pointer;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         transition: background 0.2s;
@@ -206,105 +306,77 @@ require_once 'includes/header.php';
         display: flex;
     }
 
-    /* Scrollable toolbar on short viewports */
-    @media (max-height: 700px),
-    (max-width: 900px) {
-        .wb-controls-floating {
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-            scrollbar-width: thin;
-        }
-
-        .wb-controls-floating::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .wb-controls-floating::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-    }
-
     .wb-group {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 8px;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
     }
 
-    .wb-group:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .wb-group-label {
-        color: #94a3b8;
-        font-size: 9px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 2px;
-        text-align: center;
+    .wb-divider {
+        width: 1px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.15);
+        margin: 0 5px;
     }
 
     .wb-tool-btn {
-        background: rgba(255, 255, 255, 0.06);
-        border: 2px solid rgba(255, 255, 255, 0.08);
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #e2e8f0;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
-        font-size: 18px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
     }
 
     .wb-tool-btn:hover {
         background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px) scale(1.02);
-        border-color: rgba(255, 255, 255, 0.25);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        transform: translateY(-3px);
+        color: white;
     }
 
     .wb-tool-btn:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(0) scale(0.95);
     }
 
     .wb-tool-btn.active {
-        background: #3b82f6;
-        border-color: #60a5fa;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        border-color: #3b82f6;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
     }
 
     .wb-color-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
     }
 
     .wb-color {
-        width: 20px;
-        height: 20px;
-        border-radius: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
         cursor: pointer;
-        border: 2px solid rgba(255, 255, 255, 0.25);
-        transition: all 0.2s;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .wb-color:hover {
-        transform: scale(1.1);
-        border-color: rgba(255, 255, 255, 0.5);
+        transform: scale(1.2);
+        border-color: rgba(255, 255, 255, 0.8);
     }
 
     .wb-color.active {
-        outline: 2px solid white;
-        outline-offset: 1px;
-        box-shadow: 0 0 10px currentColor;
+        transform: scale(1.2);
+        border-color: white;
+        box-shadow: 0 0 12px currentColor;
     }
 
     #laserCursor {
@@ -327,6 +399,19 @@ require_once 'includes/header.php';
         flex: 1;
         min-height: 0;
         overflow: hidden;
+    }
+
+    #mobilePanelBackdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 499;
+        backdrop-filter: blur(2px);
+    }
+
+    #mobilePanelBackdrop.visible {
+        display: block;
     }
 
     #videoContainer {
@@ -388,13 +473,14 @@ require_once 'includes/header.php';
             left: 0;
             right: 0;
             z-index: 500;
-            height: 55vh !important;
-            max-height: 55vh;
+            height: 70vh !important;
+            height: 70dvh !important;
+            max-height: 70vh;
             border-left: none !important;
             border-top: 2px solid #334155 !important;
             border-radius: 20px 20px 0 0;
             box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
-            overflow-y: auto !important;
+            overflow: hidden !important;
             min-height: unset !important;
         }
 
@@ -452,99 +538,200 @@ require_once 'includes/header.php';
         }
 
         #localControlsWrapper {
-            bottom: 15px !important;
+            position: absolute !important;
+            bottom: 20px !important;
             left: 50% !important;
             transform: translateX(-50%);
-            width: max-content;
+            width: 100% !important;
+            max-width: 100vw;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 10px;
         }
 
         #localPreview {
-            width: 100px !important;
-            height: 70px !important;
+            width: 120px !important;
+            height: 90px !important;
+            border-radius: 12px !important;
         }
 
         /* Compact local control buttons */
-        #localControlsWrapper>div:last-child {
-            padding: 10px 15px !important;
-            gap: 12px !important;
+        #localControlsWrapper > div:last-child {
+            padding: 12px 20px !important;
+            gap: 15px !important;
+            background: rgba(15, 23, 42, 0.9) !important;
+            backdrop-filter: blur(12px) !important;
+            border-radius: 50px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
         }
 
         #localControlsWrapper button {
-            width: 38px !important;
-            height: 38px !important;
+            width: 44px !important;
+            height: 44px !important;
         }
 
         #localControlsWrapper span {
-            font-size: 7px !important;
+            font-size: 8px !important;
+            margin-top: 2px;
+        }
+
+        /* Keep teacher label away from face area on mobile/tablet */
+        #mainVidLabel {
+            top: auto !important;
+            bottom: 118px !important;
+            left: 12px !important;
+            max-width: 68vw !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+            gap: 6px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+    }
+
+    /* === Whiteboard controls: 2-Row Horizontal Scrollable Bottom Panel === */
+    @media (max-width: 900px), (max-height: 700px) {
+        .wb-controls-floating {
+            top: auto !important;
+            bottom: 15px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            
+            /* Magic flex properties to create a perfect 2-row horizontal scroller */
+            display: flex !important;
+            flex-direction: column !important;
+            flex-wrap: wrap !important;
+            
+            /* Total height = 2 buttons (38*2) + gap (8) + padding (20) + scrollbar (6) + safety margin = 115px */
+            height: 115px !important;
+            max-height: 115px !important;
+            width: calc(100% - 20px) !important;
+            max-width: 600px !important;
+            
+            padding: 8px 12px !important;
+            padding-bottom: 10px !important;
+            border-radius: 20px !important;
+            
+            align-content: flex-start !important;
+            gap: 8px !important;
+            
+            overflow-x: auto !important; 
+            overflow-y: hidden !important;
+            
+            /* Explicitly stylize scrollbar so users know it scrolls! */
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1) !important;
+        }
+
+        .wb-controls-floating::-webkit-scrollbar {
+            height: 6px !important;
+            display: block !important;
+        }
+        .wb-controls-floating::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2) !important;
+            border-radius: 10px !important;
+            margin: 0 10px;
+        }
+        .wb-controls-floating::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5) !important;
+            border-radius: 10px !important;
+        }
+
+        /* Flatten groupings so elements flow freely into the 2-row layout */
+        .wb-group, .wb-color-grid {
+            display: contents !important;
+        }
+
+        /* Dividers become tall columns to separate tools logically */
+        .wb-divider {
+            display: block !important;
+            width: 1px !important;
+            height: 80px !important; /* Will take up a whole column */
+            margin: 5px 6px !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .wb-tool-btn {
+            width: 38px !important;
+            height: 38px !important;
+        }
+        .wb-tool-btn i[data-lucide] {
+            width: 18px !important;
+            height: 18px !important;
+        }
+
+        /* Vertically center text like '1/1' or '3px' */
+        #pageIndicator, #sizeDisplay {
+            display: flex !important;
+            align-items: center !important;
+            height: 38px !important;
+            margin: 0 !important;
+        }
+
+        .wb-color {
+            width: 22px !important;
+            height: 22px !important;
+            margin: 8px 4px !important; /* Vertically align smaller color dots */
+        }
+
+        /* Toggle panel animation */
+        .wb-controls-floating.wb-collapsed {
+            transform: translate(-50%, calc(100% + 20px)) !important;
+        }
+
+        /* Re-open Tab centered */
+        #wbToolbarOpenTab {
+            top: auto !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            border-radius: 100px !important;
+            padding: 10px 20px !important;
         }
     }
 
     @media (max-width: 600px) {
         #localPreview {
-            width: 80px !important;
-            height: 55px !important;
+            width: 90px !important;
+            height: 65px !important;
+        }
+        
+        /* Compact action buttons in header on mobile */
+        .btn-sm {
+            padding: 6px 12px !important;
+            font-size: 11px !important;
         }
 
-        /* Header wraps on very small screens */
-        .main-wrapper>div:first-child {
-            height: auto !important;
-            min-height: 50px !important;
-            padding: 8px 10px !important;
-            flex-wrap: wrap;
-            gap: 6px;
+        .main-wrapper > div:first-child h1 {
+            font-size: 12px !important;
         }
 
-        /* Join overlay button scales down */
-        #joinBtn {
-            padding: 18px 40px !important;
-            font-size: 18px !important;
-        }
-
-        #overlay h2 {
-            font-size: 22px !important;
-        }
-
-        /* Local controls as a static bar below video — no longer overlapping */
-        #localControlsWrapper {
-            position: static !important;
-            transform: none !important;
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 0;
-        }
-
-        #localControlsWrapper>div:first-child {
-            margin-bottom: 0 !important;
-            margin-right: 10px;
-        }
-
-        #localControlsWrapper>div:last-child {
-            width: auto;
-            justify-content: center;
-            padding: 10px 20px !important;
-            gap: 16px !important;
-        }
-
-        /* Compact control buttons */
-        #localControlsWrapper button {
-            width: 36px !important;
-            height: 36px !important;
+        #mainVidLabel {
+            bottom: 98px !important;
+            max-width: 72vw !important;
+            font-size: 10px !important;
+            padding: 5px 9px !important;
         }
     }
 </style>
 
-<div class="main-wrapper"
+    <!-- MOBILE BACKDROP -->
+    <div id="mobilePanelBackdrop" onclick="closeAllMobilePanels()"></div>
+
+    <div class="main-wrapper"
     style="margin: 0; padding: 0; background: #0f172a; height: 100vh; color: white; display: flex; flex-direction: column; overflow: hidden;">
     <!-- STUDIO HEADER -->
-    <div style="height: 55px; min-height: 55px; padding: 0 15px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; z-index: 100; gap: 8px;">
+    <div
+        style="height: 55px; min-height: 55px; padding: 0 15px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; z-index: 100; gap: 8px;">
         <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex-shrink: 1;">
             <div
                 style="width: 10px; height: 10px; min-width: 10px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; animation: blink 1s infinite;">
             </div>
-            <h1 style="font-size: 14px; margin: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <h1
+                style="font-size: 14px; margin: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 <?php echo e($lesson['course_title']); ?> <span
                     style="opacity: 0.5; margin-left: 6px; font-weight: 400;">#<?php echo $lessonId; ?></span>
             </h1>
@@ -590,8 +777,7 @@ require_once 'includes/header.php';
                     <span id="timerDisplay">00:00</span>
                 </div>
 
-                <!-- TEACHER NAME BADGE -->
-                <div
+                <div id="mainVidLabel"
                     style="position: absolute; top: 75px; left: 25px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 10px; font-size: 12px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px); z-index: 110; display: flex; align-items: center; gap: 8px;">
                     <div
                         style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; box-shadow: 0 0 8px #3b82f6;">
@@ -637,11 +823,13 @@ require_once 'includes/header.php';
             <div id="localControlsWrapper"
                 style="position: absolute; bottom: 30px; left: 30px; z-index: 120; display: none;">
                 <div style="position: relative; margin-bottom: 15px;">
-                    <video id="localPreview" muted autoplay playsinline
-                        style="width: 180px; height: 120px; object-fit: cover; border-radius: 16px; border: 2px solid rgba(255,255,255,0.2); background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                    <video id="localPreview" muted autoplay playsinline onclick="swapVideoSources()"
+                        title="Görüntüləri dəyişmək üçün klikləyin"
+                        style="width: 180px; height: 120px; object-fit: cover; border-radius: 16px; border: 2px solid rgba(255,255,255,0.2); background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.2s;"
+                        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     </video>
-                    <div
-                        style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; color: #fff; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 5px;">
+                    <div id="miniVidLabel"
+                        style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; color: #fff; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 5px; pointer-events: none;">
                         <div style="width: 5px; height: 5px; background: #fff; border-radius: 50%; opacity: 0.8;">
                         </div>
                         Mən
@@ -812,14 +1000,26 @@ require_once 'includes/header.php';
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
-    // === Mobile Chat Toggle ===
+    // === Mobile Panels Management ===
     function toggleStudentChat() {
         const panel = document.getElementById('studentChatPanel');
         const btn = document.getElementById('mobileChatToggle');
+        const backdrop = document.getElementById('mobilePanelBackdrop');
         if (panel) {
-            panel.classList.toggle('mobile-open');
-            if (btn) btn.classList.toggle('active', panel.classList.contains('mobile-open'));
+            const isOpen = panel.classList.toggle('mobile-open');
+            if (btn) btn.classList.toggle('active', isOpen);
+            if (backdrop) backdrop.classList.toggle('visible', isOpen);
         }
+    }
+
+    function closeAllMobilePanels() {
+        const chatPanel = document.getElementById('studentChatPanel');
+        const backdrop = document.getElementById('mobilePanelBackdrop');
+        const chatBtn = document.getElementById('mobileChatToggle');
+
+        if (chatPanel) chatPanel.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.remove('visible');
+        if (chatBtn) chatBtn.classList.remove('active');
     }
 
     const lID = "<?php echo $lessonId; ?>";
@@ -827,6 +1027,10 @@ require_once 'includes/header.php';
     const uID = "<?php echo $currentUser['id']; ?>";
     let p, discoveryInterval, localMediaStream = null,
         dataConn = null;
+    let activeTeacherCall = null;
+    let freezeWatchdogInterval = null;
+    let lastRemoteTime = 0;
+    let lastFreezeRecoveryAt = 0;
     let signalReady = false;
     let isConnecting = false;
     let isDummyStream = false;
@@ -843,6 +1047,10 @@ require_once 'includes/header.php';
     // Screen Share Mgmt
     let screenRequested = false;
     let screenApproved = false;
+
+    // View Swapping
+    let isViewSwapped = false;
+    let teacherStream = null;
 
     // --- LOGGING & UI ---
     const DBG = (m) => {
@@ -865,23 +1073,43 @@ require_once 'includes/header.php';
         }
     }
 
-    let lessonStartTime = Date.now(); // fallback to now if start_time is missing
-    (function() {
-        const parsed = new Date("<?php echo $lesson['start_time']; ?>").getTime();
-        if (!isNaN(parsed)) lessonStartTime = parsed;
-    })();
+    let lessonStartTime = Date.now();
+    <?php if ($lesson && isset($lesson['started_at']) && $lesson['started_at']): ?>
+        lessonStartTime = <?php echo strtotime($lesson['started_at']) * 1000; ?>;
+    <?php endif; ?>
 
     function startLessonTimer() {
-        document.getElementById('lessonTimer').style.display = 'flex';
-        setInterval(() => {
-            const now = new Date().getTime();
-            const diff = Math.floor((now - lessonStartTime) / 1000);
-            if (diff < 0) return; // Prevent negative timer if join before official start
+        const timerEl = document.getElementById('lessonTimer');
+        const displayEl = document.getElementById('timerDisplay');
+        if (!timerEl || !displayEl) return;
+        
+        timerEl.style.display = 'flex';
+        const MAX_DURATION = 3 * 3600; // 3 hours
 
-            const m = Math.floor(diff / 60);
-            const s = diff % 60;
-            document.getElementById('timerDisplay').innerText =
-                (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+        setInterval(() => {
+            const now = Date.now();
+            const totalSeconds = Math.floor((now - lessonStartTime) / 1000);
+            if (totalSeconds < 0) return;
+
+            // 3-HOUR LIMIT CHECK
+            if (totalSeconds >= MAX_DURATION) {
+                if (localMediaStream) localMediaStream.getTracks().forEach(t => t.stop());
+                showAlert("⌛ Maksimum dərs müddəti (3 saat) tamamlandı. Dərs bitmiş sayılır.", "error");
+                setTimeout(() => {
+                    window.location.href = 'live-classes.php';
+                }, 3500);
+                return;
+            }
+
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+
+            let timeStr = "";
+            if (h > 0) timeStr += (h < 10 ? '0' + h : h) + ':';
+            timeStr += (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+
+            displayEl.innerText = timeStr;
         }, 1000);
     }
 
@@ -985,12 +1213,20 @@ require_once 'includes/header.php';
                 // If there's an active peer connection, we must re-call or replace track
                 if (p && dataConn && dataConn.peer && dataConn.open) {
                     DBG("📡 Yeni kamera yayımı müəllimə göndərilir...");
-                    p.call(dataConn.peer, localMediaStream, {
+                    const call = p.call(dataConn.peer, localMediaStream, {
                         metadata: {
                             name: uName,
                             userId: uID
                         }
                     });
+                    
+                    // --- Apply Bitrate Limit ---
+                    setTimeout(() => {
+                        if (call && call.peerConnection) {
+                            applyBitrateLimit(call.peerConnection, 500); // Student cam rarely needs >500kbps
+                        }
+                    }, 1000);
+
                 }
 
                 newVideoTrack.enabled = true; // Ensure it's active
@@ -1266,7 +1502,7 @@ require_once 'includes/header.php';
         let aTrack = realAudioTrack;
         if (!aTrack) {
             try {
-                const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioCtx.createOscillator();
                 const dst = oscillator.connect(audioCtx.createMediaStreamDestination());
                 oscillator.start();
@@ -1337,11 +1573,11 @@ require_once 'includes/header.php';
     // Default fallback (STUN only — works on LAN, fails on mobile)
     let iceServers = {
         iceServers: [{
-                urls: 'stun:stun.l.google.com:19302'
-            },
-            {
-                urls: 'stun:stun1.l.google.com:19302'
-            }
+            urls: 'stun:stun.l.google.com:19302'
+        },
+        {
+            urls: 'stun:stun1.l.google.com:19302'
+        }
         ],
         sdpSemantics: 'unified-plan',
         iceCandidatePoolSize: 10
@@ -1458,10 +1694,56 @@ require_once 'includes/header.php';
     }
 
     function attemptReconnect() {
+        if (activeTeacherCall) {
+            try { activeTeacherCall.close(); } catch (e) { }
+            activeTeacherCall = null;
+        }
         isConnecting = false;
         dataConn = null;
         DBG(`🔄 Yenidən axtarılır...`);
         startDiscovery();
+    }
+
+    function stopFreezeWatchdog() {
+        if (freezeWatchdogInterval) {
+            clearInterval(freezeWatchdogInterval);
+            freezeWatchdogInterval = null;
+        }
+    }
+
+    function startFreezeWatchdog(teacherId) {
+        stopFreezeWatchdog();
+        const vid = document.getElementById('remVid');
+        if (!vid) return;
+        lastRemoteTime = vid.currentTime || 0;
+
+        freezeWatchdogInterval = setInterval(() => {
+            if (!vid.srcObject || !vid.srcObject.active) return;
+            if (vid.readyState < 2) return;
+
+            const current = vid.currentTime || 0;
+            const stalled = Math.abs(current - lastRemoteTime) < 0.01;
+            lastRemoteTime = current;
+
+            if (!stalled) return;
+
+            const now = Date.now();
+            // Avoid reconnect storm while still allowing auto-recovery.
+            if (now - lastFreezeRecoveryAt < 10000) return;
+            lastFreezeRecoveryAt = now;
+
+            DBG("⚠️ Yayım dayandı. Axın yenilənir...");
+            try {
+                if (activeTeacherCall) activeTeacherCall.close();
+            } catch (e) { }
+            activeTeacherCall = null;
+
+            if (teacherId && dataConn && dataConn.open) {
+                initiateCall(teacherId);
+            } else {
+                attemptReconnect();
+            }
+        }, 4000);
     }
 
     async function startDiscovery() {
@@ -1486,7 +1768,7 @@ require_once 'includes/header.php';
                     DBG("🔄 Müəllim sessiyası yeniləndi. Yenidən qoşulur...");
                     try {
                         dataConn.close();
-                    } catch (e) {}
+                    } catch (e) { }
                     const vid = document.getElementById('remVid');
                     if (vid) vid.srcObject = null;
                     dataConn = null;
@@ -1515,7 +1797,7 @@ require_once 'includes/header.php';
                 if (dataConn) {
                     try {
                         dataConn.close();
-                    } catch (e) {}
+                    } catch (e) { }
                 }
                 dataConn = null;
                 startDiscovery();
@@ -1561,14 +1843,21 @@ require_once 'includes/header.php';
                 if (window.lucide) lucide.createIcons();
                 document.getElementById('btnMicItem').style.background = '#ef4444';
             } else if (d.type === 'whiteboard_approved') {
+                console.log("✅ Whiteboard approved by teacher. Starting...");
                 startActualWhiteboard();
             } else if (d.type === 'whiteboard_rejected') {
+                console.warn("❌ Whiteboard request rejected by teacher.");
                 showAlert("Müəllim lövhə istəyini rədd etdi.", "error");
                 document.getElementById('btnWhiteboardItem').style.background = 'rgba(255,255,255,0.1)';
             } else if (d.type === 'whiteboard_force_stop') {
+                console.warn("⚠️ Whiteboard force stop received. Reason:", d.reason);
                 if (isWhiteboardActive) {
                     stopWhiteboard();
-                    showAlert("⚠️ Müəllim lövhəni bağladı!", "error");
+                    if (d.reason === 'teacher') {
+                        showAlert("⚠️ Müəllim lövhəni bağladı!", "error");
+                    } else {
+                        showAlert("Lövhə sessiyası dayandırıldı.", "info");
+                    }
                 }
             }
             if (d.type === 'notification') {
@@ -1583,7 +1872,7 @@ require_once 'includes/header.php';
                 // Show a beautiful notification toast
                 const toast = document.createElement('div');
                 toast.className = 'live-notification-toast';
-                toast.style = `position:fixed; top:70px; right:10px; left:10px; background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-left:5px solid ${color}; color:white; padding:16px; border-radius:16px; z-index:99999; box-shadow:0 25px 50px -12px rgba(0,0,0,0.8); max-width:420px; margin-left:auto; backdrop-filter:blur(10px); animation: fadeInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);`;
+                toast.style = `position:fixed; top:70px; right:10px; left:10px; background:rgba(15, 23, 42, 0.98); border:1px solid rgba(255,255,255,0.1); border-left:5px solid ${color}; color:white; padding:16px; border-radius:16px; z-index:99999; box-shadow:0 25px 50px -12px rgba(0,0,0,0.8); max-width:420px; margin-left:auto; backdrop-filter:blur(10px); animation: fadeInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);`;
                 toast.innerHTML = `
                     <div style="font-weight:850; font-size:12px; margin-bottom:8px; color:${color}; text-transform:uppercase; letter-spacing:1.5px; display:flex; align-items:center; justify-content:space-between;">
                         <span style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">📢</span> ${d.title || 'Müəllim Bildirişi'}</span>
@@ -1624,7 +1913,7 @@ require_once 'includes/header.php';
                 overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.98); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(10px); color:white; font-family:sans-serif; text-align:center; padding:20px;";
                 overlay.innerHTML = `
                     <div style="background:rgba(239, 68, 68, 0.1); width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:50px; margin-bottom:20px; border:2px solid #ef4444; color:#ef4444; animation: heartbeat 1.5s ease-in-out infinite;">⚠️</div>
-                    <h1 style="font-size:32px; font-weight:850; margin-bottom:12px; letter-spacing:-1px;">Giriş Məhdudlaşdırıldı</h1>
+                    <h1 style="font-size:32px; font-weight:850; margin-bottom:12px; letter-spacing:-1px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Giriş Məhdudlaşdırıldı</h1>
                     <p style="font-size:18px; color:#94a3b8; max-width:400px; line-height:1.6; font-weight:500;">Müəllim tərəfindən dərsi tərk etməniz tələb olundu.</p>
                     <div style="margin-top:40px; font-size:14px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:1px;">3 saniyə ərzində yönləndirilirsiniz...</div>
                 `;
@@ -1678,6 +1967,11 @@ require_once 'includes/header.php';
             // Clear video to prevent frozen image
             const vid = document.getElementById('remVid');
             if (vid) vid.srcObject = null;
+            stopFreezeWatchdog();
+            if (activeTeacherCall) {
+                try { activeTeacherCall.close(); } catch (e) { }
+                activeTeacherCall = null;
+            }
 
             isConnecting = false;
             dataConn = null;
@@ -1696,20 +1990,46 @@ require_once 'includes/header.php';
 
     function initiateCall(teacherId) {
         DBG("📞 Müəllimə zəng edilir...");
+        if (activeTeacherCall) {
+            try { activeTeacherCall.close(); } catch (e) { }
+            activeTeacherCall = null;
+        }
         const call = p.call(teacherId, localMediaStream, {
             metadata: {
                 name: uName,
                 userId: uID
             }
         });
+        activeTeacherCall = call;
         call.on('stream', (remoteStream) => {
             DBG("📹 Müəllim görüntüsü alındı (call tərəfindən) ✅");
             showRemoteVideo(remoteStream);
+            startFreezeWatchdog(teacherId);
         });
-        call.on('close', () => DBG("❌ Müəllim ilə əlaqə kəsildi"));
+        call.on('close', () => {
+            DBG("❌ Müəllim ilə əlaqə kəsildi");
+            if (activeTeacherCall === call) activeTeacherCall = null;
+        });
+        call.on('error', () => {
+            DBG("⚠️ Zəng xətası. Yenidən qoşulur...");
+            if (activeTeacherCall === call) activeTeacherCall = null;
+            attemptReconnect();
+        });
+
+        const pc = call.peerConnection;
+        if (pc) {
+            pc.addEventListener('iceconnectionstatechange', () => {
+                const st = pc.iceConnectionState;
+                if (st === 'failed' || st === 'disconnected') {
+                    DBG("⚠️ Şəbəkə zəifdir. Yenidən qoşulma edilir...");
+                    attemptReconnect();
+                }
+            });
+        }
     }
 
     function showRemoteVideo(stream) {
+        teacherStream = stream;
         const vid = document.getElementById('remVid');
         if (!vid) return;
 
@@ -1746,7 +2066,7 @@ require_once 'includes/header.php';
             }).catch(e => {
                 DBG("🔇 Otomatik səs bloklandı, 'Unmute' düyməsini istifadə edin.");
                 vid.muted = true;
-                vid.play().catch(() => {});
+                vid.play().catch(() => { });
                 const unmuteBtn = document.getElementById('unmuteBtn');
                 if (unmuteBtn) unmuteBtn.style.display = 'flex';
             });
@@ -1774,6 +2094,52 @@ require_once 'includes/header.php';
         const vid = document.getElementById('remVid');
         vid.muted = false;
         vid.play().then(() => document.getElementById('unmuteBtn').style.display = 'none');
+    }
+
+    function swapVideoSources() {
+        const mainVid = document.getElementById('remVid');
+        const miniVid = document.getElementById('localPreview');
+        const mainLabel = document.getElementById('mainVidLabel');
+        const miniLabel = document.getElementById('miniVidLabel');
+
+        if (!mainVid || !miniVid) return;
+
+        isViewSwapped = !isViewSwapped;
+
+        if (isViewSwapped) {
+            // Student becomes LARGE, Teacher becomes SMALL
+            mainVid.srcObject = localMediaStream;
+            miniVid.srcObject = teacherStream;
+
+            mainLabel.innerHTML = '<div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></div>Mən';
+            miniLabel.innerHTML = '<div style="width: 5px; height: 5px; background: #3b82f6; border-radius: 50%; opacity: 0.8;"></div>Müəllim';
+
+            mainVid.muted = true; // No self-echo
+            miniVid.muted = false; // Hear teacher in small window
+
+            // Adjust styles
+            mainVid.style.objectFit = 'cover';
+            miniVid.style.objectFit = 'contain';
+
+            LOG("🔄 Bakış bucağı dəyişdirildi: Öz görüntünüz böyüdü.", "#10b981");
+        } else {
+            // Restore: Teacher is LARGE, Student is SMALL
+            mainVid.srcObject = teacherStream;
+            miniVid.srcObject = localMediaStream;
+
+            mainLabel.innerHTML = '<div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; box-shadow: 0 0 8px #3b82f6;"></div>Müəllim: <?php echo e($lesson["first_name"] . " " . $lesson["last_name"]); ?>';
+            miniLabel.innerHTML = '<div style="width: 5px; height: 5px; background: #fff; border-radius: 50%; opacity: 0.8;"></div>Mən';
+
+            mainVid.muted = false;
+            miniVid.muted = true;
+
+            mainVid.style.objectFit = 'contain';
+            miniVid.style.objectFit = 'cover';
+
+            LOG("🔄 Bakış bucağı qaytarıldı: Müəllim görüntüsü böyüdü.", "#3b82f6");
+        }
+
+        if (window.lucide) lucide.createIcons();
     }
 
     // --- OTHER UI LOGIC ---
@@ -1813,13 +2179,21 @@ require_once 'includes/header.php';
             document.getElementById('localPreview').srcObject = localMediaStream;
 
             // Call teacher with specific screen_share metadata
-            p.call(dataConn.peer, localMediaStream, {
+            const call = p.call(dataConn.peer, localMediaStream, {
                 metadata: {
                     name: uName,
                     userId: uID,
                     type: 'screen_share'
                 }
             });
+
+            // --- Apply Bitrate Limit ---
+            setTimeout(() => {
+                if (call && call.peerConnection) {
+                    applyBitrateLimit(call.peerConnection, 1500); // 1.5 Mbps for screen share
+                }
+            }, 1000);
+
 
             document.getElementById('btnScreenItem').style.background = "#10b981";
             isScreenSharing = true;
@@ -1913,29 +2287,40 @@ require_once 'includes/header.php';
         }
     }
 
-    // === WHITEBOARD LOGIC ===
+    // === WHITEBOARD LOGIC (V8.0 HIGH-FIDELITY SYNC) ===
     var isWhiteboardActive = false;
-    var wbCanvas = null,
-        wbCtx = null;
-    var isDrawing = false,
-        wbSnapshot = null;
-    var startX = 0,
-        startY = 0,
-        lastX = 0,
-        lastY = 0;
-    var wbColor = '#000000',
-        wbTool = 'pencil',
-        wbBgType = 'plain';
-    var eraserSize = 30,
-        pencilSize = 3;
-    var wbPages = [],
-        currentPageIndex = 0;
-    let undoStack = [],
-        redoStack = [];
+    var wbCanvas = null;
+    var wbCtx = null;
+    var isDrawing = false;
+    var startX = 0;
+    var startY = 0;
+    var lastX = 0;
+    var lastY = 0;
+    var wbColor = '#000000';
+    var wbTool = 'pencil';
+    var wbSnapshot = null;
+    var wbBgType = 'plain';
+    var eraserSize = 30; 
+    var pencilSize = 3; 
+
+    var wbPages = [];
+    var currentPageIndex = 0;
+    let undoStack = [];
+    let redoStack = [];
     const MAX_HISTORY = 30;
+
+    var laserX = 0;
+    var laserY = 0;
+    var laserActive = false;
     var wbCall = null;
-    var wbLaserSnapshot = null;
     var wbDPR = 1;
+    
+    // Event listener references for cleanup
+    var wbResizeHandler = null;
+    var wbMouseDownHandler = null;
+    var wbMouseMoveHandler = null;
+    var wbMouseUpHandler = null;
+    var wbMouseOutHandler = null;
 
     function toggleWBToolbar() {
         const toolbar = document.querySelector('.wb-controls-floating');
@@ -1960,722 +2345,795 @@ require_once 'includes/header.php';
             stopWhiteboard();
         }
     }
-    // ... (unchanged functions) ...
 
     function setWBTool(t) {
-        // Exit Laser Mode
-        if (wbTool === 'laser' && wbLaserSnapshot) {
-            wbCtx.putImageData(wbLaserSnapshot, 0, 0);
-            wbLaserSnapshot = null;
+        wbTool = t;
+        document.querySelectorAll('.wb-tool-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.getElementById('tool' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        if (t !== 'laser') {
+            const lsr = document.getElementById('laserCursor');
+            if (lsr) lsr.style.display = 'none';
+            laserActive = false;
         }
 
-        wbTool = t;
-
-        document.querySelectorAll('.wb-tool-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tool' + t.charAt(0).toUpperCase() + t.slice(1))?.classList.add('active');
-
-        // Enter Laser Mode
-        if (t === 'laser') {
-            wbLaserSnapshot = wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height);
-            wbCanvas.style.cursor = 'none';
-        } else {
-            wbCanvas.style.cursor = 'crosshair';
+        // Update size display based on current tool
+        const sizeDisp = document.getElementById('sizeDisplay');
+        if (sizeDisp) {
+            sizeDisp.innerText = (t === 'eraser' ? eraserSize : pencilSize) + 'px';
         }
     }
 
     let wbStreamCanvas, wbStreamCtx, wbStreamInterval;
+    let wbStreamHealth = { trackCount: 0, lastUpdate: 0, isAlive: false };
+    let wbReconnectAttempts = 0;
+    const MAX_WB_RECONNECT_ATTEMPTS = 3;
+
+    function validateWhiteboardStream(stream) {
+        if (!stream) return false;
+        const videoTracks = stream.getVideoTracks();
+        if (videoTracks.length === 0) {
+            console.error("❌ Whiteboard stream has no video tracks!");
+            return false;
+        }
+        const track = videoTracks[0];
+        if (track.readyState !== 'live') {
+            console.error("❌ Whiteboard video track not live:", track.readyState);
+            return false;
+        }
+        return true;
+    }
+
+    function monitorWhiteboardStream() {
+        const checkInterval = setInterval(() => {
+            if (!isWhiteboardActive) {
+                clearInterval(checkInterval);
+                return;
+            }
+
+            if (!wbCall || !wbCall.peerConnection) return;
+
+            try {
+                const senders = wbCall.peerConnection.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                
+                if (!videoSender || !videoSender.track || videoSender.track.readyState !== 'live') {
+                    wbStreamHealth.isAlive = false;
+                    console.warn("⚠️ Whiteboard stream unhealthy - attempting reconnect...");
+                    if (wbReconnectAttempts < MAX_WB_RECONNECT_ATTEMPTS) {
+                        wbReconnectAttempts++;
+                        stopWhiteboard();
+                        setTimeout(() => {
+                            if (isWhiteboardActive === false && dataConn && dataConn.open) {
+                                dataConn.send({ type: 'whiteboard_request', sender: uName });
+                                showAlert("Lövhə bağlantısı yenidən qurulur...");
+                            }
+                        }, 500);
+                    }
+                } else {
+                    wbStreamHealth.isAlive = true;
+                    wbStreamHealth.trackCount = senders.length;
+                    wbStreamHealth.lastUpdate = Date.now();
+                }
+            } catch(e) {
+                console.error("Stream health check failed:", e);
+            }
+        }, 5000); // Check every 5 seconds
+    }
 
     function startActualWhiteboard() {
+        // Reset reconnect attempts when starting fresh
+        wbReconnectAttempts = 0;
+        
         isWhiteboardActive = true;
-        document.getElementById('whiteboardOverlay').style.display = 'flex';
+        const overlay = document.getElementById('whiteboardOverlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('is-visible'), 10);
         document.getElementById('btnWhiteboardItem').style.background = '#3b82f6';
+        
         initWBCanvas();
+        if (window.lucide) lucide.createIcons();
 
-        // --- COMPOSITING SETUP FOR STREAM ---
+        // --- VALIDATION: Ensure prerequisites are met ---
+        if (!dataConn || !dataConn.open || !dataConn.peer) {
+            showAlert("❌ Müəllim ilə bağlantı tapılmadı!", "error");
+            isWhiteboardActive = false;
+            document.getElementById('btnWhiteboardItem').style.background = 'rgba(255,255,255,0.1)';
+            return;
+        }
+
+        // --- HIGH-FIDELITY COMPOSITING SETUP ---
         if (!wbStreamCanvas) {
             wbStreamCanvas = document.createElement('canvas');
-            wbStreamCtx = wbStreamCanvas.getContext('2d');
         }
-        // Match size
-        wbStreamCanvas.width = wbCanvas.width;
-        wbStreamCanvas.height = wbCanvas.height;
+        wbStreamCtx = wbStreamCanvas.getContext('2d');
+        wbStreamCanvas.width = 1280;
+        wbStreamCanvas.height = 720;
 
-        // Start Loop
         if (wbStreamInterval) clearInterval(wbStreamInterval);
         wbStreamInterval = setInterval(() => {
-            if (!wbCanvas) return;
-            // 1. Fill White Background
-            wbStreamCtx.fillStyle = '#ffffff';
-            wbStreamCtx.fillRect(0, 0, wbStreamCanvas.width, wbStreamCanvas.height);
-
-            // 2. Draw Grid/Lines
-            if (wbBgType !== 'plain') {
-                wbStreamCtx.beginPath();
-                wbStreamCtx.strokeStyle = '#cbd5e1';
-                wbStreamCtx.lineWidth = 1 * wbDPR;
-                if (wbBgType === 'grid') {
-                    const step = 30 * wbDPR;
-                    for (let x = step; x < wbStreamCanvas.width; x += step) {
-                        wbStreamCtx.moveTo(x, 0);
-                        wbStreamCtx.lineTo(x, wbStreamCanvas.height);
+            if (!wbCanvas || !isWhiteboardActive) return;
+            
+            try {
+                // 1. Background
+                wbStreamCtx.fillStyle = '#ffffff';
+                wbStreamCtx.fillRect(0, 0, wbStreamCanvas.width, wbStreamCanvas.height);
+                
+                // 2. Pattern (only draw if needed)
+                if (wbBgType !== 'plain') {
+                    wbStreamCtx.beginPath();
+                    wbStreamCtx.strokeStyle = '#cbd5e1';
+                    wbStreamCtx.lineWidth = 1;
+                    if (wbBgType === 'grid') {
+                        const step = 30 * (wbStreamCanvas.height / wbCanvas.height);
+                        for (let x = step; x < wbStreamCanvas.width; x += step) {
+                            wbStreamCtx.moveTo(x, 0); wbStreamCtx.lineTo(x, wbStreamCanvas.height);
+                        }
+                        for (let y = step; y < wbStreamCanvas.height; y += step) {
+                            wbStreamCtx.moveTo(0, y); wbStreamCtx.lineTo(wbStreamCanvas.width, y);
+                        }
+                    } else if (wbBgType === 'lines') {
+                        const step = 25 * (wbStreamCanvas.height / wbCanvas.height);
+                        for (let y = step; y < wbStreamCanvas.height; y += step) {
+                            wbStreamCtx.moveTo(0, y); wbStreamCtx.lineTo(wbStreamCanvas.width, y);
+                        }
                     }
-                    for (let y = step; y < wbStreamCanvas.height; y += step) {
-                        wbStreamCtx.moveTo(0, y);
-                        wbStreamCtx.lineTo(wbStreamCanvas.width, y);
-                    }
-                } else if (wbBgType === 'lines') {
-                    const step = 25 * wbDPR;
-                    for (let y = step; y < wbStreamCanvas.height; y += step) {
-                        wbStreamCtx.moveTo(0, y);
-                        wbStreamCtx.lineTo(wbStreamCanvas.width, y);
-                    }
+                    wbStreamCtx.stroke();
                 }
-                wbStreamCtx.stroke();
-            }
 
-            // 3. Draw Actual Drawings
-            wbStreamCtx.drawImage(wbCanvas, 0, 0);
-        }, 80); // ~12 FPS for lower latency and bandwidth usage
+                // 3. Drawing
+                if (wbCanvas && wbCanvas.width > 0) {
+                    wbStreamCtx.drawImage(wbCanvas, 0, 0, wbStreamCanvas.width, wbStreamCanvas.height);
+                }
 
-        const wbStream = wbStreamCanvas.captureStream(12);
-        wbCall = p.call(dataConn.peer, wbStream, {
-            metadata: {
-                type: 'screen_share',
-                name: uName,
-                userId: uID
+                // 4. Laser Pointer (only draw if active)
+                if (laserActive && wbTool === 'laser' && wbCanvas && wbCanvas.width > 0) {
+                    const scaleX = wbStreamCanvas.width / wbCanvas.width;
+                    const scaleY = wbStreamCanvas.height / wbCanvas.height;
+                    const sLX = laserX * scaleX;
+                    const sLY = laserY * scaleY;
+
+                    wbStreamCtx.save();
+                    const grad = wbStreamCtx.createRadialGradient(sLX, sLY, 0, sLX, sLY, 25);
+                    grad.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
+                    grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                    wbStreamCtx.fillStyle = grad;
+                    wbStreamCtx.beginPath(); wbStreamCtx.arc(sLX, sLY, 25, 0, Math.PI*2); wbStreamCtx.fill();
+                    wbStreamCtx.beginPath(); wbStreamCtx.arc(sLX, sLY, 8, 0, Math.PI*2); wbStreamCtx.fillStyle = '#ef4444'; wbStreamCtx.fill();
+                    wbStreamCtx.strokeStyle = 'white'; wbStreamCtx.lineWidth = 2; wbStreamCtx.stroke();
+                    wbStreamCtx.restore();
+                }
+
+                // 5. Camera PiP (Student Camera) - only if video is ready
+                const localVid = document.getElementById('localVid');
+                if (localVid && localVid.readyState >= 2) {
+                    const camW = 200, camH = 150;
+                    wbStreamCtx.save();
+                    wbStreamCtx.shadowBlur = 10; 
+                    wbStreamCtx.shadowColor = 'rgba(0,0,0,0.3)';
+                    wbStreamCtx.drawImage(localVid, wbStreamCanvas.width - camW - 20, wbStreamCanvas.height - camH - 20, camW, camH);
+                    wbStreamCtx.restore();
+                }
+            } catch(e) {
+                console.warn("Whiteboard streaming error:", e);
             }
-        });
-        showAlert("Lövhə aktivdir!");
+        }, 150); // Increased to 150ms (6-7fps) for better CPU efficiency and less memory churn
+
+        // --- STREAM CAPTURE & VALIDATION ---
+        let wbStream = null;
+        try {
+            wbStream = wbStreamCanvas.captureStream(12);
+        } catch(e) {
+            console.error("❌ Canvas capture stream failed:", e);
+            showAlert("Lövhə stream xətası", "error");
+            stopWhiteboard();
+            return;
+        }
+
+        if (!validateWhiteboardStream(wbStream)) {
+            console.error("❌ Whiteboard stream validation failed");
+            showAlert("Lövhə stream qüsurlu", "error");
+            wbStream.getTracks().forEach(t => t.stop());
+            stopWhiteboard();
+            return;
+        }
+
+        // --- ESTABLISH WHITEBOARD CALL WITH ERROR HANDLING ---
+        try {
+            wbCall = p.call(dataConn.peer, wbStream, {
+                metadata: { type: 'screen_share', name: uName, userId: uID }
+            });
+
+            wbCall.on('error', (err) => {
+                console.error("❌ Whiteboard call error:", err);
+                showAlert("Lövhə bağlantısı xətası: " + err.message, "error");
+                if (isWhiteboardActive) {
+                    stopWhiteboard();
+                }
+            });
+
+            wbCall.on('close', () => {
+                console.log("⚠️ Whiteboard call closed unexpectedly");
+                if (isWhiteboardActive) {
+                    showAlert("Lövhə bağlantısı kəsildi", "warning");
+                    stopWhiteboard();
+                }
+            });
+
+            // Monitor stream health
+            setTimeout(() => monitorWhiteboardStream(), 1000);
+
+        } catch(e) {
+            console.error("❌ Failed to initiate whiteboard call:", e);
+            showAlert("Lövhə çağırışı başarısız: " + e.message, "error");
+            wbStream.getTracks().forEach(t => t.stop());
+            stopWhiteboard();
+            return;
+        }
+
+        // --- Apply Bitrate Limit ---
+        setTimeout(() => {
+            if (wbCall && wbCall.peerConnection) {
+                try {
+                    applyBitrateLimit(wbCall.peerConnection, 1000); // Max 1 Mbps for whiteboard
+                } catch(e) {
+                    console.warn("Bitrate limit apply failed:", e);
+                }
+            }
+        }, 1000);
+
+        console.log("🎨 Whiteboard system initialized with stream validation.");
     }
 
     function stopWhiteboard() {
         isWhiteboardActive = false;
-        if (wbStreamInterval) clearInterval(wbStreamInterval);
-        document.getElementById('whiteboardOverlay').style.display = 'none';
+        wbReconnectAttempts = 0; // Reset reconnection attempts
+        
+        const overlay = document.getElementById('whiteboardOverlay');
+        overlay.classList.remove('is-visible');
         document.getElementById('btnWhiteboardItem').style.background = 'rgba(255,255,255,0.1)';
+        
+        // ====== COMPLETE RESOURCE CLEANUP ======
+        
+        // 1. Stop canvas stream interval
+        if (wbStreamInterval) {
+            clearInterval(wbStreamInterval);
+            wbStreamInterval = null;
+        }
+        
+        // 2. Release stream canvas resources
+        if (wbStreamCanvas) {
+            try {
+                const stream = wbStreamCanvas.captureStream ? wbStreamCanvas.captureStream() : null;
+                if (stream) {
+                    stream.getTracks().forEach(track => {
+                        if (track && track.stop) track.stop();
+                    });
+                }
+                wbStreamCanvas.width = 0;
+                wbStreamCanvas.height = 0;
+                wbStreamCtx = null;
+            } catch(e) { console.warn("Error releasing stream canvas:", e); }
+        }
+        
+        // 3. Close the WebRTC call for whiteboard stream
         if (wbCall) {
-            wbCall.close();
+            try {
+                if (wbCall.peerConnection) {
+                    wbCall.peerConnection.getSenders().forEach(sender => {
+                        if (sender.track) sender.track.stop();
+                    });
+                    wbCall.peerConnection.close();
+                }
+                wbCall.close();
+            } catch(e) { console.warn("Error closing wbCall:", e); }
             wbCall = null;
         }
-        if (dataConn && dataConn.open) dataConn.send({
-            type: 'whiteboard_ended'
-        });
-        // Reset toolbar to expanded state for next open
-        document.querySelector('.wb-controls-floating').classList.remove('wb-collapsed');
-        document.getElementById('wbToolbarOpenTab').classList.remove('visible');
-        showAlert("Lövhə bağlandı.");
+        
+        // 4. Remove event listeners to prevent memory leaks
+        if (wbCanvas) {
+            // Remove mouse listeners
+            if (wbMouseDownHandler) wbCanvas.removeEventListener('mousedown', wbMouseDownHandler);
+            if (wbMouseMoveHandler) wbCanvas.removeEventListener('mousemove', wbMouseMoveHandler);
+            if (wbMouseUpHandler) wbCanvas.removeEventListener('mouseup', wbMouseUpHandler);
+            if (wbMouseOutHandler) wbCanvas.removeEventListener('mouseout', wbMouseOutHandler);
+            
+            // Remove touch listeners
+            if (wbCanvas._touchStartHandler) wbCanvas.removeEventListener('touchstart', wbCanvas._touchStartHandler);
+            if (wbCanvas._touchMoveHandler) wbCanvas.removeEventListener('touchmove', wbCanvas._touchMoveHandler);
+            if (wbCanvas._touchEndHandler) wbCanvas.removeEventListener('touchend', wbCanvas._touchEndHandler);
+            
+            // Clear all stored handlers
+            wbMouseDownHandler = null;
+            wbMouseMoveHandler = null;
+            wbMouseUpHandler = null;
+            wbMouseOutHandler = null;
+            wbCanvas._touchStartHandler = null;
+            wbCanvas._touchMoveHandler = null;
+            wbCanvas._touchEndHandler = null;
+            
+            // Reset canvas reference
+            wbCanvas = null;
+            wbCtx = null;
+        }
+        
+        // 5. Remove resize listener
+        if (wbResizeHandler) {
+            window.removeEventListener('resize', wbResizeHandler);
+            wbResizeHandler = null;
+        }
+        
+        // 6. Clear undo/redo stacks to free memory
+        undoStack = [];
+        redoStack = [];
+        
+        // 7. Clear whiteboard state variables
+        isDrawing = false;
+        wbSnapshot = null;
+        laserActive = false;
+        laserX = 0;
+        laserY = 0;
+        wbTool = 'pencil';
+        
+        // 8. Reset stream health monitoring
+        wbStreamHealth = { trackCount: 0, lastUpdate: 0, isAlive: false };
+        
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+        if (dataConn && dataConn.open) dataConn.send({ type: 'whiteboard_ended' });
+        
+        // Reset toolbar
+        const toolbar = document.querySelector('.wb-controls-floating');
+        if (toolbar) toolbar.classList.remove('wb-collapsed');
+        const tab = document.getElementById('wbToolbarOpenTab');
+        if (tab) tab.classList.remove('visible');
+        
+        console.log("🎨 Whiteboard resources completely cleaned up");
     }
 
     function initWBCanvas() {
         if (wbCanvas) return;
         wbCanvas = document.getElementById('wbCanvasInternal');
         wbCtx = wbCanvas.getContext('2d');
-        const resize = () => {
+        
+        // Create and store resize handler for later cleanup
+        wbResizeHandler = () => {
+            if (!wbCanvas || !wbCtx) return;
             const container = wbCanvas.parentElement;
-            wbDPR = window.devicePixelRatio || 1;
-            let tempImg = (wbCanvas.width > 0 && wbCanvas.height > 0) ? wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height) : null;
-
-            wbCanvas.width = container.clientWidth * wbDPR;
-            wbCanvas.height = container.clientHeight * wbDPR;
-            wbCanvas.style.width = container.clientWidth + 'px';
-            wbCanvas.style.height = container.clientHeight + 'px';
-
+            if (!container || container.clientWidth === 0) return;
+            let tempImg = (wbCanvas.width > 0) ? wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height) : null;
+            wbCanvas.width = container.clientWidth;
+            wbCanvas.height = container.clientHeight;
             wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
             if (tempImg) wbCtx.putImageData(tempImg, 0, 0);
-            else saveState();
+            else if (wbPages.length === 0 || !wbPages[currentPageIndex]) saveState();
             setWBBackground(wbBgType);
-
-            // Sync Stream Canvas if exists
-            if (wbStreamCanvas) {
-                wbStreamCanvas.width = wbCanvas.width;
-                wbStreamCanvas.height = wbCanvas.height;
-            }
         };
-        window.addEventListener('resize', resize);
-        resize();
-        if (wbPages.length === 0) {
-            wbPages.push(null);
-            updatePageIndicator();
-        }
+        
+        window.addEventListener('resize', wbResizeHandler);
+        wbResizeHandler();
+        
+        if (wbPages.length === 0) { wbPages.push(null); updatePageIndicator(); }
 
-        wbCanvas.onmousedown = (e) => {
-            const mx = e.offsetX * wbDPR,
-                my = e.offsetY * wbDPR;
+        // Store mouse handlers for later cleanup
+        wbMouseDownHandler = (e) => {
             if (wbTool === 'laser') return;
-            if (wbTool === 'text') {
-                drawText(mx, my);
-                return;
-            }
+            if (wbTool === 'text') { drawText(e.offsetX, e.offsetY); return; }
             saveState();
             isDrawing = true;
-            [startX, startY] = [mx, my];
-            [lastX, lastY] = [mx, my];
+            [startX, startY] = [e.offsetX, e.offsetY];
+            [lastX, lastY] = [e.offsetX, e.offsetY];
             wbSnapshot = wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height);
         };
-        wbCanvas.onmousemove = (e) => {
-            const mx = e.offsetX * wbDPR,
-                my = e.offsetY * wbDPR;
+        
+        wbMouseMoveHandler = (e) => {
+            const lsr = document.getElementById('laserCursor');
             if (wbTool === 'laser') {
-                if (wbLaserSnapshot) wbCtx.putImageData(wbLaserSnapshot, 0, 0);
-                drawLaser(mx, my);
-                return;
+                lsr.style.display = 'block';
+                lsr.style.left = (e.clientX - 6) + 'px'; lsr.style.top = (e.clientY - 6) + 'px';
+                laserX = e.offsetX; laserY = e.offsetY; laserActive = true;
+            } else { 
+                lsr.style.display = 'none'; 
+                laserActive = false; 
             }
             if (!isDrawing) return;
-            if (wbTool === 'pencil' || wbTool === 'eraser') drawFreehand(mx, my);
-            else if (wbTool !== 'text') {
+            if (wbTool === 'pencil' || wbTool === 'eraser') drawFreehand(e.offsetX, e.offsetY);
+            else if (wbTool !== 'text' && wbTool !== 'laser') {
                 wbCtx.putImageData(wbSnapshot, 0, 0);
-                drawShape(mx, my);
+                drawShape(e.offsetX, e.offsetY);
             }
         };
-        wbCanvas.onmouseup = () => {
-            isDrawing = false;
-            wbSnapshot = null;
-        };
-        wbCanvas.onmouseout = () => {
-            if (wbTool === 'laser' && wbLaserSnapshot) wbCtx.putImageData(wbLaserSnapshot, 0, 0);
-        };
+        
+        wbMouseUpHandler = () => { isDrawing = false; wbSnapshot = null; };
+        wbMouseOutHandler = () => { isDrawing = false; document.getElementById('laserCursor').style.display = 'none'; laserActive = false; };
 
-        // ── Touch support ─────────────────────────────────────────────
-        function getTouchPos(touch) {
-            const rect = wbCanvas.getBoundingClientRect();
-            return {
-                x: (touch.clientX - rect.left) * (wbCanvas.width / rect.width),
-                y: (touch.clientY - rect.top) * (wbCanvas.height / rect.height)
-            };
-        }
+        wbCanvas.addEventListener('mousedown', wbMouseDownHandler);
+        wbCanvas.addEventListener('mousemove', wbMouseMoveHandler);
+        wbCanvas.addEventListener('mouseup', wbMouseUpHandler);
+        wbCanvas.addEventListener('mouseout', wbMouseOutHandler);
 
-        wbCanvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const pos = getTouchPos(e.touches[0]);
+        // Touch handlers with cleanup references
+        var touchStartHandler = (e) => {
+            e.preventDefault(); 
+            const r = wbCanvas.getBoundingClientRect();
+            const p = { x: (e.touches[0].clientX - r.left) * (wbCanvas.width / r.width), y: (e.touches[0].clientY - r.top) * (wbCanvas.height / r.height) };
             if (wbTool === 'laser') return;
-            if (wbTool === 'text') {
-                drawText(pos.x, pos.y);
-                return;
-            }
-            saveState();
-            isDrawing = true;
-            startX = pos.x;
-            startY = pos.y;
-            lastX = pos.x;
-            lastY = pos.y;
+            if (wbTool === 'text') { drawText(p.x, p.y); return; }
+            saveState(); isDrawing = true; [startX, startY] = [p.x, p.y]; [lastX, lastY] = [p.x, p.y];
             wbSnapshot = wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height);
-        }, {
-            passive: false
-        });
-
-        wbCanvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (!isDrawing) return;
-            const pos = getTouchPos(e.touches[0]);
-            if (wbTool === 'pencil' || wbTool === 'eraser') {
-                drawFreehand(pos.x, pos.y);
-            } else if (wbTool !== 'text' && wbTool !== 'laser') {
-                wbCtx.putImageData(wbSnapshot, 0, 0);
-                drawShape(pos.x, pos.y);
-            }
-        }, {
-            passive: false
-        });
-
-        wbCanvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isDrawing = false;
-            wbSnapshot = null;
-        }, {
-            passive: false
-        });
+        };
+        
+        var touchMoveHandler = (e) => {
+            e.preventDefault(); 
+            if (!isDrawing) return; 
+            const r = wbCanvas.getBoundingClientRect();
+            const p = { x: (e.touches[0].clientX - r.left) * (wbCanvas.width / r.width), y: (e.touches[0].clientY - r.top) * (wbCanvas.height / r.height) };
+            if (wbTool === 'pencil' || wbTool === 'eraser') drawFreehand(p.x, p.y);
+            else if (wbTool !== 'text' && wbTool !== 'laser') { wbCtx.putImageData(wbSnapshot, 0, 0); drawShape(p.x, p.y); }
+        };
+        
+        var touchEndHandler = (e) => { isDrawing = false; };
+        
+        wbCanvas.addEventListener('touchstart', touchStartHandler, {passive:false});
+        wbCanvas.addEventListener('touchmove', touchMoveHandler, {passive:false});
+        wbCanvas.addEventListener('touchend', touchEndHandler, {passive:false});
+        
+        // Store touch handlers on the canvas for later cleanup
+        wbCanvas._touchStartHandler = touchStartHandler;
+        wbCanvas._touchMoveHandler = touchMoveHandler;
+        wbCanvas._touchEndHandler = touchEndHandler;
     }
 
-    function saveCurrentPage() {
-        if (wbCanvas && wbCtx) wbPages[currentPageIndex] = wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height);
-    }
-
-    function loadPage(index) {
-        if (wbPages[index]) wbCtx.putImageData(wbPages[index], 0, 0);
+    function saveCurrentPage() { if (wbCanvas) wbPages[currentPageIndex] = wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height); }
+    function loadPage(idx) {
+        if (wbPages[idx]) wbCtx.putImageData(wbPages[idx], 0, 0);
         else wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
         updatePageIndicator();
     }
-
-    function addNewPage() {
-        saveCurrentPage();
-        currentPageIndex = wbPages.length;
-        wbPages.push(null);
-        wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
-        updatePageIndicator();
+    function addNewPage() { 
+        saveCurrentPage(); 
+        currentPageIndex = wbPages.length; 
+        wbPages.push(null); 
+        wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height); 
+        updatePageIndicator(); 
     }
-
-    function prevPage() {
-        if (currentPageIndex > 0) {
-            saveCurrentPage();
-            currentPageIndex--;
-            loadPage(currentPageIndex);
-        }
-    }
-
-    function nextPage() {
-        if (currentPageIndex < wbPages.length - 1) {
-            saveCurrentPage();
-            currentPageIndex++;
-            loadPage(currentPageIndex);
-        }
-    }
-
-    function deletePage() {
-        if (wbPages.length <= 1) return;
-        if (confirm("Silinsin?")) {
-            wbPages.splice(currentPageIndex, 1);
-            if (currentPageIndex >= wbPages.length) currentPageIndex = wbPages.length - 1;
-            loadPage(currentPageIndex);
-        }
-    }
-
-    function updatePageIndicator() {
-        document.getElementById('pageIndicator').innerText = (currentPageIndex + 1) + '/' + wbPages.length;
-    }
+    function prevPage() { if (currentPageIndex > 0) { saveCurrentPage(); currentPageIndex--; loadPage(currentPageIndex); } }
+    function nextPage() { if (currentPageIndex < wbPages.length - 1) { saveCurrentPage(); currentPageIndex++; loadPage(currentPageIndex); } }
+    function deletePage() { if (wbPages.length <= 1) return; if (confirm("Səhifə silinsin?")) { wbPages.splice(currentPageIndex, 1); if (currentPageIndex >= wbPages.length) currentPageIndex = wbPages.length - 1; loadPage(currentPageIndex); } }
+    function updatePageIndicator() { document.getElementById('pageIndicator').innerText = (currentPageIndex + 1) + '/' + wbPages.length; }
 
     function saveState() {
+        if (!wbCtx) return;
         if (undoStack.length >= MAX_HISTORY) undoStack.shift();
         undoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height));
         redoStack = [];
     }
-
-    function undo() {
-        if (undoStack.length > 0) {
-            redoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height));
-            wbCtx.putImageData(undoStack.pop(), 0, 0);
-        }
-    }
-
-    function redo() {
-        if (redoStack.length > 0) {
-            undoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height));
-            wbCtx.putImageData(redoStack.pop(), 0, 0);
-        }
-    }
+    function undo() { if (undoStack.length > 0) { redoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height)); wbCtx.putImageData(undoStack.pop(), 0, 0); } }
+    function redo() { if (redoStack.length > 0) { undoStack.push(wbCtx.getImageData(0, 0, wbCanvas.width, wbCanvas.height)); wbCtx.putImageData(redoStack.pop(), 0, 0); } }
 
     function setWBBackground(type) {
         wbBgType = type;
         document.querySelectorAll('[id^="bg"]').forEach(b => b.classList.remove('active'));
-        document.getElementById('bg' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
+        const bgBtn = document.getElementById('bg' + type.charAt(0).toUpperCase() + type.slice(1));
+        if (bgBtn) bgBtn.classList.add('active');
+        
         const canvasEl = document.getElementById('wbCanvasInternal');
-        if (type === 'grid') {
-            canvasEl.style.backgroundImage = 'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)';
-            canvasEl.style.backgroundSize = '30px 30px';
-        } else if (type === 'lines') {
-            canvasEl.style.backgroundImage = 'linear-gradient(#94a3b8 1px, transparent 1px)';
-            canvasEl.style.backgroundSize = '100% 25px';
-        } else canvasEl.style.backgroundImage = 'none';
-        canvasEl.style.backgroundColor = 'white';
-    }
+        if (!canvasEl) return;
 
-    function setWBColor(c, el) {
-        wbColor = c;
-        document.querySelectorAll('.wb_color_item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
+        if (type === 'grid') { canvasEl.style.backgroundImage = 'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)'; canvasEl.style.backgroundSize = '30px 30px'; }
+        else if (type === 'lines') { canvasEl.style.backgroundImage = 'linear-gradient(#94a3b8 1px, transparent 1px)'; canvasEl.style.backgroundSize = '100% 25px'; }
+        else canvasEl.style.backgroundImage = 'none';
+        canvasEl.style.backgroundColor = 'white';
     }
 
     function changeSize(d) {
         if (wbTool === 'eraser') eraserSize = Math.max(10, Math.min(100, eraserSize + d));
         else pencilSize = Math.max(1, Math.min(20, pencilSize + d));
-        document.getElementById('sizeDisplay').innerText = (wbTool === 'eraser' ? eraserSize : pencilSize) + 'px';
+        const val = (wbTool === 'eraser' ? eraserSize : pencilSize);
+        const disp = document.getElementById('sizeDisplay');
+        if (disp) disp.innerText = val + 'px';
+        console.log("📏 Whiteboard size changed to:", val);
     }
-
-    function drawFreehand(x, y) {
-        wbCtx.beginPath();
-        wbCtx.moveTo(lastX, lastY);
-        wbCtx.lineTo(x, y);
-        if (wbTool === 'eraser') {
-            wbCtx.globalCompositeOperation = 'destination-out';
-            wbCtx.lineWidth = eraserSize * wbDPR;
-        } else {
-            wbCtx.globalCompositeOperation = 'source-over';
-            wbCtx.strokeStyle = wbColor;
-            wbCtx.lineWidth = pencilSize * wbDPR;
-        }
-        wbCtx.lineCap = 'round';
-        wbCtx.lineJoin = 'round';
-        wbCtx.stroke();
-        wbCtx.globalCompositeOperation = 'source-over';
-        [lastX, lastY] = [x, y];
-    }
-
-    function drawShape(x, y) {
-        wbCtx.beginPath();
-        wbCtx.strokeStyle = wbColor;
-        wbCtx.lineWidth = 3 * wbDPR;
-        if (wbTool === 'line') {
-            wbCtx.moveTo(startX, startY);
-            wbCtx.lineTo(x, y);
-        } else if (wbTool === 'rect') wbCtx.strokeRect(startX, startY, x - startX, y - startY);
-        else if (wbTool === 'circle') wbCtx.arc(startX, startY, Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2)), 0, 2 * Math.PI);
-        else if (wbTool === 'arrow') {
-            const headlen = 15 * wbDPR,
-                angle = Math.atan2(y - startY, x - startX);
-            wbCtx.moveTo(startX, startY);
-            wbCtx.lineTo(x, y);
-            wbCtx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
-            wbCtx.moveTo(x, y);
-            wbCtx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
-        }
-        wbCtx.stroke();
-    }
-
-    function drawText(x, y) {
-        const t = prompt("Mətn:");
-        if (t) {
-            saveState();
-            wbCtx.font = (24 * wbDPR) + "px Inter";
-            wbCtx.fillStyle = wbColor;
-            wbCtx.fillText(t, x, y);
-        }
-    }
-
-    function drawLaser(x, y) {
-        wbCtx.beginPath();
-        wbCtx.fillStyle = 'rgba(239, 68, 68, 0.8)'; // Red with slight transparency
-        wbCtx.shadowBlur = 15 * wbDPR;
-        wbCtx.shadowColor = "#ef4444";
-        wbCtx.arc(x, y, 6 * wbDPR, 0, Math.PI * 2);
-        wbCtx.fill();
-        wbCtx.shadowBlur = 0; // Reset
-    }
-    var placementImg = null;
-    var isDraggingImage = false,
-        isResizingImage = false;
-    var imgDragStartX = 0,
-        imgDragStartY = 0,
-        imgStartLeft = 0,
-        imgStartTop = 0;
-    var imgStartWidth = 0,
-        imgStartHeight = 0,
-        imgAspectRatio = 1;
 
     function wbUploadImage(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                placementImg = new Image();
-                placementImg.onload = () => showImagePlacement(placementImg);
-                placementImg.src = e.target.result;
+                const img = new Image();
+                img.onload = () => showImagePlacement(img);
+                img.src = e.target.result;
             };
             reader.readAsDataURL(input.files[0]);
-            input.value = '';
         }
     }
+
+    function setWBColor(c, el) { wbColor = c; document.querySelectorAll('.wb-color').forEach(i => i.classList.remove('active')); if (el) el.classList.add('active'); }
+    function openColorPicker() { document.getElementById('customColorPicker').click(); }
+    function setCustomColor(c) { wbColor = c; document.querySelectorAll('.wb-color').forEach(i => i.classList.remove('active')); }
+
+    function drawFreehand(x, y) {
+        wbCtx.beginPath(); wbCtx.moveTo(lastX, lastY); wbCtx.lineTo(x, y);
+        if (wbTool === 'eraser') { wbCtx.globalCompositeOperation = 'destination-out'; wbCtx.lineWidth = eraserSize; }
+        else { wbCtx.globalCompositeOperation = 'source-over'; wbCtx.strokeStyle = wbColor; wbCtx.lineWidth = pencilSize; }
+        wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round'; wbCtx.stroke();
+        wbCtx.globalCompositeOperation = 'source-over'; [lastX, lastY] = [x, y];
+    }
+    function drawArrow(x1, y1, x2, y2) {
+        const h = 15, a = Math.atan2(y2-y1, x2-x1);
+        wbCtx.moveTo(x1, y1); wbCtx.lineTo(x2, y2);
+        wbCtx.lineTo(x2 - h * Math.cos(a - Math.PI/6), y2 - h * Math.sin(a - Math.PI/6));
+        wbCtx.moveTo(x2, y2); wbCtx.lineTo(x2 - h * Math.cos(a + Math.PI/6), y2 - h * Math.sin(a + Math.PI/6));
+    }
+    function drawText(x, y) { const t = prompt("Mətn:"); if (t) { saveState(); wbCtx.font = "24px Inter"; wbCtx.fillStyle = wbColor; wbCtx.fillText(t, x, y); } }
+
+    var placementImg = null, isDraggingImage = false, isResizingImage = false, imgDragStartX, imgDragStartY, imgStartLeft, imgStartTop, imgStartWidth, imgAspectRatio;
 
     function showImagePlacement(img) {
-        const overlay = document.getElementById('imagePlacementOverlay');
-        const container = document.getElementById('imagePlacementContainer');
-        const imgEl = document.getElementById('placementImage');
-        imgEl.src = img.src;
-        imgAspectRatio = img.width / img.height;
-        const maxW = wbCanvas.width * 0.5,
-            maxH = wbCanvas.height * 0.5;
-        let w, h;
-        if (img.width / img.height > maxW / maxH) {
-            w = maxW;
-            h = w / imgAspectRatio;
-        } else {
-            h = maxH;
-            w = h * imgAspectRatio;
-        }
-        const left = (wbCanvas.width - w) / 2,
-            top = (wbCanvas.height - h) / 2;
-        container.style.left = left + 'px';
-        container.style.top = top + 'px';
-        container.style.width = w + 'px';
-        container.style.height = h + 'px';
-        overlay.style.display = 'block';
-        container.onmousedown = startImageDrag;
-        document.getElementById('resizeHandle').onmousedown = startImageResize;
-        // Touch listeners
-        container.addEventListener('touchstart', startImageDragTouch, {
-            passive: false
-        });
-        document.getElementById('resizeHandle').addEventListener('touchstart', startImageResizeTouch, {
-            passive: false
-        });
-    }
+        const ov = document.getElementById('imagePlacementOverlay'), ct = document.getElementById('imagePlacementContainer'), el = document.getElementById('placementImage');
+        el.src = img.src; imgAspectRatio = img.width/img.height;
+        const w = (wbCanvas.width||1280)*0.5, h = w/imgAspectRatio;
+        ct.style.left = ((wbCanvas.width||1280)-w)/2 + 'px'; ct.style.top = ((wbCanvas.height||720)-h)/2 + 'px'; ct.style.width = w+'px'; ct.style.height = h+'px';
+        ov.style.display = 'block';
+        
+        // Mouse Events
+        ct.onmousedown = (e) => { 
+            if(e.target.id==='resizeHandle') return; 
+            isDraggingImage=true; imgDragStartX=e.clientX; imgDragStartY=e.clientY; 
+            imgStartLeft=parseInt(ct.style.left); imgStartTop=parseInt(ct.style.top); 
+            document.onmousemove= (ev)=>{ 
+                if(!isDraggingImage) return; 
+                ct.style.left=(imgStartLeft+(ev.clientX-imgDragStartX))+'px'; 
+                ct.style.top=(imgStartTop+(ev.clientY-imgDragStartY))+'px'; 
+            }; 
+            document.onmouseup=()=>{isDraggingImage=false; document.onmousemove=null;}; 
+        };
+        document.getElementById('resizeHandle').onmousedown = (e) => { 
+            isResizingImage=true; imgDragStartX=e.clientX; imgStartWidth=parseInt(ct.style.width); 
+            document.onmousemove=(ev)=>{ 
+                if(!isResizingImage) return; 
+                let nW=Math.max(50, imgStartWidth+(ev.clientX-imgDragStartX)); 
+                ct.style.width=nW+'px'; ct.style.height=(nW/imgAspectRatio)+'px'; 
+            }; 
+            document.onmouseup=()=>{isResizingImage=false; document.onmousemove=null;}; 
+        };
 
-    function startImageDrag(e) {
-        if (e.target.id === 'resizeHandle') return;
-        e.preventDefault();
-        isDraggingImage = true;
-        const container = document.getElementById('imagePlacementContainer');
-        imgDragStartX = e.clientX;
-        imgDragStartY = e.clientY;
-        imgStartLeft = parseInt(container.style.left);
-        imgStartTop = parseInt(container.style.top);
-        document.onmousemove = dragImage;
-        document.onmouseup = stopImageDrag;
-    }
-
-    function dragImage(e) {
-        if (!isDraggingImage) return;
-        const container = document.getElementById('imagePlacementContainer');
-        container.style.left = (imgStartLeft + (e.clientX - imgDragStartX)) + 'px';
-        container.style.top = (imgStartTop + (e.clientY - imgDragStartY)) + 'px';
-    }
-
-    function stopImageDrag() {
-        isDraggingImage = false;
-        document.onmousemove = null;
-        document.onmouseup = null;
-    }
-
-    function startImageResize(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        isResizingImage = true;
-        const container = document.getElementById('imagePlacementContainer');
-        imgDragStartX = e.clientX;
-        imgStartWidth = parseInt(container.style.width);
-        document.onmousemove = resizeImage;
-        document.onmouseup = stopImageResize;
-    }
-
-    function resizeImage(e) {
-        if (!isResizingImage) return;
-        const container = document.getElementById('imagePlacementContainer');
-        let newW = Math.max(50, imgStartWidth + (e.clientX - imgDragStartX));
-        container.style.width = newW + 'px';
-        container.style.height = (newW / imgAspectRatio) + 'px';
-    }
-
-    function stopImageResize() {
-        isResizingImage = false;
-        document.onmousemove = null;
-        document.onmouseup = null;
-    }
-
-    // ── Touch: image drag ───────────────────────────────────────────────────
-    function startImageDragTouch(e) {
-        if (e.target.id === 'resizeHandle') return;
-        e.preventDefault();
-        const t = e.touches[0];
-        isDraggingImage = true;
-        const container = document.getElementById('imagePlacementContainer');
-        imgDragStartX = t.clientX;
-        imgDragStartY = t.clientY;
-        imgStartLeft = parseInt(container.style.left);
-        imgStartTop = parseInt(container.style.top);
-        document.addEventListener('touchmove', dragImageTouch, {
-            passive: false
-        });
-        document.addEventListener('touchend', stopImageDragTouch);
-    }
-
-    function dragImageTouch(e) {
-        e.preventDefault();
-        if (!isDraggingImage) return;
-        const container = document.getElementById('imagePlacementContainer');
-        const t = e.touches[0];
-        container.style.left = (imgStartLeft + (t.clientX - imgDragStartX)) + 'px';
-        container.style.top = (imgStartTop + (t.clientY - imgDragStartY)) + 'px';
-    }
-
-    function stopImageDragTouch() {
-        isDraggingImage = false;
-        document.removeEventListener('touchmove', dragImageTouch);
-        document.removeEventListener('touchend', stopImageDragTouch);
-    }
-
-    // ── Touch: image resize ──────────────────────────────────────────────────
-    function startImageResizeTouch(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const t = e.touches[0];
-        isResizingImage = true;
-        const container = document.getElementById('imagePlacementContainer');
-        imgDragStartX = t.clientX;
-        imgStartWidth = parseInt(container.style.width);
-        imgStartHeight = parseInt(container.style.height);
-        document.addEventListener('touchmove', resizeImageTouch, {
-            passive: false
-        });
-        document.addEventListener('touchend', stopImageResizeTouch);
-    }
-
-    function resizeImageTouch(e) {
-        e.preventDefault();
-        if (!isResizingImage) return;
-        const container = document.getElementById('imagePlacementContainer');
-        const t = e.touches[0];
-        const newW = Math.max(50, imgStartWidth + (t.clientX - imgDragStartX));
-        container.style.width = newW + 'px';
-        container.style.height = (newW / imgAspectRatio) + 'px';
-    }
-
-    function stopImageResizeTouch() {
-        isResizingImage = false;
-        document.removeEventListener('touchmove', resizeImageTouch);
-        document.removeEventListener('touchend', stopImageResizeTouch);
-    }
-
-    function cleanupImagePlacementTouchListeners() {
-        const container = document.getElementById('imagePlacementContainer');
-        const handle = document.getElementById('resizeHandle');
-        if (container) container.removeEventListener('touchstart', startImageDragTouch);
-        if (handle) handle.removeEventListener('touchstart', startImageResizeTouch);
+        // Touch Events
+        const handleTouchDrag = (e) => {
+            if(e.target.id==='resizeHandle') return;
+            const t = e.touches[0]; isDraggingImage=true; imgDragStartX=t.clientX; imgDragStartY=t.clientY;
+            imgStartLeft=parseInt(ct.style.left); imgStartTop=parseInt(ct.style.top);
+        };
+        const handleTouchMove = (e) => {
+            if(!isDraggingImage && !isResizingImage) return;
+            e.preventDefault(); const t = e.touches[0];
+            if(isDraggingImage){
+                ct.style.left=(imgStartLeft+(t.clientX-imgDragStartX))+'px';
+                ct.style.top=(imgStartTop+(t.clientY-imgDragStartY))+'px';
+            } else if(isResizingImage){
+                let nW=Math.max(50, imgStartWidth+(t.clientX-imgDragStartX));
+                ct.style.width=nW+'px'; ct.style.height=(nW/imgAspectRatio)+'px';
+            }
+        };
+        ct.ontouchstart = handleTouchDrag;
+        document.getElementById('resizeHandle').ontouchstart = (e) => {
+            const t = e.touches[0]; isResizingImage=true; imgDragStartX=t.clientX; imgStartWidth=parseInt(ct.style.width);
+        };
+        window.ontouchmove = handleTouchMove;
+        window.ontouchend = () => { isDraggingImage=false; isResizingImage=false; };
     }
 
     function confirmImagePlacement() {
-        const container = document.getElementById('imagePlacementContainer');
-        // container.style values are CSS pixels; canvas is scaled by wbDPR
-        const x = parseInt(container.style.left) * wbDPR;
-        const y = parseInt(container.style.top) * wbDPR;
-        const w = parseInt(container.style.width) * wbDPR;
-        const h = parseInt(container.style.height) * wbDPR;
-        saveState();
-        wbCtx.drawImage(placementImg, x, y, w, h);
-        document.getElementById('imagePlacementOverlay').style.display = 'none';
-        cleanupImagePlacementTouchListeners();
-        placementImg = null;
+        const ct = document.getElementById('imagePlacementContainer');
+        saveState(); 
+        wbCtx.drawImage(placementImg, parseInt(ct.style.left), parseInt(ct.style.top), parseInt(ct.style.width), parseInt(ct.style.height));
+        document.getElementById('imagePlacementOverlay').style.display = 'none'; placementImg = null;
     }
+    function cancelImagePlacement() { document.getElementById('imagePlacementOverlay').style.display = 'none'; placementImg = null; }
+    function cleanupImagePlacementTouchListeners() {} // Simplified
+    function clearWhiteboard() { if(confirm("Təmizlənsin?")) { saveState(); wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height); } }
+    function exportWhiteboard() { const l = document.createElement('a'); l.download = 'whiteboard.png'; l.href = wbCanvas.toDataURL(); l.click();    }
 
-    function cancelImagePlacement() {
-        document.getElementById('imagePlacementOverlay').style.display = 'none';
-        cleanupImagePlacementTouchListeners();
-        placementImg = null;
-    }
-
-    function clearWhiteboard() {
-        if (confirm("Təmizlənsin?")) {
-            saveState();
-            wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height);
-        }
-    }
-
-    function exportWhiteboard() {
-        const link = document.createElement('a');
-        link.download = 'whiteboard.png';
-        link.href = wbCanvas.toDataURL();
-        link.click();
+    /**
+     * Set max bitrate for outgoing video senders
+     * @param {RTCPeerConnection} pc 
+     * @param {number} maxKbps 
+     */
+    function applyBitrateLimit(pc, maxKbps) {
+        if (!pc || !pc.getSenders) return;
+        pc.getSenders().forEach(sender => {
+            if (sender.track && sender.track.kind === 'video') {
+                const parameters = sender.getParameters();
+                if (!parameters.encodings || parameters.encodings.length === 0) {
+                    parameters.encodings = [{}];
+                }
+                parameters.encodings[0].maxBitrate = maxKbps * 1000;
+                sender.setParameters(parameters).catch(e => console.warn("Bitrate control exception:", e));
+            }
+        });
     }
 </script>
-<!-- Pure Whiteboard Overlay -->
+
 <div id="whiteboardOverlay">
-    <!-- Floating Toolbar -->
+    <!-- Floating Toolbar (Horizontal bottom) -->
     <div class="wb-controls-floating">
-        <!-- Header with close button -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
-            <span style="color: #94a3b8; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">LÖVHƏ ALƏTLƏRİ</span>
-            <button class="wb-tool-btn" onclick="toggleWBToolbar()" title="Paneli Bağla"
-                style="width: 26px; height: 26px; font-size: 13px; border-radius: 8px; background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); color: #f87171; flex-shrink: 0;">✕</button>
-        </div>
+
+        <!-- SƏHİFƏLƏR - Çoxsəhifəli sistem -->
         <div class="wb-group">
-            <span class="wb-group-label">NÖV</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
-                <button id="bgPlain" class="wb-tool-btn active" onclick="setWBBackground('plain')"
-                    title="Ağ Fon">⬜</button>
-                <button id="bgGrid" class="wb-tool-btn" onclick="setWBBackground('grid')" title="Dama">📏</button>
-                <button id="bgLines" class="wb-tool-btn" onclick="setWBBackground('lines')" title="Xətli">📝</button>
-            </div>
+            <button class="wb-tool-btn" onclick="prevPage()" title="Əvvəlki Səhifə"
+                style="width: 32px; height: 32px;"><i data-lucide="chevron-left"
+                    style="width:16px;height:16px;"></i></button>
+            <div id="pageIndicator"
+                style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; min-width: 40px; text-align: center; color: white;">
+                1/1</div>
+            <button class="wb-tool-btn" onclick="nextPage()" title="Növbəti Səhifə"
+                style="width: 32px; height: 32px;"><i data-lucide="chevron-right"
+                    style="width:16px;height:16px;"></i></button>
+            <button class="wb-tool-btn" onclick="addNewPage()" title="Yeni Səhifə"
+                style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.15); color: #10b981;"><i
+                    data-lucide="plus" style="width:16px;height:16px;"></i></button>
+            <button class="wb-tool-btn" onclick="deletePage()" title="Səhifəni Sil"
+                style="width: 32px; height: 32px; background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i
+                    data-lucide="minus" style="width:16px;height:16px;"></i></button>
         </div>
+
+        <div class="wb-divider"></div>
+
+        <!-- ALƏTLƏR - Əsas alətlər -->
         <div class="wb-group">
-            <span class="wb-group-label">ADDIM</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button class="wb-tool-btn" onclick="undo()">↩️</button>
-                <button class="wb-tool-btn" onclick="redo()">↪️</button>
-            </div>
-        </div>
-        <div class="wb-group">
-            <span class="wb-group-label">ALƏTLƏR</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button id="toolPencil" class="wb-tool-btn active" onclick="setWBTool('pencil')">✏️</button>
-                <button id="toolEraser" class="wb-tool-btn" onclick="setWBTool('eraser')">🧽</button>
-                <button id="toolText" class="wb-tool-btn" onclick="setWBTool('text')">🔤</button>
-                <button id="toolLaser" class="wb-tool-btn" onclick="setWBTool('laser')">🔦</button>
-                <button class="wb-tool-btn" onclick="document.getElementById('wbImgInput').click()"
-                    style="grid-column: span 2;">🖼️</button>
-            </div>
-            <div id="sizeControl"
-                style="display: flex; align-items: center; gap: 4px; justify-content: center; margin-top: 6px;">
-                <button class="wb-tool-btn" onclick="changeSize(-5)" style="width:28px; height:28px;">−</button>
-                <div id="sizeDisplay"
-                    style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px;">
-                    3px
-                </div>
-                <button class="wb-tool-btn" onclick="changeSize(5)" style="width:28px; height:28px;">+</button>
-            </div>
+            <button id="toolPencil" class="wb-tool-btn active" onclick="setWBTool('pencil')" title="Qələm">
+                <i data-lucide="pen-tool" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolEraser" class="wb-tool-btn" onclick="setWBTool('eraser')" title="Silgi">
+                <i data-lucide="eraser" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolText" class="wb-tool-btn" onclick="setWBTool('text')" title="Mətn Yaz">
+                <i data-lucide="type" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolLaser" class="wb-tool-btn" onclick="setWBTool('laser')" title="Lazer Göstərici">
+                <i data-lucide="mouse-pointer-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="document.getElementById('wbImgInput').click()" title="Şəkil Əlavə Et">
+                <i data-lucide="image" style="width:20px;height:20px;"></i>
+            </button>
+
             <input type="file" id="wbImgInput" style="display:none" accept="image/*" onchange="wbUploadImage(this)">
         </div>
+
+        <!-- Size control -->
+        <div class="wb-group" style="background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 100px;">
+            <button class="wb-tool-btn" onclick="changeSize(-5)" title="Kiçilt"
+                style="width: 24px; height: 24px; background: transparent; border: none; color: #94a3b8;"><i
+                    data-lucide="minus" style="width:14px;height:14px;"></i></button>
+            <div id="sizeDisplay"
+                style="font-size: 11px; font-weight: 800; min-width: 24px; text-align: center; color: white;">3px</div>
+            <button class="wb-tool-btn" onclick="changeSize(5)" title="Böyüt"
+                style="width: 24px; height: 24px; background: transparent; border: none; color: #94a3b8;"><i
+                    data-lucide="plus" style="width:14px;height:14px;"></i></button>
+        </div>
+
+        <div class="wb-divider"></div>
+
+        <!-- FİQURLAR -->
         <div class="wb-group">
-            <span class="wb-group-label">FİQURLAR</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button id="toolLine" class="wb-tool-btn" onclick="setWBTool('line')">➖</button>
-                <button id="toolRect" class="wb-tool-btn" onclick="setWBTool('rect')">⬜</button>
-                <button id="toolCircle" class="wb-tool-btn" onclick="setWBTool('circle')">⭕</button>
-                <button id="toolArrow" class="wb-tool-btn" onclick="setWBTool('arrow')">↗️</button>
+            <button id="toolLine" class="wb-tool-btn" onclick="setWBTool('line')" title="Düz Xətt">
+                <i data-lucide="minus" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolRect" class="wb-tool-btn" onclick="setWBTool('rect')" title="Dördbucaqlı">
+                <i data-lucide="square" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolCircle" class="wb-tool-btn" onclick="setWBTool('circle')" title="Dairə">
+                <i data-lucide="circle" style="width:20px;height:20px;"></i>
+            </button>
+            <button id="toolArrow" class="wb-tool-btn" onclick="setWBTool('arrow')" title="Ox İşarəsi">
+                <i data-lucide="arrow-up-right" style="width:20px;height:20px;"></i>
+            </button>
+        </div>
+
+        <div class="wb-divider"></div>
+
+        <!-- RƏNGLƏR -->
+        <div class="wb-color-grid">
+            <div class="wb-color active" style="background: #000000;" onclick="setWBColor('#000000', this)" title="Qara"></div>
+            <div class="wb-color" style="background: #ef4444;" onclick="setWBColor('#ef4444', this)" title="Qırmızı"></div>
+            <div class="wb-color" style="background: #3b82f6;" onclick="setWBColor('#3b82f6', this)" title="Mavi"></div>
+            <div class="wb-color" style="background: #10b981;" onclick="setWBColor('#10b981', this)" title="Yaşıl"></div>
+            <div class="wb-color" style="background: #f59e0b;" onclick="setWBColor('#f59e0b', this)" title="Narıncı"></div>
+            <div class="wb-color" style="background: #8b5cf6;" onclick="setWBColor('#8b5cf6', this)" title="Bənövşəyi"></div>
+            <div class="wb-color" style="background: #ec4899;" onclick="setWBColor('#ec4899', this)" title="Çəhrayı"></div>
+            <div class="wb-color"
+                style="background: linear-gradient(135deg, #fff, #ddd); border:2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; position: relative;"
+                onclick="openColorPicker()" title="Xüsusi Rəng">
+                <i data-lucide="palette" style="width:12px;height:12px;color:#64748b;"></i>
+                <input type="color" id="customColorPicker"
+                    style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer;"
+                    onchange="setCustomColor(this.value)">
             </div>
         </div>
-        <div class="wb-group">
-            <span class="wb-group-label">RƏNG</span>
-            <div class="wb-color-grid">
-                <div class="wb_color_item wb-color active" style="background: #000000;"
-                    onclick="setWBColor('#000000', this)"></div>
-                <div class="wb_color_item wb-color" style="background: #ef4444;" onclick="setWBColor('#ef4444', this)">
-                </div>
-                <div class="wb_color_item wb-color" style="background: #3b82f6;" onclick="setWBColor('#3b82f6', this)">
-                </div>
-                <div class="wb_color_item wb-color" style="background: #10b981;" onclick="setWBColor('#10b981', this)">
-                </div>
-            </div>
+
+        <div class="wb-divider"></div>
+
+        <!-- FON -->
+        <div class="wb-group" style="background: rgba(0,0,0,0.2); padding: 4px; border-radius: 100px;">
+            <button id="bgPlain" class="wb-tool-btn active" onclick="setWBBackground('plain')" title="Ağ Fon"
+                style="width: 34px; height: 34px;">
+                <div style="width:16px;height:16px;background:white;border-radius:2px;border:1px solid #cbd5e1;"></div>
+            </button>
+            <button id="bgGrid" class="wb-tool-btn" onclick="setWBBackground('grid')" title="Riyaziyyat (Dama)"
+                style="width: 34px; height: 34px;">
+                <i data-lucide="grid" style="width:18px;height:18px;"></i>
+            </button>
+            <button id="bgLines" class="wb-tool-btn" onclick="setWBBackground('lines')" title="Dil (Xətli)"
+                style="width: 34px; height: 34px;">
+                <i data-lucide="align-justify" style="width:18px;height:18px;"></i>
+            </button>
         </div>
+
+        <div class="wb-divider"></div>
+
+        <!-- ƏMƏLİYYATLAR -->
         <div class="wb-group">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
-                <button class="wb-tool-btn" onclick="clearWhiteboard()">🗑️</button>
-                <button class="wb-tool-btn" onclick="exportWhiteboard()">💾</button>
-                <button class="wb-tool-btn" onclick="toggleWhiteboard()" style="background:#ef4444;">❌</button>
-            </div>
-        </div>
-        <div class="wb-group" style="border-bottom: none;">
-            <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
-                <button class="wb-tool-btn" onclick="prevPage()" style="width:32px; height:32px;">◀</button>
-                <div id="pageIndicator"
-                    style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:11px;">
-                    1/1
-                </div>
-                <button class="wb-tool-btn" onclick="nextPage()" style="width:32px; height:32px;">▶</button>
-                <button class="wb-tool-btn" onclick="addNewPage()"
-                    style="width:32px; height:32px; background:rgba(16,185,129,0.2);">+</button>
-            </div>
+            <button class="wb-tool-btn" onclick="undo()" title="Geri Al (Undo)">
+                <i data-lucide="undo-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="redo()" title="Yenidən (Redo)">
+                <i data-lucide="redo-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="clearWhiteboard()" title="Təmizlə"
+                style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                <i data-lucide="trash-2" style="width:20px;height:20px;"></i>
+            </button>
+            <button class="wb-tool-btn" onclick="exportWhiteboard()" title="Yadda Saxla lövhəni"
+                style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">
+                <i data-lucide="download" style="width:20px;height:20px;"></i>
+            </button>
+
+            <div style="width: 1px; height: 20px; background: rgba(255, 255, 255, 0.1); margin: 0 4px;"></div>
+
+            <button class="wb-tool-btn" onclick="toggleWBToolbar()" title="Paneli Gizlət"
+                style="background: rgba(255, 255, 255, 0.1); color: white; width: auto !important; padding: 0 14px; border-radius: 12px; font-weight: bold; font-size: 11px;">
+                <i data-lucide="chevron-down" style="width:16px;height:16px; margin-right: 4px;"></i> GİZLƏT
+            </button>
         </div>
     </div>
 
-    <!-- Re-open toolbar tab -->
-    <div id="wbToolbarOpenTab" onclick="toggleWBToolbar()" title="Paneli Aç">
-        <span style="font-size: 16px;">🛠️</span>
-        <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; writing-mode: vertical-rl; text-orientation: mixed;">ALƏTLƏR</span>
-        <span style="font-size: 12px; color: #60a5fa;">▶</span>
+    <!-- Re-open toolbar tab (shown when toolbar is collapsed) -->
+    <div id="wbToolbarOpenTab" onclick="toggleWBToolbar()">
+        <i data-lucide="grid-3x3" style="width:20px;height:20px;color:white;"></i>
+        <span style="font-size: 11px; font-weight: 800; color: white; letter-spacing: 0.5px;">ALƏTLƏRİ AÇ</span>
     </div>
 
-    <div
-        style="position: absolute; top: 20px; right: 20px; background: #1e293b; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 11px; display: flex; align-items: center; gap: 10px; z-index: 2010;">
-        <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: blink 1s infinite;">
+    <!-- Top Bar Overlay (Info & Exit) -->
+    <div style="position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 2010; pointer-events: none;">
+        <div style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); pointer-events: auto;">
+            <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);"></div>
+            STUDİO WHITEBOARD PRO
         </div>
-        TƏLƏBƏ LÖVHƏSİ PRO
+
+        <button onclick="toggleWhiteboard()" title="Lövhəni Bağla & Kameraya Qayıt"
+            style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px); cursor: pointer; pointer-events: auto; transition: all 0.2s ease;"
+            onmouseover="this.style.background='#ef4444'; this.style.borderColor='#ef4444'; this.style.transform='scale(1.05)'"
+            onmouseout="this.style.background='rgba(15, 23, 42, 0.65)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)'">
+            <i data-lucide="x" style="width:16px;height:16px;"></i> BAĞLA
+        </button>
     </div>
-    <div id="imagePlacementOverlay"
-        style="display: none; position: absolute; inset: 0; z-index: 3000; background: rgba(0,0,0,0.3);">
-        <div id="imagePlacementContainer"
-            style="position: absolute; cursor: move; border: 2px dashed #3b82f6; box-shadow: 0 10px 30px rgba(0,0,0,0.3); touch-action: none;">
+
+    <div id="laserCursor"></div>
+
+    <div id="imagePlacementOverlay" style="display: none; position: absolute; inset: 0; z-index: 3000; background: rgba(0,0,0,0.3);">
+        <div id="imagePlacementContainer" style="position: absolute; cursor: move; border: 2px dashed #3b82f6; box-shadow: 0 10px 30px rgba(0,0,0,0.3); touch-action: none;">
             <img id="placementImage" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
-            <div id="resizeHandle"
-                style="position: absolute; bottom: -12px; right: -12px; width: 28px; height: 28px; background: #3b82f6; border: 2px solid white; border-radius: 50%; cursor: se-resize; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; user-select: none; touch-action: none;">↘</div>
+            <div id="resizeHandle" style="position: absolute; bottom: -12px; right: -12px; width: 28px; height: 28px; background: #3b82f6; border: 2px solid white; border-radius: 50%; cursor: se-resize; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; user-select: none; touch-action: none;">↘</div>
         </div>
-        <div
-            style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px;">
-            <button onclick="confirmImagePlacement()"
-                style="background: #22c55e; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 700; cursor: pointer;">✓
-                Yerləşdir</button>
-            <button onclick="cancelImagePlacement()"
-                style="background: #ef4444; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 700; cursor: pointer;">✕
-                Ləğv Et</button>
+        <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px;">
+            <button onclick="confirmImagePlacement()" style="background: #22c55e; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);">✓ Yerləşdir</button>
+            <button onclick="cancelImagePlacement()" style="background: #ef4444; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);">✕ Ləğv Et</button>
         </div>
+        <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;">🖼️ Şəkli sürükləyin. Küncündən tutub ölçüsünü dəyişin.</div>
     </div>
+
     <div style="flex: 1; position: relative; background: #ffffff; cursor: crosshair; overflow: hidden;">
         <canvas id="wbCanvasInternal" style="display: block; touch-action: none;"></canvas>
     </div>
 </div>
+
 <?php require_once 'includes/footer.php'; ?>

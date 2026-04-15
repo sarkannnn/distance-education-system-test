@@ -4,17 +4,26 @@
  * Distant Təhsil - Müəllim Autentifikasiya Sistemi
  */
 
-session_name('DISTANT_TEACHER_SESSION');
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path'     => '/',
-    'secure'   => true,
-    'httponly' => true,
-    'samesite' => 'Strict',
-]);
-ini_set('session.use_strict_mode', 1);
-ini_set('session.use_only_cookies', 1);
-session_start();
+session_name('DISTANT_T_SESSION_V4');
+$isSecure = false;
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+    $isSecure = true;
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $isSecure = true;
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.use_only_cookies', 1);
+    session_start();
+}
 date_default_timezone_set('Asia/Baku');
 
 require_once __DIR__ . '/../config/database.php';

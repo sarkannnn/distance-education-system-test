@@ -209,8 +209,16 @@ if ($chunkFileExists) {
     // Final video blob varsa, onu da əlavə et (append)
     if ($videoFile && $videoFile['error'] === UPLOAD_ERR_OK) {
         $finalData = file_get_contents($videoFile['tmp_name']);
+        
+        // Final blob-un da WebM header-ini silib yalnız Cluster-ləri append et (əgər chunk file artıq varsa)
+        // Bu, pleyerlərin videonun sonuna qədər oxuya bilməsini təmin edir.
+        $clusterPos = strpos($finalData, "\x1F\x43\xB6\x75");
+        if ($clusterPos !== false) {
+            $finalData = substr($finalData, $clusterPos);
+        }
+
         file_put_contents($targetPath, $finalData, FILE_APPEND);
-        $logData = date('Y-m-d H:i:s') . " - Final blob appended: " . strlen($finalData) . " bytes. Total: " . filesize($targetPath) . " bytes\n";
+        $logData = date('Y-m-d H:i:s') . " - Final blob (stripped) appended: " . strlen($finalData) . " bytes. Total: " . filesize($targetPath) . " bytes\n";
         file_put_contents($logFile, $logData, FILE_APPEND);
     }
 
@@ -226,11 +234,26 @@ if ($fileSaved) {
     // Video linki
     $videoLink = '../../uploads/videos/' . $fileName;
 
+    // Patch WebM Duration to enable seeking in the browser player
+    $exactDurationMs = (float) ($_POST['duration_ms'] ?? 0);
+    
+    if ($exactDurationMs <= 0) {
+        $exactDurationMs = 90 * 60 * 1000; // fallback
+        if ($lesson && isset($lesson['start_time']) && $lesson['start_time']) {
+            $startT = strtotime($lesson['start_time']);
+            $endT = time();
+            if ($endT > $startT) {
+                $exactDurationMs = ($endT - $startT) * 1000;
+            }
+        }
+    }
+    patchWebmDuration($targetPath, $exactDurationMs);
+
     try {
         $db->query("UPDATE live_classes SET recording_path = ?, status = 'pending_approval', end_time = NOW(), duration_minutes = ? WHERE id = ?", [$fileName, $msgDuration, $lessonId]);
         $db->query("UPDATE schedule SET status = 'completed' WHERE live_class_id = ?", [$lessonId]);
 
-        $logData = date('Y-m-d H:i:s') . " - Local Success: Lesson " . $lessonId . " saved and DB updated. Proceeding to background TMIS upload.\n";
+        $logData = date('Y-m-d H:i:s') . " - Local Success: Lesson " . $lessonId . " saved and DB updated. Duration patched ($exactDurationMs ms). Proceeding to background TMIS upload.\n";
         file_put_contents($logFile, $logData, FILE_APPEND);
 
         // Send early success response to user
