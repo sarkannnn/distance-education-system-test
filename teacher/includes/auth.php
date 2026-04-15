@@ -345,10 +345,10 @@ class Auth
         // If session was destroyed (e.g. by logout() inside isLoggedIn()),
         // start a new one so the data is actually persisted after redirect.
         if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+            session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
             ini_set('session.use_strict_mode', 1);
             ini_set('session.use_only_cookies', 1);
-            session_name('DISTANT_TEACHER_SESSION');
+            session_name('DISTANT_T_SESSION_V4');
             session_start();
         }
         session_regenerate_id(true);

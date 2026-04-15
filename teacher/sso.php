@@ -25,13 +25,13 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     session_unset();
     session_destroy();
 }
-session_name('DISTANT_TEACHER_SESSION');
+session_name('DISTANT_T_SESSION_V4');
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',
     'secure'   => true,
     'httponly' => true,
-    'samesite' => 'Strict',
+    'samesite' => 'Lax',
 ]);
 ini_set('session.use_strict_mode', 1);
 ini_set('session.use_only_cookies', 1);
@@ -83,6 +83,8 @@ if ($httpCode === 200 && isset($responseData) && (isset($responseData['success']
     $result = $auth->loginViaSso($profileData);
 
     if ($result['success']) {
+        // Clear SSO loop counter on successful login
+        unset($_SESSION['sso_attempts'], $_SESSION['sso_last_attempt']);
         // Dashboard-a yönləndir
         header('Location: ./');
         exit;

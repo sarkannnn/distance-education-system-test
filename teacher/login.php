@@ -26,6 +26,25 @@ if ($auth->isLoggedIn()) {
 // We add ?sso=0 on the redirect-back URL so we don't loop if TMIS has no session.
 $skipSso = isset($_GET['sso']) || isset($_GET['error']) || isset($_GET['no_sso']);
 
+// SSO redirect loop breaker: if we've already tried SSO recently, don't try again
+if (!$skipSso) {
+    $ssoAttempts = $_SESSION['sso_attempts'] ?? 0;
+    $ssoLastAttempt = $_SESSION['sso_last_attempt'] ?? 0;
+    // Reset counter if last attempt was more than 60 seconds ago
+    if (time() - $ssoLastAttempt > 60) {
+        $ssoAttempts = 0;
+    }
+    if ($ssoAttempts >= 3) {
+        $skipSso = true;
+        // Reset for next time
+        unset($_SESSION['sso_attempts'], $_SESSION['sso_last_attempt']);
+        error_log('SSO redirect loop detected — falling back to manual login.');
+    } else {
+        $_SESSION['sso_attempts'] = $ssoAttempts + 1;
+        $_SESSION['sso_last_attempt'] = time();
+    }
+}
+
 // Lokal mühitdə avtomatik TMİS SSO yönləndirməsini deaktiv edirik (çünki TMİS canlı sayta qaytarır)
 $host = $_SERVER['HTTP_HOST'] ?? '';
 $isLocal = preg_match('/\.test$|\.local$|^localhost(:\d+)?$|^127\.0\.0\.1(:\d+)?$/', $host);
