@@ -43,7 +43,25 @@ $pageTitle = "Studio: " . $webinar['title'];
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="bg-[#060f23]">
+<body class="bg-[#060f23] overflow-hidden">
+    <!-- Production Start Overlay -->
+    <div id="startProductionOverlay" class="fixed inset-0 z-[1000] bg-[#06112a] flex flex-col items-center justify-center p-6 text-center">
+        <div class="absolute inset-0 opacity-20 bg-grid pointer-events-none"></div>
+        <div class="relative w-24 h-24 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center mb-8 animate-pulse shadow-[0_0_50px_rgba(16,185,129,0.2)] border border-emerald-500/20">
+            <i data-lucide="video" class="w-10 h-10 text-emerald-400"></i>
+        </div>
+        <h2 class="text-3xl font-black text-white mb-4 tracking-tight">Studio Hazırdır</h2>
+        <p class="text-blue-100/40 text-lg max-w-md mb-12 font-medium">Yayıma başlamaq üçün aşağıdakı düyməni sıxın. Sistem avtomatik olaraq tam ekran rejiminə keçəcək.</p>
+        
+        <button onclick="startProductionNow()" class="px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black text-lg tracking-widest uppercase transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 flex items-center gap-4">
+            Yayıma Başla <i data-lucide="play" class="w-6 h-6"></i>
+        </button>
+        
+        <p class="mt-12 text-[10px] text-white/20 font-bold uppercase tracking-[0.3em] flex items-center gap-3">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500/40"></i>
+            TƏHLÜKƏSİZ YAYIM SİSTEMİ V3.5
+        </p>
+    </div>
 
     <header class="h-14 lg:h-16 border-b border-white/5 bg-[#0a1f44]/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 z-50">
         <!-- Desktop Header Title -->
@@ -411,6 +429,7 @@ $pageTitle = "Studio: " . $webinar['title'];
         let recordedChunks = [];
         let recordingStartTime = 0;
         let recordingMimeType = 'video/webm;codecs=vp8,opus';
+        let isFirstChunkRecorded = true; // Tracks if this is the start of a recorder session
 
         function getBestMimeType() {
             const types = [
@@ -427,6 +446,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
         function startRecording() {
             if (!stream) return;
+            isFirstChunkRecorded = true; // New recorder session
             try {
                 const bestType = getBestMimeType();
                 recordingMimeType = bestType;
@@ -503,6 +523,9 @@ $pageTitle = "Studio: " . $webinar['title'];
             formData.append('webinar_id', wID);
             formData.append('video_blob', blob);
             formData.append('mime_type', recordingMimeType);
+            formData.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
+            
+            if (isFirstChunkRecorded) isFirstChunkRecorded = false;
 
             lastFlushPromise = fetch('api/upload_recording.php', {
                 method: 'POST',
@@ -1529,13 +1552,57 @@ $pageTitle = "Studio: " . $webinar['title'];
             toggleMobilePanel('right');
         }
 
-        window.onload = () => {
+        function startProductionNow() {
+            // 1. Request Fullscreen
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+            } catch(e) {}
+
+            // 2. Hide Overlay
+            const overlay = document.getElementById('startProductionOverlay');
+            overlay.style.transition = 'opacity 0.8s, transform 0.8s';
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.body.classList.remove('overflow-hidden');
+            }, 800);
+
+            // 3. Init
             init();
+            LOG("🎬 Yayım və tam ekran rejimi başladıldı.", "#10b981");
+        }
+
+        // --- PROTECTION LOGIC ---
+        // Block F5, F12, Ctrl+R, Ctrl+F5
+        window.addEventListener('keydown', (e) => {
+            // 116 = F5, 123 = F12, 82 = R
+            if (e.keyCode === 116 || e.keyCode === 123 || (e.ctrlKey && e.keyCode === 82)) {
+                e.preventDefault();
+                LOG("⚠️ Diqqət: Yayım zamanı bu əməliyyat bloklanıb!", "#f59e0b");
+                return false;
+            }
+        });
+
+        // Warn before leaving
+        window.addEventListener('beforeunload', (e) => {
+            const msg = "Vebinar davam edir. Çıxsanız yayım kəsiləcək və hər kəs sistemdən atılacaq!";
+            e.preventDefault();
+            e.returnValue = msg;
+            return msg;
+        });
+
+        window.onload = () => {
+            // Don't call init here, wait for click
             lucide.createIcons();
         };
 
+        const oldBeforeUnload = window.onbeforeunload;
         window.onbeforeunload = () => {
             if (peer) peer.destroy();
+            if (oldBeforeUnload) oldBeforeUnload();
         };
     </script>
 </body>
