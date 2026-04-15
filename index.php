@@ -1329,14 +1329,14 @@ try {
                     prosesinə dərhal başlayın.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                 <!-- Student Portal Card -->
                 <div
-                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-12 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
-                    <div class="flex items-start justify-between mb-10">
+                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
+                    <div class="flex items-start justify-between mb-8">
                         <div
-                            class="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.3)] transition-transform duration-500 group-hover:scale-110">
-                            <i data-lucide="graduation-cap" class="w-10 h-10 sm:w-12 sm:h-12"></i>
+                            class="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.3)] transition-transform duration-500 group-hover:scale-110">
+                            <i data-lucide="graduation-cap" class="w-8 h-8 sm:w-10 sm:h-10"></i>
                         </div>
                         <div class="px-4 py-1.5 bg-blue-500/10 border border-blue-400/20 rounded-full">
                             <span class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Tələbə
@@ -1344,38 +1344,38 @@ try {
                         </div>
                     </div>
 
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-6">Tələbə Girişi</h2>
-                    <p class="text-blue-100/60 text-lg mb-8 leading-relaxed">Şəxsi kabinetinizə daxil olaraq bütün
+                    <h2 class="text-2xl font-extrabold text-white mb-6">Tələbə Girişi</h2>
+                    <p class="text-blue-100/60 text-base mb-8 leading-relaxed">Şəxsi kabinetinizə daxil olaraq bütün
                         təhsil resurslarından yararlanın.</p>
 
                     <div class="space-y-4 mb-10">
-                        <div class="flex items-center gap-3 text-sm text-blue-100/80">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-400"></i>
-                            <span>Canlı dərslərə və video arxivə birbaşa giriş</span>
+                            <span>Canlı dərslərə və arxivə giriş</span>
                         </div>
-                        <div class="flex items-center gap-3 text-sm text-blue-100/80">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-400"></i>
-                            <span>Distant dərslərdə interaktiv iştirak və akademik təqvim</span>
+                            <span>İnteraktiv təhsil mühiti</span>
                         </div>
-                        <div class="flex items-center gap-3 text-sm text-blue-100/80">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-400"></i>
-                            <span>Fənn materiallarının rəqəmsal bazası</span>
+                            <span>Rəqəmsal material bazası</span>
                         </div>
                     </div>
 
                     <a href="student/login.php"
-                        class="flex w-full items-center justify-center gap-3 py-5 bg-white text-[#0a1f44] rounded-2xl font-bold text-lg hover:bg-blue-50 hover:scale-[1.02] transition-all shadow-xl">
+                        class="flex w-full items-center justify-center gap-3 py-4 bg-white text-[#0a1f44] rounded-2xl font-bold text-base hover:bg-blue-50 hover:scale-[1.02] transition-all shadow-xl">
                         SİSTEMƏ GİRİŞ <i data-lucide="log-in" class="w-5 h-5"></i>
                     </a>
                 </div>
 
-                <!-- Admin Card -->
+                <!-- Teacher Card -->
                 <div
-                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-12 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
-                    <div class="flex items-start justify-between mb-10">
+                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
+                    <div class="flex items-start justify-between mb-8">
                         <div
-                            class="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-slate-700 to-slate-900 border border-white/10 flex items-center justify-center text-white shadow-2xl transition-transform duration-500 group-hover:scale-110">
-                            <i data-lucide="user-circle" class="w-10 h-10 sm:w-12 sm:h-12 text-slate-200"></i>
+                            class="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] bg-gradient-to-br from-slate-700 to-slate-900 border border-white/10 flex items-center justify-center text-white shadow-2xl transition-transform duration-500 group-hover:scale-110">
+                            <i data-lucide="user-circle" class="w-8 h-8 sm:w-10 sm:h-10 text-slate-200"></i>
                         </div>
                         <div class="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full">
                             <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Müəllim
@@ -1383,26 +1383,64 @@ try {
                         </div>
                     </div>
 
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-6">Müəllim Girişi</h2>
-                    <p class="text-blue-100/60 text-lg mb-8 leading-relaxed">Tədris prosesini və tələbə irəliləyişini
+                    <h2 class="text-2xl font-extrabold text-white mb-6">Müəllim Girişi</h2>
+                    <p class="text-blue-100/60 text-base mb-8 leading-relaxed">Tədris prosesini və tələbə irəliləyişini
                         rəqəmsal mühitdə idarə edin.</p>
 
                     <div class="space-y-4 mb-10">
-                        <div class="flex items-center gap-3 text-sm text-blue-100/80">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-400"></i>
-                            <span>Onlayn mühazirələrin başladılması və idarəsi</span>
+                            <span>Onlayn mühazirələrin idarəsi</span>
                         </div>
-                        <div class="flex items-center gap-3 text-sm text-blue-100/80">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-400"></i>
-                            <span>Davamiyyət və akademik göstəricilərin uçotu</span>
+                            <span>Davamiyyət və akademik uçot</span>
                         </div>
-                        <div class="flex items-center gap-3 text-sm text-blue-100/80">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-400"></i>
-                            <span>Tədris materiallarının mütəşəkkil idarəedilməsi</span>
+                            <span>Resursların idarəedilməsi</span>
                         </div>
                     </div>
                     <a href="teacher/login.php"
-                        class="flex w-full items-center justify-center gap-3 py-5 bg-white text-[#0a1f44] rounded-2xl font-bold text-lg hover:bg-blue-50 hover:scale-[1.02] transition-all shadow-xl">
+                        class="flex w-full items-center justify-center gap-3 py-4 bg-white text-[#0a1f44] rounded-2xl font-bold text-base hover:bg-blue-50 hover:scale-[1.02] transition-all shadow-xl">
+                        SİSTEMƏ GİRİŞ <i data-lucide="log-in" class="w-5 h-5"></i>
+                    </a>
+                </div>
+
+                <!-- Webinar Portal Card -->
+                <div
+                    class="relative group bg-[#0e2652] border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 transition-all duration-500 hover:bg-[#143269] hover:-translate-y-2 shadow-2xl">
+                    <div class="flex items-start justify-between mb-8">
+                        <div
+                            class="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-[0_20px_40px_rgba(16,185,129,0.3)] transition-transform duration-500 group-hover:scale-110">
+                            <i data-lucide="video" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+                        </div>
+                        <div class="px-4 py-1.5 bg-emerald-500/10 border border-emerald-400/20 rounded-full">
+                            <span class="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">Vebinar
+                                Portalı</span>
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-extrabold text-white mb-6">Vebinar Girişi</h2>
+                    <p class="text-blue-100/60 text-base mb-8 leading-relaxed">Mərkəzi vebinar sisteminə qoşularaq geniş hədəf kütləli tədbirlərdə iştirak edin.</p>
+
+                    <div class="space-y-4 mb-10">
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                            <span>Kütləvi onlayn seminarlara qoşulma</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                            <span>İnteraktiv sual-cavab sessiyaları</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-blue-100/80 font-medium">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                            <span>Vebinar materiallarının arxivi</span>
+                        </div>
+                    </div>
+
+                    <a href="webinar/index.php"
+                        class="flex w-full items-center justify-center gap-3 py-4 bg-white text-[#0a1f44] rounded-2xl font-bold text-base hover:bg-emerald-50 hover:scale-[1.02] transition-all shadow-xl">
                         SİSTEMƏ GİRİŞ <i data-lucide="log-in" class="w-5 h-5"></i>
                     </a>
                 </div>
