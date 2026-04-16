@@ -44,7 +44,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $filePath = $uploadDir . $fileName;
 
     // Append chunk to file
-    $tempFile = $_FILES['video_blob']['tmp_name'];
+    $tempFile = $_FILES['video_blob']['tmp_name'] ?? '';
+    $uploadError = $_FILES['video_blob']['error'] ?? UPLOAD_ERR_NO_FILE;
+
+    if ($uploadError !== UPLOAD_ERR_OK || $tempFile === '' || !is_uploaded_file($tempFile)) {
+        $errorMessages = [
+            UPLOAD_ERR_INI_SIZE   => 'File exceeds upload_max_filesize',
+            UPLOAD_ERR_FORM_SIZE  => 'File exceeds MAX_FILE_SIZE',
+            UPLOAD_ERR_PARTIAL    => 'File was only partially uploaded',
+            UPLOAD_ERR_NO_FILE    => 'No file was uploaded',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write to disk',
+            UPLOAD_ERR_EXTENSION  => 'Upload stopped by extension',
+        ];
+        $msg = $errorMessages[$uploadError] ?? "Upload error code: $uploadError";
+        echo json_encode(['success' => false, 'message' => $msg]);
+        exit;
+    }
+
     $chunkData = file_get_contents($tempFile);
     $isFirstChunk = ($_POST['is_first_chunk'] ?? '0') === '1';
 
@@ -73,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         echo json_encode([
-            'success' => true, 
+            'success' => true,
             'message' => 'Chunk saved',
             'size' => filesize($filePath)
         ]);
