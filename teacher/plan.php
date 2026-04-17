@@ -1005,6 +1005,15 @@ require_once 'includes/header.php';
 
                                 if ($canDelete):
                                     ?>
+                                    <?php if ($userRole === 'admin'): ?>
+                                        <button
+                                            onclick="openEditTitleModal(<?php echo $lesson['db_id']; ?>, '<?php echo addslashes($lesson['title']); ?>', 'live_class')"
+                                            class="btn btn-secondary"
+                                            style="width: 48px; height: 48px; border-radius: 12px; padding: 0; color: #10b981; border: 1px solid #d1fae5;"
+                                            title="Mövzu Adını Redaktə et">
+                                            <i data-lucide="pencil" style="width: 20px;"></i>
+                                        </button>
+                                    <?php endif; ?>
                                     <button
                                         onclick="deleteArchive(<?php echo $lesson['db_id']; ?>, '<?php echo addslashes($lesson['title']); ?>', <?php echo $isLive ? 'true' : 'false'; ?>)"
                                         class="btn btn-secondary"
@@ -1298,6 +1307,81 @@ require_once 'includes/header.php';
             video.src = url;
         });
     });
+
+    // ===== EDIT THEME TITLE FUNCTIONALITY =====
+    function openEditTitleModal(id, currentTitle, type) {
+        document.getElementById('edit_theme_id').value = id;
+        document.getElementById('edit_theme_title').value = currentTitle;
+        document.getElementById('edit_theme_type').value = type;
+        document.getElementById('editTitleModal').style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeEditTitleModal() {
+        document.getElementById('editTitleModal').style.display = 'none';
+    }
+
+    function submitEditTitleForm(e) {
+        e.preventDefault();
+        const form = document.getElementById('editTitleForm');
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Yadda saxlanılır...';
+
+        fetch('api/update_archive_title.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Xəta: ' + data.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        })
+        .catch(err => {
+            alert('Şəbəkə xətası baş verdi.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        });
+    }
 </script>
+
+<!-- Edit Title Modal -->
+<div id="editTitleModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: white; width: 100%; max-width: 500px; border-radius: 20px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); position: relative; margin: 20px;">
+        <button onclick="closeEditTitleModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; color: var(--text-muted);">
+            <i data-lucide="x"></i>
+        </button>
+        
+        <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text-primary); display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="pencil-line" style="color: var(--primary);"></i>
+            Mövzu Adını Redaktə Et
+        </h3>
+        
+        <form id="editTitleForm" onsubmit="submitEditTitleForm(event)">
+            <input type="hidden" id="edit_theme_id" name="id">
+            <input type="hidden" id="edit_theme_type" name="type">
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; margin-left: 5px;">Yeni Mövzu Adı</label>
+                <input type="text" id="edit_theme_title" name="title" required 
+                       style="width: 100%; padding: 15px 20px; border-radius: 12px; border: 2px solid var(--border-color); font-size: 14px; font-weight: 600; outline: none; transition: border-color 0.2s;"
+                       onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeEditTitleModal()" class="btn btn-secondary" style="flex: 1; height: 50px; border-radius: 12px; font-weight: 700;">Ləğv Et</button>
+                <button type="submit" class="btn btn-primary" style="flex: 2; height: 50px; border-radius: 12px; font-weight: 800;">Yadda Saxla</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <?php require_once 'includes/footer.php'; ?>
