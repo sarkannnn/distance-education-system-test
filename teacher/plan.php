@@ -985,7 +985,7 @@ require_once 'includes/header.php';
                                     </a>
                                 <?php endif; ?>
 
-                                <?php if ($lesson['is_live']): ?>
+                                <?php if ($lesson['is_live'] && ($_SESSION['user_role'] ?? '') !== 'admin'): ?>
                                     <a href="attendance_report.php?id=<?php echo $lesson['local_live_id'] ?? $lesson['db_id']; ?>"
                                         class="btn btn-secondary"
                                         style="width: 48px; height: 48px; border-radius: 12px; padding: 0;" title="Hesabat">
