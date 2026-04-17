@@ -31,18 +31,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // 2. Lokal bazadan silməyə çalış
-        // Müəllimin instructor_id-sini tap
+        $isAdmin = (strtolower($_SESSION['user_role'] ?? '') === 'admin');
+        
         $instructor = $db->fetch(
             "SELECT id FROM instructors WHERE user_id = ? OR email = ?",
             [$user['id'], $user['email']]
         );
 
-        if ($instructor) {
-            $archive = $db->fetch("SELECT * FROM archived_lessons WHERE id = ? AND instructor_id = ?", [$archive_id, $instructor['id']]);
-            if ($archive) {
-                $db->delete('archived_lessons', 'id = :id', ['id' => $archive_id]);
-                $deletedFromLocal = true;
-            }
+        $instructorId = $instructor ? $instructor['id'] : 0;
+
+        // Admin hər şeyi silə bilər, müəllim isə ancaq özününkünü
+        $archiveQuery = $isAdmin 
+            ? "SELECT * FROM archived_lessons WHERE id = ?" 
+            : "SELECT * FROM archived_lessons WHERE id = ? AND instructor_id = ?";
+        $archiveParams = $isAdmin ? [$archive_id] : [$archive_id, $instructorId];
+
+        $archive = $db->fetch($archiveQuery, $archiveParams);
+        if ($archive) {
+            $db->delete('archived_lessons', 'id = :id', ['id' => $archive_id]);
+            $deletedFromLocal = true;
         }
 
         if ($deletedFromTmis || $deletedFromLocal) {

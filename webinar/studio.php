@@ -14,9 +14,9 @@ if (!$id) {
 
 $webinar = $db->fetch(
     "SELECT w.*, f.name as faculty_name 
-     FROM webinars w 
-     JOIN webinar_faculties f ON w.faculty_id = f.id 
-     WHERE w.id = ? AND w.faculty_id = ?",
+         FROM webinars w 
+         JOIN webinar_faculties f ON w.faculty_id = f.id 
+         WHERE w.id = ? AND w.faculty_id = ?",
     [$id, $user['faculty_id']]
 );
 
@@ -28,6 +28,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 ?>
 <!DOCTYPE html>
 <html lang="az">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,32 +39,47 @@ $pageTitle = "Studio: " . $webinar['title'];
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/studio.css?v=<?php echo time(); ?>">
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
     </style>
 </head>
+
 <body class="bg-[#060f23] overflow-hidden">
     <!-- Production Start Overlay -->
-    <div id="startProductionOverlay" class="fixed inset-0 z-[1000] bg-[#06112a] flex flex-col items-center justify-center p-6 text-center">
+    <div id="startProductionOverlay"
+        class="fixed inset-0 z-[1000] bg-[#06112a] flex flex-col items-center justify-center p-6 text-center">
         <div class="absolute inset-0 opacity-20 bg-grid pointer-events-none"></div>
-        <div class="relative w-24 h-24 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center mb-8 animate-pulse shadow-[0_0_50px_rgba(16,185,129,0.2)] border border-emerald-500/20">
+        <div
+            class="relative w-24 h-24 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center mb-8 animate-pulse shadow-[0_0_50px_rgba(16,185,129,0.2)] border border-emerald-500/20">
             <i data-lucide="video" class="w-10 h-10 text-emerald-400"></i>
         </div>
         <h2 class="text-3xl font-black text-white mb-4 tracking-tight">Studio Hazırdır</h2>
-        <p class="text-blue-100/40 text-lg max-w-md mb-12 font-medium">Yayıma başlamaq üçün aşağıdakı düyməni sıxın. Sistem avtomatik olaraq tam ekran rejiminə keçəcək.</p>
-        
-        <button onclick="startProductionNow()" class="px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black text-lg tracking-widest uppercase transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 flex items-center gap-4">
+        <p class="text-blue-100/40 text-lg max-w-md mb-12 font-medium">Yayıma başlamaq üçün aşağıdakı düyməni sıxın.
+            Sistem avtomatik olaraq tam ekran rejiminə keçəcək.</p>
+
+        <button onclick="startProductionNow()"
+            class="px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black text-lg tracking-widest uppercase transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 flex items-center gap-4">
             Yayıma Başla <i data-lucide="play" class="w-6 h-6"></i>
         </button>
-        
+
         <p class="mt-12 text-[10px] text-white/20 font-bold uppercase tracking-[0.3em] flex items-center gap-3">
             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500/40"></i>
             TƏHLÜKƏSİZ YAYIM SİSTEMİ V3.5
         </p>
     </div>
 
-    <header class="h-14 lg:h-16 border-b border-white/5 bg-[#0a1f44]/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 z-50">
+    <header
+        class="h-14 lg:h-16 border-b border-white/5 bg-[#0a1f44]/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 z-50">
         <!-- Desktop Header Title -->
         <div class="hidden lg:flex items-center gap-4">
             <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -71,28 +87,32 @@ $pageTitle = "Studio: " . $webinar['title'];
             </div>
             <div>
                 <h1 class="text-sm font-bold leading-none"><?php echo e($webinar['title']); ?></h1>
-                <p class="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1"><?php echo e($webinar['faculty_name']); ?></p>
+                <p class="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">
+                    <?php echo e($webinar['faculty_name']); ?></p>
             </div>
         </div>
 
         <!-- Mobile Header (Legacy Style) -->
         <div class="flex lg:hidden items-center">
-             <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
+            <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
         </div>
 
         <div class="flex lg:hidden items-center justify-center">
             <div class="flex bg-white/5 border border-white/10 rounded-full p-1 gap-1">
-                <button onclick="toggleMobilePanel('left')" class="px-3 py-1.5 rounded-full text-[10px] font-bold text-white/60 hover:text-white transition-all flex items-center gap-1.5">
+                <button onclick="toggleMobilePanel('left')"
+                    class="px-3 py-1.5 rounded-full text-[10px] font-bold text-white/60 hover:text-white transition-all flex items-center gap-1.5">
                     <i data-lucide="users" class="w-3 h-3"></i> İştirakçılar
                 </button>
-                <button onclick="toggleMobilePanel('right')" class="px-3 py-1.5 rounded-full bg-white/10 text-[10px] font-bold text-white transition-all flex items-center gap-1.5">
+                <button onclick="toggleMobilePanel('right')"
+                    class="px-3 py-1.5 rounded-full bg-white/10 text-[10px] font-bold text-white transition-all flex items-center gap-1.5">
                     <i data-lucide="message-square" class="w-3 h-3"></i> Çat
                 </button>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <button onclick="endWebinar()" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
+            <button onclick="endWebinar()"
+                class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
                 Bitir
             </button>
         </div>
@@ -105,129 +125,195 @@ $pageTitle = "Studio: " . $webinar['title'];
                 <!-- Main Feed -->
                 <canvas id="outputCanvas" class="w-full h-full object-contain"></canvas>
                 <video id="localMainVid" autoplay playsinline class="hidden w-full h-full object-contain"></video>
-                
+
                 <!-- Whiteboard Overlay -->
-                <div id="whiteboardOverlay" class="absolute inset-0 bg-white hidden z-40 animate-in fade-in duration-300">
+                <div id="whiteboardOverlay"
+                    class="absolute inset-0 bg-white hidden z-40 animate-in fade-in duration-300">
                     <canvas id="wbCanvasInternal" class="w-full h-full cursor-crosshair"></canvas>
-                                <!-- Whiteboard Toolbar (Premium V3: Professional Broadcast Edition) -->
-                    <div id="wbToolbarWrapper" class="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-50 scale-[0.85] origin-left transition-all duration-500">
-                        
+                    <!-- Whiteboard Toolbar (Premium V3: Professional Broadcast Edition) -->
+                    <div id="wbToolbarWrapper"
+                        class="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3 z-50 scale-[0.85] origin-left transition-all duration-500">
+
                         <!-- Master Control Panel -->
-                        <div id="wbToolbarContent" class="p-4 bg-[#06112a]/80 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/5 flex flex-col gap-6 transition-all duration-500">
-                            
+                        <div id="wbToolbarContent"
+                            class="p-4 bg-[#06112a]/80 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/5 flex flex-col gap-6 transition-all duration-500">
+
                             <!-- Navigation Module -->
-                            <div class="flex flex-col items-center gap-1.5 p-2 bg-white/5 rounded-[1.5rem] border border-white/5">
-                                <button onclick="prevPage()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40 transition-all active:scale-90" title="Əvvəlki">
+                            <div
+                                class="flex flex-col items-center gap-1.5 p-2 bg-white/5 rounded-[1.5rem] border border-white/5">
+                                <button onclick="prevPage()"
+                                    class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40 transition-all active:scale-90"
+                                    title="Əvvəlki">
                                     <i data-lucide="chevron-up" class="w-4 h-4"></i>
                                 </button>
                                 <div class="bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
-                                    <span id="pageIndicator" class="text-[9px] font-black text-emerald-400 tracking-widest uppercase">1/1</span>
+                                    <span id="pageIndicator"
+                                        class="text-[9px] font-black text-emerald-400 tracking-widest uppercase">1/1</span>
                                 </div>
-                                <button onclick="nextPage()" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40 transition-all active:scale-90" title="Növbəti">
+                                <button onclick="nextPage()"
+                                    class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40 transition-all active:scale-90"
+                                    title="Növbəti">
                                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                                 </button>
                                 <div class="w-full h-px bg-white/5 my-1"></div>
-                                <button onclick="addNewPage()" class="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-all active:scale-90 shadow-[0_0_15px_rgba(16,185,129,0.2)]" title="Yeni Səhifə">
+                                <button onclick="addNewPage()"
+                                    class="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-all active:scale-90 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                    title="Yeni Səhifə">
                                     <i data-lucide="plus" class="w-4 h-4"></i>
                                 </button>
                             </div>
 
                             <!-- Tools Grid Module -->
                             <div class="grid grid-cols-2 gap-2.5">
-                                <button onclick="setWBTool('pencil')" id="toolPencil" class="wb-tool-btn active w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Qələm">
+                                <button onclick="setWBTool('pencil')" id="toolPencil"
+                                    class="wb-tool-btn active w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Qələm">
                                     <i data-lucide="pen-tool" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="setWBTool('eraser')" id="toolEraser" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Pozan">
+                                <button onclick="setWBTool('eraser')" id="toolEraser"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Pozan">
                                     <i data-lucide="eraser" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="setWBTool('text')" id="toolText" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Mətn">
+                                <button onclick="setWBTool('text')" id="toolText"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Mətn">
                                     <i data-lucide="type" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="setWBTool('laser')" id="toolLaser" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Lazer">
+                                <button onclick="setWBTool('laser')" id="toolLaser"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Lazer">
                                     <i data-lucide="pointer" class="w-4.5 h-4.5"></i>
                                 </button>
                                 <div class="col-span-2 h-px bg-white/5 my-0.5"></div>
-                                <button onclick="setWBTool('line')" id="toolLine" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Xətt">
+                                <button onclick="setWBTool('line')" id="toolLine"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Xətt">
                                     <i data-lucide="minus" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="setWBTool('rect')" id="toolRect" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Dördbucaqlı">
+                                <button onclick="setWBTool('rect')" id="toolRect"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Dördbucaqlı">
                                     <i data-lucide="square" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="setWBTool('circle')" id="toolCircle" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Dairə">
+                                <button onclick="setWBTool('circle')" id="toolCircle"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Dairə">
                                     <i data-lucide="circle" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="setWBTool('arrow')" id="toolArrow" class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300" title="Ox">
+                                <button onclick="setWBTool('arrow')" id="toolArrow"
+                                    class="wb-tool-btn w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all duration-300"
+                                    title="Ox">
                                     <i data-lucide="arrow-up-right" class="w-4.5 h-4.5"></i>
                                 </button>
-                                <button onclick="document.getElementById('wbImgInput').click()" class="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white hover:bg-emerald-500/10 hover:border-emerald-500/20 transition-all" title="Şəkil">
+                                <button onclick="document.getElementById('wbImgInput').click()"
+                                    class="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white hover:bg-emerald-500/10 hover:border-emerald-500/20 transition-all"
+                                    title="Şəkil">
                                     <i data-lucide="image" class="w-4.5 h-4.5"></i>
-                                    <input type="file" id="wbImgInput" class="hidden" accept="image/*" onchange="wbUploadImage(this)">
+                                    <input type="file" id="wbImgInput" class="hidden" accept="image/*"
+                                        onchange="wbUploadImage(this)">
                                 </button>
-                                <button onclick="setWBBackground('grid')" id="bgGrid" class="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all" title="Dama Fon">
+                                <button onclick="setWBBackground('grid')" id="bgGrid"
+                                    class="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 text-white/30 hover:text-white transition-all"
+                                    title="Dama Fon">
                                     <i data-lucide="grid" class="w-4.5 h-4.5"></i>
                                 </button>
                             </div>
 
                             <!-- Properties Module -->
                             <div class="space-y-4 pt-4 border-t border-white/5">
-                                <div class="flex items-center justify-between p-1 bg-black/40 rounded-2xl border border-white/5">
-                                    <button onclick="changeWBSize(-2)" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
-                                    <span id="wbSizeDisplay" class="text-[10px] font-black text-white/60 w-5 text-center">4</span>
-                                    <button onclick="changeWBSize(2)" class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+                                <div
+                                    class="flex items-center justify-between p-1 bg-black/40 rounded-2xl border border-white/5">
+                                    <button onclick="changeWBSize(-2)"
+                                        class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40"><i
+                                            data-lucide="minus" class="w-3.5 h-3.5"></i></button>
+                                    <span id="wbSizeDisplay"
+                                        class="text-[10px] font-black text-white/60 w-5 text-center">4</span>
+                                    <button onclick="changeWBSize(2)"
+                                        class="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 text-white/40"><i
+                                            data-lucide="plus" class="w-3.5 h-3.5"></i></button>
                                 </div>
                                 <div class="grid grid-cols-4 gap-3">
-                                    <button onclick="setWBColor('#000000', this)" class="wb-color-btn active w-6 h-6 rounded-full bg-black border-2 border-white/10 hover:scale-110 transition-all shadow-lg"></button>
-                                    <button onclick="setWBColor('#ef4444', this)" class="wb-color-btn w-6 h-6 rounded-full bg-rose-500 border-2 border-transparent hover:scale-110 transition-all shadow-lg shadow-rose-500/20"></button>
-                                    <button onclick="setWBColor('#3b82f6', this)" class="wb-color-btn w-6 h-6 rounded-full bg-blue-500 border-2 border-transparent hover:scale-110 transition-all shadow-lg shadow-blue-500/20"></button>
-                                    <button onclick="setWBColor('#10b981', this)" class="wb-color-btn w-6 h-6 rounded-full bg-emerald-500 border-2 border-transparent hover:scale-110 transition-all shadow-lg shadow-emerald-500/20"></button>
-                                    <button onclick="openColorPicker()" class="col-span-4 h-6 rounded-full bg-gradient-to-r from-rose-500 via-emerald-500 to-blue-500 border border-white/10 hover:scale-[1.02] transition-all relative overflow-hidden group">
-                                        <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <input type="color" id="customColorPicker" class="opacity-0 w-full h-full cursor-pointer" onchange="setWBColor(this.value, this.parentElement)">
+                                    <button onclick="setWBColor('#000000', this)"
+                                        class="wb-color-btn active w-6 h-6 rounded-full bg-black border-2 border-white/10 hover:scale-110 transition-all shadow-lg"></button>
+                                    <button onclick="setWBColor('#ef4444', this)"
+                                        class="wb-color-btn w-6 h-6 rounded-full bg-rose-500 border-2 border-transparent hover:scale-110 transition-all shadow-lg shadow-rose-500/20"></button>
+                                    <button onclick="setWBColor('#3b82f6', this)"
+                                        class="wb-color-btn w-6 h-6 rounded-full bg-blue-500 border-2 border-transparent hover:scale-110 transition-all shadow-lg shadow-blue-500/20"></button>
+                                    <button onclick="setWBColor('#10b981', this)"
+                                        class="wb-color-btn w-6 h-6 rounded-full bg-emerald-500 border-2 border-transparent hover:scale-110 transition-all shadow-lg shadow-emerald-500/20"></button>
+                                    <button onclick="openColorPicker()"
+                                        class="col-span-4 h-6 rounded-full bg-gradient-to-r from-rose-500 via-emerald-500 to-blue-500 border border-white/10 hover:scale-[1.02] transition-all relative overflow-hidden group">
+                                        <div
+                                            class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        </div>
+                                        <input type="color" id="customColorPicker"
+                                            class="opacity-0 w-full h-full cursor-pointer"
+                                            onchange="setWBColor(this.value, this.parentElement)">
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Actions Module -->
                             <div class="flex items-center gap-2 pt-4 border-t border-white/5">
-                                <button onclick="undo()" class="flex-1 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/30 hover:text-white transition-all" title="Geri Al">
+                                <button onclick="undo()"
+                                    class="flex-1 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/30 hover:text-white transition-all"
+                                    title="Geri Al">
                                     <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                                 </button>
-                                <button onclick="clearWhiteboard()" class="flex-1 h-10 rounded-2xl flex items-center justify-center bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all shadow-[0_0_20px_rgba(244,63,94,0.1)]" title="Təmizlə">
+                                <button onclick="clearWhiteboard()"
+                                    class="flex-1 h-10 rounded-2xl flex items-center justify-center bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all shadow-[0_0_20px_rgba(244,63,94,0.1)]"
+                                    title="Təmizlə">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
-                                <button onclick="toggleWhiteboard()" class="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/20 hover:text-white transition-all" title="Bağla">
+                                <button onclick="toggleWhiteboard()"
+                                    class="w-10 h-10 rounded-2xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/20 hover:text-white transition-all"
+                                    title="Bağla">
                                     <i data-lucide="x" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Toggle Collapse Button -->
-                        <button onclick="toggleWBToolbar()" class="w-12 h-12 rounded-2xl bg-[#06112a]/80 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white shadow-2xl transition-all active:scale-90 group" title="Alətləri Gizlə/Göstər">
-                            <i id="wbToolbarToggleIcon" data-lucide="chevron-left" class="w-6 h-6 transition-transform duration-500"></i>
+                        <button onclick="toggleWBToolbar()"
+                            class="w-12 h-12 rounded-2xl bg-[#06112a]/80 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white shadow-2xl transition-all active:scale-90 group"
+                            title="Alətləri Gizlə/Göstər">
+                            <i id="wbToolbarToggleIcon" data-lucide="chevron-left"
+                                class="w-6 h-6 transition-transform duration-500"></i>
                         </button>
                     </div>
 
                     <!-- Image Placement UI -->
                     <div id="imagePlacementOverlay" class="absolute inset-0 z-50 bg-black/40 hidden">
-                        <div id="imagePlacementContainer" class="absolute border-2 border-dashed border-emerald-500 cursor-move">
+                        <div id="imagePlacementContainer"
+                            class="absolute border-2 border-dashed border-emerald-500 cursor-move">
                             <img id="placementImage" src="" class="w-full h-full pointer-events-none select-none">
-                            <div id="resizeHandle" class="absolute -bottom-3 -right-3 w-6 h-6 bg-emerald-500 rounded-full cursor-nwse-resize flex items-center justify-center shadow-lg">
+                            <div id="resizeHandle"
+                                class="absolute -bottom-3 -right-3 w-6 h-6 bg-emerald-500 rounded-full cursor-nwse-resize flex items-center justify-center shadow-lg">
                                 <div class="w-2 h-2 border-r-2 border-b-2 border-white"></div>
                             </div>
                             <div class="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                                <button onclick="confirmImagePlacement()" class="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-lg">Təsdiqlə</button>
-                                <button onclick="cancelImagePlacement()" class="px-4 py-2 bg-rose-500 text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-lg">Ləğv Et</button>
+                                <button onclick="confirmImagePlacement()"
+                                    class="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-lg">Təsdiqlə</button>
+                                <button onclick="cancelImagePlacement()"
+                                    class="px-4 py-2 bg-rose-500 text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-lg">Ləğv
+                                    Et</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="laserCursor" class="fixed w-4 h-4 bg-rose-500 rounded-full blur-[2px] border-2 border-white pointer-events-none hidden z-50 shadow-[0_0_15px_rgba(244,63,94,0.8)]"></div>
+                <div id="laserCursor"
+                    class="fixed w-4 h-4 bg-rose-500 rounded-full blur-[2px] border-2 border-white pointer-events-none hidden z-50 shadow-[0_0_15px_rgba(244,63,94,0.8)]">
+                </div>
 
                 <!-- Hidden Source Elements for Compositing -->
-                <video id="camSource" autoplay playsinline muted style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
-                <video id="screenSource" autoplay playsinline muted style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
-                <video id="studentSource" autoplay playsinline muted style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
+                <video id="camSource" autoplay playsinline muted
+                    style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
+                <video id="screenSource" autoplay playsinline muted
+                    style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
+                <video id="studentSource" autoplay playsinline muted
+                    style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
 
                 <!-- Status Badges -->
                 <div class="live-badge">
@@ -281,42 +367,53 @@ $pageTitle = "Studio: " . $webinar['title'];
 
 
             <!-- Debug Logs (Hidden by default, useful for dev) -->
-            <div id="logBox" class="glass-panel p-4 rounded-2xl hidden h-32 overflow-y-auto custom-scrollbar text-[10px] font-mono text-white/40"></div>
+            <div id="logBox"
+                class="glass-panel p-4 rounded-2xl hidden h-32 overflow-y-auto custom-scrollbar text-[10px] font-mono text-white/40">
+            </div>
         </div>
 
         <!-- Sidebar (Tabs & Chat) -->
-        <aside id="studioAside" class="w-[380px] border-l border-white/5 bg-[#0a1f44]/30 backdrop-blur-xl flex flex-col h-full overflow-hidden transition-all duration-300">
-            <button onclick="toggleMobileChat()" class="lg:hidden absolute top-4 right-4 w-10 h-10 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20 flex items-center justify-center z-[100]">
+        <aside id="studioAside"
+            class="w-[380px] border-l border-white/5 bg-[#0a1f44]/30 backdrop-blur-xl flex flex-col h-full overflow-hidden transition-all duration-300">
+            <button onclick="toggleMobileChat()"
+                class="lg:hidden absolute top-4 right-4 w-10 h-10 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20 flex items-center justify-center z-[100]">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            
+
             <!-- Side Stage Container (Unified) -->
             <div id="sideStageContainer" class="p-4 border-b border-white/10 bg-blue-500/5 transition-all duration-500">
                 <div class="mb-3 flex items-center justify-between">
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-2">
+                    <h3
+                        class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-2">
                         <span id="sideStageDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span id="sideStageLabel">İŞTİRAKÇI CANLIDA</span>
                     </h3>
                     <div class="flex items-center gap-2">
-                        <button id="btnSideSwap" onclick="toggleStudentMain()" class="hidden w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all" title="Yayımı Dəyişdir">
+                        <button id="btnSideSwap" onclick="toggleStudentMain()"
+                            class="hidden w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
+                            title="Yayımı Dəyişdir">
                             <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
                         </button>
                         <span class="text-[9px] font-bold text-white/20 uppercase tracking-widest">Studio</span>
                     </div>
                 </div>
-                <div class="relative aspect-video rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-xl group cursor-pointer" onclick="toggleStudentMain()">
+                <div class="relative aspect-video rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-xl group cursor-pointer"
+                    onclick="toggleStudentMain()">
                     <video id="sideStageVid" autoplay playsinline muted class="w-full h-full object-cover"></video>
                     <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                    
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                         <div class="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30">
+
+                    <div
+                        class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                        <div class="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30">
                             <i data-lucide="repeat" class="w-5 h-5 text-white"></i>
-                         </div>
+                        </div>
                     </div>
 
                     <!-- Overlay for Student Controls when they are in sidebar -->
-                    <div id="sideStageOverlay" class="absolute inset-x-0 bottom-0 p-3 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="event.stopPropagation(); toggleStudentExpand()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all">
+                    <div id="sideStageOverlay"
+                        class="absolute inset-x-0 bottom-0 p-3 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="event.stopPropagation(); toggleStudentExpand()"
+                            class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all">
                             <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
@@ -324,10 +421,12 @@ $pageTitle = "Studio: " . $webinar['title'];
             </div>
 
             <div class="flex border-b border-white/5">
-                <button onclick="switchSidebarTab('chat')" id="tabBtnChat" class="flex-1 p-4 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 border-b-2 border-emerald-500 transition-all flex items-center justify-center gap-2">
+                <button onclick="switchSidebarTab('chat')" id="tabBtnChat"
+                    class="flex-1 p-4 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 border-b-2 border-emerald-500 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Çat
                 </button>
-                <button onclick="switchSidebarTab('students')" id="tabBtnStudents" class="flex-1 p-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b-2 border-transparent hover:text-white/60 transition-all flex items-center justify-center gap-2">
+                <button onclick="switchSidebarTab('students')" id="tabBtnStudents"
+                    class="flex-1 p-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 border-b-2 border-transparent hover:text-white/60 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="users" class="w-3.5 h-3.5"></i> İştirakçılar
                 </button>
             </div>
@@ -343,15 +442,17 @@ $pageTitle = "Studio: " . $webinar['title'];
 
                 <div class="p-6 bg-[#060f23]/50 border-t border-white/5 flex-shrink-0">
                     <div class="flex items-center gap-3 mb-4">
-                        <button onclick="sendAnnouncement()" class="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-emerald-500/20 flex items-center justify-center gap-2">
+                        <button onclick="sendAnnouncement()"
+                            class="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-emerald-500/20 flex items-center justify-center gap-2">
                             <i data-lucide="megaphone" class="w-3 h-3"></i> Elan Göndər
                         </button>
                     </div>
                     <div class="relative">
-                        <input type="text" id="chatInput" placeholder="Mesaj yazın..." 
-                               class="w-full bg-white/5 border border-white/10 rounded-2xl pl-6 pr-14 py-4 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium placeholder:text-white/10"
-                               onkeypress="if(event.key==='Enter') sendChat()">
-                        <button onclick="sendChat()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center hover:bg-emerald-400 transition-all active:scale-90 shadow-lg shadow-emerald-500/20">
+                        <input type="text" id="chatInput" placeholder="Mesaj yazın..."
+                            class="w-full bg-white/5 border border-white/10 rounded-2xl pl-6 pr-14 py-4 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium placeholder:text-white/10"
+                            onkeypress="if(event.key==='Enter') sendChat()">
+                        <button onclick="sendChat()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center hover:bg-emerald-400 transition-all active:scale-90 shadow-lg shadow-emerald-500/20">
                             <i data-lucide="send" class="w-4 h-4 text-white"></i>
                         </button>
                     </div>
@@ -361,28 +462,39 @@ $pageTitle = "Studio: " . $webinar['title'];
             <!-- Students Tab Content -->
             <div id="tabContentStudents" class="hidden flex-1 flex flex-col min-h-0">
                 <div class="p-6 border-b border-white/5 flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online İştirakçılar</span>
-                    <span id="studentCountBadge" class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full">0</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online
+                        İştirakçılar</span>
+                    <span id="studentCountBadge"
+                        class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full">0</span>
                 </div>
                 <div id="studentListContainer" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                    <div class="text-center py-10 opacity-20 text-[10px] font-bold uppercase tracking-widest italic">İştirakçı yoxdur</div>
+                    <div class="text-center py-10 opacity-20 text-[10px] font-bold uppercase tracking-widest italic">
+                        İştirakçı yoxdur</div>
                 </div>
             </div>
         </aside>
     </div>
 
     <!-- Student Large View Overlay -->
-    <div id="largeStudentStageOverlay" class="fixed inset-0 z-[100] bg-[#060f23]/95 backdrop-blur-2xl hidden flex flex-col items-center justify-center p-10 animate-in fade-in zoom-in duration-300">
-        <div class="relative w-full max-w-5xl aspect-video rounded-[2.5rem] overflow-hidden bg-black shadow-[0_0_100px_rgba(16,185,129,0.2)] ring-1 ring-white/10">
+    <div id="largeStudentStageOverlay"
+        class="fixed inset-0 z-[100] bg-[#060f23]/95 backdrop-blur-2xl hidden flex flex-col items-center justify-center p-10 animate-in fade-in zoom-in duration-300">
+        <div
+            class="relative w-full max-w-5xl aspect-video rounded-[2.5rem] overflow-hidden bg-black shadow-[0_0_100px_rgba(16,185,129,0.2)] ring-1 ring-white/10">
             <video id="studentRemoteVidLarge" autoplay playsinline class="w-full h-full object-contain"></video>
-            
+
             <div class="absolute top-8 right-8 flex items-center gap-4">
-                <div class="flex items-center gap-3 px-6 py-3 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl">
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
-                    <span class="text-[11px] font-black text-white uppercase tracking-[0.2em]">İştirakçı ilə Fərdi Seans</span>
+                <div
+                    class="flex items-center gap-3 px-6 py-3 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl">
+                    <div
+                        class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]">
+                    </div>
+                    <span class="text-[11px] font-black text-white uppercase tracking-[0.2em]">İştirakçı ilə Fərdi
+                        Seans</span>
                 </div>
-                <button onclick="toggleStudentExpand()" class="w-12 h-12 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-xl text-white flex items-center justify-center transition-all group shadow-2xl border border-white/10">
-                    <i data-lucide="minimize-2" class="w-5 h-5 group-hover:scale-110 transition-transform text-white/80 group-hover:text-white"></i>
+                <button onclick="toggleStudentExpand()"
+                    class="w-12 h-12 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-xl text-white flex items-center justify-center transition-all group shadow-2xl border border-white/10">
+                    <i data-lucide="minimize-2"
+                        class="w-5 h-5 group-hover:scale-110 transition-transform text-white/80 group-hover:text-white"></i>
                 </button>
             </div>
         </div>
@@ -390,7 +502,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
     <!-- JS Logic -->
     <script>
-        const wID = <?php echo (int)$id; ?>;
+        const wID = <?php echo (int) $id; ?>;
         const uName = "<?php echo e($user['full_name']); ?>";
         let peer, stream, camStream, screenStream, destStream;
         let allDataConns = [];
@@ -400,15 +512,15 @@ $pageTitle = "Studio: " . $webinar['title'];
         // --- WHITEBOARD STATE (V2.1) ---
         let isWBActive = false, isDrawing = false;
         let wbCanvas, wbCtx, wbTool = 'pencil', wbColor = '#000000';
-        let wbSize = 4, wbEraserSize = 30; 
+        let wbSize = 4, wbEraserSize = 30;
         let lastX = 0, lastY = 0, startX = 0, startY = 0;
         let laserActive = false, laserX = 0, laserY = 0;
-        
+
         // History & Pages
         let wbHistory = [], wbUndoStack = [];
         let wbPages = [], currentWBPage = 0;
         let wbBgType = 'plain', wbSnapshot = null;
-        
+
         // Image Placement
         let placementImg = null, isDraggingImg = false, isResizingImg = false;
         let imgDragStartX = 0, imgDragStartY = 0, imgStartLeft = 0, imgStartTop = 0;
@@ -450,7 +562,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             try {
                 const bestType = getBestMimeType();
                 recordingMimeType = bestType;
-                
+
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: bestType,
                     videoBitsPerSecond: 1500000 // 1.5 Mbps
@@ -486,7 +598,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
         async function finalizeRecording() {
             if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-            
+
             const durationMs = Date.now() - recordingStartTime;
             LOG("🏁 Yayım yekunlaşdırılır, video emal edilir...", "#60a5fa");
 
@@ -494,7 +606,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 mediaRecorder.onstop = async () => {
                     // Wait for the very last flush triggered by stop()
                     await lastFlushPromise;
-                    
+
                     try {
                         const formData = new FormData();
                         formData.append('webinar_id', wID);
@@ -524,7 +636,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             formData.append('video_blob', blob);
             formData.append('mime_type', recordingMimeType);
             formData.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
-            
+
             if (isFirstChunkRecorded) isFirstChunkRecorded = false;
 
             lastFlushPromise = fetch('api/upload_recording.php', {
@@ -551,16 +663,16 @@ $pageTitle = "Studio: " . $webinar['title'];
                     video: { width: 1280, height: 720 },
                     audio: { echoCancellation: true }
                 });
-                
+
                 document.getElementById('camSource').srcObject = camStream;
                 updateSideStage();
                 startCompositing();
-                
+
                 // START RECORDING
                 startRecording();
-                
+
                 // Initialize PeerJS
-                const uniqueID = `ndu-webinar-${wID}-${Math.floor(Math.random()*1000)}`;
+                const uniqueID = `ndu-webinar-${wID}-${Math.floor(Math.random() * 1000)}`;
                 peer = new Peer(uniqueID, {
                     debug: 1,
                     host: '0.peerjs.com',
@@ -579,7 +691,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     if (statusEl) {
                         statusEl.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>AKTİV';
                     }
-                    
+
                     fetch(`api/update_peer_id.php?id=${wID}&peer_id=${id}`)
                         .then(r => r.json())
                         .then(data => data.success ? LOG("✅ DB yeniləndi") : LOG("❌ DB xətası", "red"));
@@ -590,7 +702,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     updateViewerCount();
                     renderStudentList();
                     LOG(`👤 İştirakçı qoşuldu: ${conn.metadata.name || 'Naməlum'}`, "#60a5fa");
-                    
+
                     conn.on('data', (data) => {
                         if (data.type === 'chat') {
                             appendChat(data.sender, data.message);
@@ -610,7 +722,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     // Detect if the call is a student sharing camera (has video tracks)
                     // In PeerJS, we can check the metadata or simply observe the incoming stream
                     LOG(`📞 Giriş zəngi qəbul edilir...`, "#fbbf24");
-                    
+
                     // We have the globally composed 'stream' (Canvas + Audio)
                     if (!stream || stream.getTracks().length === 0) {
                         LOG("⚠️ Yayım hələ hazır deyil, cəhd edilir...", "#f59e0b");
@@ -625,7 +737,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                         if (remoteStream.getVideoTracks().length > 0) {
                             LOG("👤 İştirakçı səhnəyə qoşuldu!", "#10b981");
                             activeStudentCall = call;
-                            
+
                             const vSource = document.getElementById('studentSource');
                             vSource.srcObject = remoteStream;
                             vSource.play();
@@ -633,7 +745,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                             const v2 = document.getElementById('studentRemoteVidLarge');
                             v2.srcObject = remoteStream;
                             v2.play();
-                            
+
                             updateSideStage();
                             lucide.createIcons();
                         }
@@ -660,11 +772,11 @@ $pageTitle = "Studio: " . $webinar['title'];
 
             function draw() {
                 const canvasEl = document.getElementById('outputCanvas');
-                
+
                 // Dynamic Canvas Resolution
                 let targetW = 1280;
                 let targetH = 720;
-                
+
                 if (isScreenOn && screenVid && screenVid.videoWidth) {
                     targetW = screenVid.videoWidth;
                     targetH = screenVid.videoHeight;
@@ -712,50 +824,50 @@ $pageTitle = "Studio: " . $webinar['title'];
                         for (let y = step; y < canvas.height; y += step) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
                         ctx.stroke();
                     }
-                    
+
                     drawImageFit(ctx, wbCanvas, 0, 0, canvas.width, canvas.height);
 
-            if (laserActive && wbTool === 'laser') {
-                const imgW = wbCanvas.width;
-                const imgH = wbCanvas.height;
-                const targetAspect = canvas.width / canvas.height;
-                const imgAspect = imgW / imgH;
-                let dw, dh, dx, dy;
+                    if (laserActive && wbTool === 'laser') {
+                        const imgW = wbCanvas.width;
+                        const imgH = wbCanvas.height;
+                        const targetAspect = canvas.width / canvas.height;
+                        const imgAspect = imgW / imgH;
+                        let dw, dh, dx, dy;
 
-                if (imgAspect > targetAspect) {
-                    dw = canvas.width;
-                    dh = canvas.width / imgAspect;
-                    dx = 0;
-                    dy = (canvas.height - dh) / 2;
-                } else {
-                    dh = canvas.height;
-                    dw = canvas.height * imgAspect;
-                    dx = (canvas.width - dw) / 2;
-                    dy = 0;
-                }
+                        if (imgAspect > targetAspect) {
+                            dw = canvas.width;
+                            dh = canvas.width / imgAspect;
+                            dx = 0;
+                            dy = (canvas.height - dh) / 2;
+                        } else {
+                            dh = canvas.height;
+                            dw = canvas.height * imgAspect;
+                            dx = (canvas.width - dw) / 2;
+                            dy = 0;
+                        }
 
-                // Map laser coordinates from wbCanvas to fitted outputCanvas
-                const lx = dx + (laserX / imgW) * dw;
-                const ly = dy + (laserY / imgH) * dh;
+                        // Map laser coordinates from wbCanvas to fitted outputCanvas
+                        const lx = dx + (laserX / imgW) * dw;
+                        const ly = dy + (laserY / imgH) * dh;
 
-                ctx.save();
-                const grad = ctx.createRadialGradient(lx, ly, 0, lx, ly, 20);
-                grad.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
-                grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(lx, ly, 20, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.beginPath();
-                ctx.arc(lx, ly, 6, 0, Math.PI * 2);
-                ctx.fillStyle = '#ef4444';
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.restore();
-            }
+                        ctx.save();
+                        const grad = ctx.createRadialGradient(lx, ly, 0, lx, ly, 20);
+                        grad.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
+                        grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(lx, ly, 20, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(lx, ly, 6, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ef4444';
+                        ctx.fill();
+                        ctx.strokeStyle = 'white';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
                     isMainDrawn = true;
                 } else if (isScreenOn) {
                     drawImageFit(ctx, screenVid, 0, 0, canvas.width, canvas.height);
@@ -817,14 +929,14 @@ $pageTitle = "Studio: " . $webinar['title'];
 
             // Use setInterval instead of requestAnimationFrame so the broadcast 
             // continues even if the teacher switches tabs (prevents black screen for students)
-            setInterval(draw, 1000/30);
-            
+            setInterval(draw, 1000 / 30);
+
             const canvasStream = canvas.captureStream(30);
             const audioTracks = (camStream && camStream.getAudioTracks().length > 0) ? camStream.getAudioTracks() : [];
-            
+
             // Construct a pristine MediaStream with consolidated tracks
             stream = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
-            
+
             LOG("📡 Yayım axını hazırlandı (V3)", "#10b981");
         }
 
@@ -944,7 +1056,7 @@ $pageTitle = "Studio: " . $webinar['title'];
         function appendChat(sender, msg, color = '#60a5fa') {
             const box = document.getElementById('chatMessages');
             if (box.innerHTML.includes('Çat boşdur')) box.innerHTML = '';
-            
+
             const div = document.createElement('div');
             div.className = 'bg-white/5 p-4 rounded-2xl border border-white/5 animate-in slide-in-from-right duration-300';
             div.innerHTML = `
@@ -964,13 +1076,13 @@ $pageTitle = "Studio: " . $webinar['title'];
             isWBActive = !isWBActive;
             const overlay = document.getElementById('whiteboardOverlay');
             const btn = document.getElementById('btnWhiteboard');
-            
+
             if (isWBActive) {
                 overlay.classList.remove('hidden');
                 btn.classList.add('active-green');
                 initWBCanvas();
                 // Force a resize check after showing
-                setTimeout(() => { if(window.wbResize) window.wbResize(); }, 50);
+                setTimeout(() => { if (window.wbResize) window.wbResize(); }, 50);
                 LOG("🎨 Professional Lövhə aktivdir", "#10b981");
                 broadcast({ type: 'whiteboard_state', active: true });
             } else {
@@ -1006,7 +1118,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             const content = document.getElementById('wbToolbarContent');
             const icon = document.getElementById('wbToolbarToggleIcon');
             const wrapper = document.getElementById('wbToolbarWrapper');
-            
+
             if (isWBToolbarCollapsed) {
                 content.style.display = 'none';
                 icon.style.transform = 'rotate(180deg)';
@@ -1026,7 +1138,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             if (wbCanvas) return;
             wbCanvas = document.getElementById('wbCanvasInternal');
             wbCtx = wbCanvas.getContext('2d');
-            
+
             window.wbResize = () => {
                 const rect = wbCanvas.parentElement.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) return;
@@ -1041,7 +1153,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 wbCanvas.height = rect.height;
 
                 if (temp) wbCtx.putImageData(temp, 0, 0);
-                
+
                 // Restore context settings
                 wbCtx.lineCap = 'round';
                 wbCtx.lineJoin = 'round';
@@ -1060,7 +1172,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 const { x, y } = getXY(e);
                 if (wbTool === 'laser') return;
                 if (wbTool === 'text') { drawText(x, y); return; }
-                
+
                 if (wbCanvas.width === 0 || wbCanvas.height === 0) return;
 
                 saveState();
@@ -1074,7 +1186,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             const moveDraw = (e) => {
                 const { x, y } = getXY(e);
                 const laser = document.getElementById('laserCursor');
-                
+
                 if (wbTool === 'laser') {
                     laser.style.display = 'block';
                     laser.style.left = (e.touches ? e.touches[0].clientX : e.clientX) + 'px';
@@ -1088,7 +1200,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 }
 
                 if (!isDrawing) return;
-                
+
                 if (wbTool === 'pencil' || wbTool === 'eraser') {
                     drawFreehand(x, y);
                 } else {
@@ -1135,7 +1247,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             wbCtx.beginPath();
             wbCtx.moveTo(lastX, lastY);
             wbCtx.lineTo(x, y);
-            
+
             if (wbTool === 'eraser') {
                 wbCtx.globalCompositeOperation = 'destination-out';
                 wbCtx.lineWidth = wbEraserSize;
@@ -1144,7 +1256,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 wbCtx.strokeStyle = wbColor;
                 wbCtx.lineWidth = wbSize;
             }
-            
+
             wbCtx.stroke();
             wbCtx.globalCompositeOperation = 'source-over';
             [lastX, lastY] = [x, y];
@@ -1203,7 +1315,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             const imgEl = document.getElementById('placementImage');
             imgEl.src = img.src;
             imgAspectRatio = img.width / img.height;
-            
+
             const w = 400, h = 400 / imgAspectRatio;
             container.style.width = w + 'px';
             container.style.height = h + 'px';
@@ -1288,7 +1400,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             wbBgType = type;
             document.querySelectorAll('.wb-tool-btn').forEach(b => { if (b.id && b.id.startsWith('bg')) b.classList.remove('active', 'text-emerald-400'); });
             document.getElementById('bg' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active', 'text-emerald-400');
-            
+
             const canvasEl = document.getElementById('wbCanvasInternal');
             if (type === 'grid') {
                 canvasEl.style.backgroundImage = 'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)';
@@ -1305,7 +1417,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             wbTool = tool;
             document.querySelectorAll('.wb-tool-btn').forEach(b => { if (b.id && b.id.startsWith('tool')) b.classList.remove('active', 'text-emerald-400'); });
             document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active', 'text-emerald-400');
-            
+
             // Update size display
             document.getElementById('wbSizeDisplay').innerText = (tool === 'eraser') ? wbEraserSize : wbSize;
         }
@@ -1340,9 +1452,9 @@ $pageTitle = "Studio: " . $webinar['title'];
                 const oldText = btn.innerHTML;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="animate-spin mr-2">...</i> EMAL EDİLİR...';
-                
+
                 LOG("⌛ Yayım dayandırılır və son görüntülər saxlanılır...", "#f59e0b");
-                
+
                 // Allow user to leave without warning now that we are finalizing
                 window.onbeforeunload = null;
 
@@ -1351,7 +1463,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
                     const resp = await fetch('api/end_webinar.php?id=' + wID);
                     const d = await resp.json();
-                    
+
                     if (d.success) {
                         window.location.href = 'dashboard.php?success=webinar_ended';
                     } else {
@@ -1369,7 +1481,7 @@ $pageTitle = "Studio: " . $webinar['title'];
         }
 
         // --- Prevent Accidental Refresh ---
-        window.onbeforeunload = function() {
+        window.onbeforeunload = function () {
             return "Canlı yayım davam edir. Səhifəni yeniləsəniz yayım kəsiləcək. Davam etmək istəyirsiniz?";
         };
 
@@ -1393,7 +1505,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 container.classList.add('hidden');
                 localMainVid.classList.add('hidden');
                 mainCanvas.classList.remove('hidden');
-                mainCanvas.classList.add('mirrored-canvas'); 
+                mainCanvas.classList.add('mirrored-canvas');
                 return;
             }
 
@@ -1407,7 +1519,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             if (isStudentMain && activeStudentCall) {
                 // LOCAL SWAP: Showing STUDENT in MAIN stage, TEACHER in SIDEBAR
                 // (But broadcast canvas still shows Teacher in background)
-                
+
                 // Sidebar: Show Lecturer
                 video.srcObject = camStream;
                 video.classList.add('scale-x-[-1]');
@@ -1417,7 +1529,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 dot.classList.add('bg-blue-500');
                 btnSwap.classList.add('bg-emerald-500/80');
                 overlay.classList.add('hidden');
-                
+
                 // Main Stage: Show Participant (Locally)
                 mainCanvas.classList.add('hidden'); // Hide broadcast preview
                 localMainVid.classList.remove('hidden'); // Show student direct feed
@@ -1425,7 +1537,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 localMainVid.classList.remove('scale-x-[-1]');
             } else if (activeStudentCall) {
                 // NORMAL: Showing LECTURER in MAIN stage, PARTICIPANT in SIDEBAR
-                
+
                 // Sidebar: Show Participant
                 video.srcObject = studentVid.srcObject;
                 video.classList.remove('scale-x-[-1]');
@@ -1435,7 +1547,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 dot.classList.add('bg-emerald-500', 'animate-pulse');
                 btnSwap.classList.remove('bg-emerald-500/80');
                 overlay.classList.remove('hidden');
-                
+
                 // Main Stage: Show Lecturer (Broadcast Preview)
                 mainCanvas.classList.remove('hidden');
                 mainCanvas.classList.add('mirrored-canvas');
@@ -1471,7 +1583,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             if (!activeStudentCall) return;
             isStudentMain = !isStudentMain;
             updateSideStage();
-            
+
             if (isStudentMain) {
                 LOG("🌟 İştirakçı əsas yayım səhnəsinə çıxarıldı!", "#10b981");
             } else {
@@ -1484,13 +1596,13 @@ $pageTitle = "Studio: " . $webinar['title'];
                 activeStudentCall.close();
                 activeStudentCall = null;
             }
-            
+
             isStudentMain = false;
             updateSideStage();
-            
+
             document.getElementById('largeStudentStageOverlay').classList.add('hidden');
             isStudentExpanded = false;
-            
+
             document.getElementById('studentSource').srcObject = null;
             document.getElementById('studentRemoteVidLarge').srcObject = null;
 
@@ -1501,24 +1613,25 @@ $pageTitle = "Studio: " . $webinar['title'];
         }
 
         function initWebinarTimer() {
-            <?php 
-                $startedAt = !empty($webinar['started_at']) ? strtotime($webinar['started_at']) : time();
-                $elapsedSeconds = time() - $startedAt;
-                if ($elapsedSeconds < 0) $elapsedSeconds = 0;
+            <?php
+            $startedAt = !empty($webinar['started_at']) ? strtotime($webinar['started_at']) : time();
+            $elapsedSeconds = time() - $startedAt;
+            if ($elapsedSeconds < 0)
+                $elapsedSeconds = 0;
             ?>
-            let secondsElapsed = <?php echo (int)$elapsedSeconds; ?>;
-            
+            let secondsElapsed = <?php echo (int) $elapsedSeconds; ?>;
+
             setInterval(() => {
                 secondsElapsed++;
-                
+
                 const hours = Math.floor(secondsElapsed / 3600);
                 const minutes = Math.floor((secondsElapsed % 3600) / 60);
                 const seconds = secondsElapsed % 60;
-                
+
                 const display = [hours, minutes, seconds]
                     .map(v => v.toString().padStart(2, '0'))
                     .join(':');
-                
+
                 const el = document.getElementById('webinarTimer');
                 if (el) el.innerText = display;
             }, 1000);
@@ -1527,16 +1640,16 @@ $pageTitle = "Studio: " . $webinar['title'];
         function toggleMobilePanel(side) {
             const aside = document.getElementById('studioAside');
             if (!aside) return; // Defensive check
-            
+
             const studentsTab = document.querySelector('[data-tab="students"]');
             const chatTab = document.querySelector('[data-tab="chat"]');
-            
+
             const isCurrentlyOpen = aside.classList.contains('mobile-open');
             const targetTab = side === 'left' ? studentsTab : chatTab;
 
             if (isCurrentlyOpen) {
                 // Determine if we click identical tab
-                const isActive = targetTab && targetTab.classList.contains('active-tab-class'); 
+                const isActive = targetTab && targetTab.classList.contains('active-tab-class');
             }
 
             if (!isCurrentlyOpen) {
@@ -1556,9 +1669,9 @@ $pageTitle = "Studio: " . $webinar['title'];
             // 1. Request Fullscreen
             try {
                 if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(() => {});
+                    document.documentElement.requestFullscreen().catch(() => { });
                 }
-            } catch(e) {}
+            } catch (e) { }
 
             // 2. Hide Overlay
             const overlay = document.getElementById('startProductionOverlay');
@@ -1606,4 +1719,5 @@ $pageTitle = "Studio: " . $webinar['title'];
         };
     </script>
 </body>
+
 </html>

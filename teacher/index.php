@@ -13,6 +13,7 @@ requireInstructor();
 
 $currentUser = $auth->getCurrentUser();
 $db = Database::getInstance();
+$isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
 
 // Müəllimin instructor_id-sini tap
 $instructor = $db->fetch(
@@ -134,8 +135,15 @@ try {
             lc.lesson_type,
             lc.start_time as date,
             lc.duration_minutes,
-            lc.course_id
+            lc.course_id,
+            lc.faculty_name as lc_faculty,
+            lc.specialty_name as lc_specialty,
+            lc.course_level as lc_course_level,
+            i.name as teacher_name,
+            c.title as db_course_name
         FROM live_classes lc
+        LEFT JOIN instructors i ON lc.instructor_id = i.id
+        LEFT JOIN courses c ON lc.course_id = c.id
         WHERE lc.status IN ('ended', 'completed')
         ORDER BY lc.start_time DESC
         LIMIT 10
@@ -145,26 +153,12 @@ try {
         $cId = (int) $item['course_id'];
         $sInfo = $subjectMap[$cId] ?? [];
 
-        // TMİS-dən metadata al, yoxdursa lokal bazadan axtar
-        $facultyName = $sInfo['faculty_name'] ?? '';
-        $specialtyName = $sInfo['profession_name'] ?? '';
+        // TMİS-dən metadata al, yoxdursa lokal bazadan (və ya lc-dən) axtar
+        $facultyName = $item['lc_faculty'] ?: ($sInfo['faculty_name'] ?? 'NDU');
+        $specialtyName = $item['lc_specialty'] ?: ($sInfo['profession_name'] ?? '-');
         $groupName = $sInfo['class_name'] ?? '*';
-        $courseLevel = $sInfo['course'] ?? '-';
-        $courseName = $sInfo['subject_name'] ?? '';
-
-        // Əgər TMİS-dən fənn adı tapılmadısa, lokal bazadan axtar
-        if (empty($courseName)) {
-            $courseRow = $db->fetch("SELECT title FROM courses WHERE tmis_subject_id = ?", [$cId]);
-            if (!$courseRow) {
-                $courseRow = $db->fetch("SELECT title FROM courses WHERE id = ?", [$cId]);
-            }
-            $courseName = $courseRow ? $courseRow['title'] : ('Fənn #' . $cId);
-        }
-
-        if (empty($facultyName))
-            $facultyName = 'NDU';
-        if (empty($specialtyName))
-            $specialtyName = '-';
+        $courseLevel = $item['lc_course_level'] ?: ($sInfo['course'] ?? '-');
+        $courseName = $item['db_course_name'] ?: ($sInfo['subject_name'] ?? ('Fənn #' . $cId));
 
         $recentActivities[] = [
             'id' => $item['id'],
@@ -173,10 +167,12 @@ try {
             'group' => $groupName,
             'course_level' => $courseLevel,
             'course' => $courseName,
+            'teacher' => $item['teacher_name'] ?? 'Məlum deyil',
             'lesson_type' => match($item['lesson_type']) { 'lecture' => 'Mühazirə', 'seminar' => 'Seminar', 'laboratory' => 'Laboratoriya', 'consultation' => 'Məsləhət saatı', 'practice' => 'Praktika', default => ucfirst($item['lesson_type'] ?? 'Dərs') },
             'topic' => $item['topic'],
             'date' => $item['date']
         ];
+
     }
 
     // Tədris saatı üçün arxiv
@@ -207,6 +203,10 @@ try {
         $stats['liveClassesThisMonth'] = (int) $localLiveCount['total'];
     }
 
+    // 1b. Aktiv Canlı Dərslər
+    $activeLiveCount = $db->fetch("SELECT COUNT(*) as total FROM live_classes WHERE status IN ('live', 'in-progress')");
+    $stats['activeLiveClasses'] = (int) ($activeLiveCount['total'] ?? 0);
+
     // 2. Tədris Saatı (Bütün yekunlaşmış dərslərin müddəti)
     $localDuration = $db->fetch("SELECT SUM(duration_minutes) as total_minutes FROM live_classes WHERE status IN ('ended', 'completed')");
     $totalMinutes = (int) ($localDuration['total_minutes'] ?? 0);
@@ -224,6 +224,32 @@ try {
 }
 
 require_once 'includes/header.php';
+
+// Admin üçün vebinar statistikalarını hazırla
+$adminWebinarStats = ['total' => 0, 'live' => 0];
+$recentWebinars = [];
+if ($isAdmin) {
+    try {
+        require_once '../webinar/config/database.php';
+        $wdb = WebinarDatabase::getInstance();
+        $wTotal = $wdb->fetch("SELECT COUNT(*) as c FROM webinars");
+        $wLive = $wdb->fetch("SELECT COUNT(*) as c FROM webinars WHERE status = 'live'");
+        $adminWebinarStats['total'] = $wTotal['c'] ?? 0;
+        $adminWebinarStats['live'] = $wLive['c'] ?? 0;
+
+        $recentWebinars = $wdb->fetchAll("
+            SELECT w.id, w.title, w.status, w.ended_at, w.started_at, w.created_at, f.name as faculty_name, u.full_name as teacher_name
+            FROM webinars w
+            LEFT JOIN webinar_faculties f ON w.faculty_id = f.id
+            LEFT JOIN webinar_users u ON w.teacher_id = u.id
+            WHERE w.status IN ('ended', 'completed')
+            ORDER BY w.ended_at DESC, w.created_at DESC
+            LIMIT 10
+        ");
+    } catch (Exception $e) {
+        // Vebinar DB mövcud olmaya bilər
+    }
+}
 ?>
 
 <!-- Sidebar -->
@@ -239,35 +265,74 @@ require_once 'includes/header.php';
         <div class="content-container space-y-6">
             <!-- Page Header -->
             <div class="page-header">
-                <h1>Xoş gəldiniz, <?php echo e($currentUser['first_name']); ?>!</h1>
-                <p>Bu gün və bu həftənin tədris fəaliyyətlərinə ümumi baxış.</p>
+                <?php if ($isAdmin): ?>
+                    <h1>Sistem İdarəetmə Paneli</h1>
+                    <p>Bütün canlı dərslərin və vebinarların ümumi monitorinqi.</p>
+                <?php else: ?>
+                    <h1>Xoş gəldiniz, <?php echo e($currentUser['first_name']); ?>!</h1>
+                    <p>Bu gün və bu həftənin tədris fəaliyyətlərinə ümumi baxış.</p>
+                <?php endif; ?>
             </div>
 
             <!-- Stats Grid -->
             <div class="stats-grid-mockup">
-                <a href="subjects.php" class="stat-card-mockup pink" style="text-decoration: none;">
-                    <div class="stat-icon-mockup pink"><i data-lucide="book-open"></i></div>
-                    <div class="stat-value-mockup"><?php echo $stats['totalCourses']; ?></div>
-                    <div class="stat-label-mockup pink">Fənn</div>
-                </a>
+                <?php if ($isAdmin): ?>
+                    <!-- Admin Stats: Vebinar + Canlı Dərs + Tədris Saatı -->
+                    <div class="stat-card-mockup pink" style="cursor: default;">
+                        <div class="stat-icon-mockup pink"><i data-lucide="radio"></i></div>
+                        <div class="stat-value-mockup"><?php echo $adminWebinarStats['total']; ?></div>
+                        <div class="stat-label-mockup pink">Ümumi Vebinar</div>
+                    </div>
 
-                <a href="students.php" class="stat-card-mockup purple" style="text-decoration: none;">
-                    <div class="stat-icon-mockup purple"><i data-lucide="graduation-cap"></i></div>
-                    <div class="stat-value-mockup"><?php echo $stats['totalStudents']; ?></div>
-                    <div class="stat-label-mockup purple">Tələbə</div>
-                </a>
+                    <div class="stat-card-mockup purple" style="cursor: default;">
+                        <div class="stat-icon-mockup purple"><i data-lucide="monitor"></i></div>
+                        <div class="stat-value-mockup"><?php echo $adminWebinarStats['live']; ?></div>
+                        <div class="stat-label-mockup purple">Aktiv Vebinar</div>
+                    </div>
+                    
+                    <div class="stat-card-mockup orange" style="cursor: default;">
+                        <div class="stat-icon-mockup orange"><i data-lucide="activity"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['activeLiveClasses'] ?? 0; ?></div>
+                        <div class="stat-label-mockup orange">Aktiv Canlı Dərs</div>
+                    </div>
 
-                <a href="live-classes.php" class="stat-card-mockup blue" style="text-decoration: none;">
-                    <div class="stat-icon-mockup blue"><i data-lucide="video"></i></div>
-                    <div class="stat-value-mockup"><?php echo $stats['liveClassesThisMonth']; ?></div>
-                    <div class="stat-label-mockup blue">Canlı Dərslər</div>
-                </a>
+                    <div class="stat-card-mockup blue" style="cursor: default;">
+                        <div class="stat-icon-mockup blue"><i data-lucide="video"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['liveClassesThisMonth']; ?></div>
+                        <div class="stat-label-mockup blue">Ümumi Canlı Dərslər</div>
+                    </div>
 
-                <a href="archive.php" class="stat-card-mockup green" style="text-decoration: none;">
-                    <div class="stat-icon-mockup green"><i data-lucide="clock"></i></div>
-                    <div class="stat-value-mockup"><?php echo $stats['totalHours']; ?></div>
-                    <div class="stat-label-mockup green">Tədris Saatı</div>
-                </a>
+                    <div class="stat-card-mockup green" style="cursor: default;">
+                        <div class="stat-icon-mockup green"><i data-lucide="clock"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['totalHours']; ?></div>
+                        <div class="stat-label-mockup green">Ümumi Tədris Saatı</div>
+                    </div>
+                <?php else: ?>
+                    <!-- Teacher Stats -->
+                    <a href="subjects.php" class="stat-card-mockup pink" style="text-decoration: none;">
+                        <div class="stat-icon-mockup pink"><i data-lucide="book-open"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['totalCourses']; ?></div>
+                        <div class="stat-label-mockup pink">Fənn</div>
+                    </a>
+
+                    <a href="students.php" class="stat-card-mockup purple" style="text-decoration: none;">
+                        <div class="stat-icon-mockup purple"><i data-lucide="graduation-cap"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['totalStudents']; ?></div>
+                        <div class="stat-label-mockup purple">Tələbə</div>
+                    </a>
+
+                    <a href="live-classes.php" class="stat-card-mockup blue" style="text-decoration: none;">
+                        <div class="stat-icon-mockup blue"><i data-lucide="video"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['liveClassesThisMonth']; ?></div>
+                        <div class="stat-label-mockup blue">Canlı Dərslər</div>
+                    </a>
+
+                    <a href="archive.php" class="stat-card-mockup green" style="text-decoration: none;">
+                        <div class="stat-icon-mockup green"><i data-lucide="clock"></i></div>
+                        <div class="stat-value-mockup"><?php echo $stats['totalHours']; ?></div>
+                        <div class="stat-label-mockup green">Tədris Saatı</div>
+                    </a>
+                <?php endif; ?>
             </div>
 
             <style>
@@ -306,6 +371,8 @@ require_once 'includes/header.php';
                 }
             </style>
 
+            <?php if (!$isAdmin): ?>
+            <!-- Teacher-only: Today's Schedule + Live Support -->
             <div class="dashboard-grid-row">
                 <!-- 1. Today's Schedule -->
                 <div class="card">
@@ -367,6 +434,7 @@ require_once 'includes/header.php';
                     </a>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- 3. Recent Activities (Detailed Table) -->
             <div class="card" style="border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
@@ -379,8 +447,7 @@ require_once 'includes/header.php';
                         <div>
                             <h2 style="font-size: 16px; font-weight: 700; color: #1e293b; margin: 0;">Son keçirilmiş
                                 dərslər</h2>
-                            <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Sizin tərəfinizdən
-                                yekunlaşdırılmış dərslərin siyahısı</p>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;"><?php echo $isAdmin ? 'Bütün müəllimlərin yekunlaşdırılmış dərsləri' : 'Sizin tərəfinizdən yekunlaşdırılmış dərslərin siyahısı'; ?></p>
                         </div>
                     </div>
                 </div>
@@ -400,6 +467,11 @@ require_once 'includes/header.php';
                                 <th
                                     style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; white-space: nowrap;">
                                     Fənn / Mövzu</th>
+                                <?php if ($isAdmin): ?>
+                                <th
+                                    style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; white-space: nowrap;">
+                                    Müəllim</th>
+                                <?php endif; ?>
                                 <th
                                     style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; white-space: nowrap;">
                                     Tip</th>
@@ -411,7 +483,7 @@ require_once 'includes/header.php';
                         <tbody>
                             <?php if (empty($recentActivities)): ?>
                                 <tr>
-                                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 50px;">
+                                    <td colspan="<?php echo $isAdmin ? '7' : '6'; ?>" style="text-align: center; color: var(--text-muted); padding: 50px;">
                                         Hələ ki, heç bir fəaliyyət yoxdur.</td>
                                 </tr>
                             <?php else: ?>
@@ -441,6 +513,14 @@ require_once 'includes/header.php';
                                             <span
                                                 style="display: block; font-size: 11px; color: var(--text-muted);"><?php echo e($activity['topic']); ?></span>
                                         </td>
+                                        <?php if ($isAdmin): ?>
+                                        <td style="padding: 14px 16px;">
+                                            <div style="font-weight: 600; color: #334155; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                                                <i data-lucide="user" style="width: 14px; height: 14px; color: #94a3b8;"></i>
+                                                <?php echo e($activity['teacher']); ?>
+                                            </div>
+                                        </td>
+                                        <?php endif; ?>
                                         <td style="padding: 14px 16px;">
                                             <span
                                                 style="background: #eef2ff; color: #4f46e5; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap;">
@@ -460,6 +540,64 @@ require_once 'includes/header.php';
                     </table>
                 </div>
             </div>
+
+            <?php if ($isAdmin): ?>
+            <!-- 4. Recent Webinars (Detailed Table) -->
+            <div class="card" style="border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+                <div class="card-header" style="border-bottom: 1px solid var(--gray-100); padding: 20px 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--gray-50); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <i data-lucide="monitor" style="width: 20px;"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-size: 16px; font-weight: 700; color: #1e293b; margin: 0;">Son keçirilmiş Vebinarlar</h2>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Sistemdə yekunlaşdırılmış ən son vebinarların siyahısı</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" style="font-size: 13px; margin: 0; width: 100%; table-layout: auto;">
+                        <thead>
+                            <tr style="background: #fdfdfd; border-bottom: 1px solid var(--gray-100);">
+                                <th style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase;">Aparat / Fakültə</th>
+                                <th style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase;">Vebinar Mövzusu</th>
+                                <th style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase;">Müəllim / Spiker</th>
+                                <th style="padding: 14px 16px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; text-align: right;">Bitiş Tarixi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($recentWebinars)): ?>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 50px;">Hələ ki, heç bir vebinar yoxdur.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($recentWebinars as $webinar): ?>
+                                    <tr style="border-bottom: 1px solid #f8fafc; transition: background 0.2s;" onmouseover="this.style.background='#fcfdff'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: 14px 16px;">
+                                            <span style="display: block; font-weight: 600; color: #334155; font-size: 12px;"><?php echo e($webinar['faculty_name'] ?? '-'); ?></span>
+                                        </td>
+                                        <td style="padding: 14px 16px;">
+                                            <span style="display: block; font-weight: 700; color: var(--primary); margin-bottom: 2px; font-size: 12px;"><?php echo e($webinar['title'] ?? '-'); ?></span>
+                                        </td>
+                                        <td style="padding: 14px 16px;">
+                                            <div style="font-weight: 600; color: #334155; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                                                <i data-lucide="user" style="width: 14px; height: 14px; color: #94a3b8;"></i>
+                                                <?php echo e($webinar['teacher_name'] ?? '-'); ?>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+                                            <span style="display: block; font-size: 12px; color: #64748b; font-weight: 500;"><?php echo $webinar['ended_at'] ? date('d.m.Y', strtotime($webinar['ended_at'])) : '-'; ?></span>
+                                            <span style="display: block; font-size: 10px; color: #94a3b8;"><?php echo $webinar['ended_at'] ? date('H:i', strtotime($webinar['ended_at'])) : '-'; ?></span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+            
         </div>
     </main>
 </div>

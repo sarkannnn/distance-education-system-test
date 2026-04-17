@@ -22,15 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Müəllimin instructor_id-sini tap
+    // Müəllimin instructor_id-sini tap (yalnız müəllim tərəfindən idarəolunan dərslər üçün, amma bu API admin-only-dir)
+    $instructorId = 0;
     $instructor = $db->fetch(
         "SELECT id FROM instructors WHERE user_id = ? OR email = ?",
         [$currentUser['id'], $currentUser['email']]
     );
-
-    if (!$instructor) {
-        echo json_encode(['success' => false, 'message' => 'Müəllim məlumatları tapılmadı']);
-        exit;
+    if ($instructor) {
+        $instructorId = $instructor['id'];
     }
 
     $liveClassId = intval($_POST['live_class_id'] ?? 0);
@@ -55,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 2. Lokal bazadan silməyə çalış (Əgər bu müəllimə aiddirsə)
         $class = $db->fetch(
             "SELECT id FROM live_classes WHERE id = ? AND (instructor_id = ? OR ? = 'admin')",
-            [$liveClassId, $instructor['id'], $_SESSION['user_role']]
+            [$liveClassId, $instructorId, $_SESSION['user_role'] ?? 'user']
         );
 
         if ($class) {

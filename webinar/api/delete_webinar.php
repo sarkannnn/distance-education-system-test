@@ -21,11 +21,15 @@ if (!$id) {
 }
 
 try {
-    // Verify the webinar belongs to this teacher
-    $webinar = $db->fetch(
-        "SELECT * FROM webinars WHERE id = ? AND teacher_id = ? AND faculty_id = ?",
-        [$id, $user['id'], $user['faculty_id']]
-    );
+    // Admin can delete any webinar, teachers only their own
+    if ($user['role'] === 'admin') {
+        $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ?", [$id]);
+    } else {
+        $webinar = $db->fetch(
+            "SELECT * FROM webinars WHERE id = ? AND teacher_id = ? AND faculty_id = ?",
+            [$id, $user['id'], $user['faculty_id']]
+        );
+    }
 
     if (!$webinar) {
         echo json_encode(['success' => false, 'message' => 'Vebinar tapılmadı və ya icazəniz yoxdur.']);

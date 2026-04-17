@@ -109,6 +109,27 @@
 
 ---
 
+### 👑 Super User (Admin) Paneli
+
+- **Vebinar Arxiv və Resurslar:** Yalnız Admin üçün əlçatan olan ayrıca qlobal Vebinar arxivi (`/teacher/webinar_plan.php`).
+- **Qlobal Analitika:** Dərslərə baxış sayları, ən aktiv müəllimlər və fakültələr üzrə statistikanı bütün universitet miqyasında analiz edə bilmə.
+- **İştirakçı Jurnalı (Tam Keçid):** Admin tərəfindən istənilən fənnin iştirakçı siyahısına fasiləsiz nəzarət.
+- **Vahid Platforma Modeli:** "Distant Təhsil" və "Vebinar" sistemlərinin eyni bazadan mərkəzləşdirilmiş idarəolunması.
+
+---
+
+### 🌍 Vebinar Portalı (`/webinar`)
+
+| Fayl | Funksiya |
+|------|----------|
+| `dashboard.php` | **Vebinar Paneli** – Qarşıdan gələn vebinarlar, aktiv sessiyalar, illik/aylıq vebinar analitikası |
+| `manage.php` | **Vebinar İdarəetməsi** – Yeni vebinar yaradılması, statusların tənzimlənməsi (Aktiv/Ləğv), poster/plakat yüklənməsi |
+| `users.php` | **İstifadəçilər** – Vebinara xüsusi hesabların cədvəl şəklində idarəsi və fakültə mənsubiyyətləri |
+| `archive.php` | **Vebinar Arxivi** – Keçmiş vebinar qeydləri (MP4/WebM) və təqdimat materialları (PDF) |
+| `course-details.php`| **Detallı Baxış** – Xüsusi vebinara aid tərkibə, iştirakçılara və iclas materiallarına dərindən baxış |
+
+---
+
 ## 📡 Canlı Dərs Sistemi (WebRTC)
 
 ### Bağlantı Arxitekturası
@@ -283,10 +304,18 @@ distant-tehsil/
 │   └── migrations/
 │       └── 001_add_is_visible_to_lessons.sql  # Dərs görünürlük sahəsi
 │
+├── webinar/                         # 🌍 Vebinar Portalı
+│   ├── dashboard.php                # Vebinar qlobal idarəetmə paneli
+│   ├── manage.php                   # Vebinar yaratma və nizamlama
+│   ├── archive.php                  # Vebinar materialları və video arxivi
+│   ├── users.php                    # İstifadəçi idarəetməsi
+│   └── api/                         # Vebinarlara aid CRUD metodları
+│
 ├── tests/                           # Test faylları
 │
 └── uploads/                         # Yüklənmiş fayllar
-    └── videos/                      # Canlı dərs yazıları (MP4/WebM)
+    ├── videos/                      # Canlı dərs yazıları (MP4/WebM)
+    └── webinar_recordings/          # Vebinar video arxivləri
 ```
 
 ---
@@ -456,6 +485,8 @@ Canlı dərs video chunk-larını yükləmə (dərs yazısı üçün).
 | `live_classes` | Canlı dərslər – başlama vaxtı, status, `recording_path`, `is_visible`, `views`, `duration_minutes` |
 | `archived_lessons` | Manual arxivlər – `video_url`, `pdf_url`, `is_visible` |
 | `live_attendance` | Canlı dərsdə iştirak – kim, nə vaxt qoşuldu/ayrıldı |
+| `webinars` | Vebinarlar – mövzu, aid olduğu fakültə, tarix, plakat və statuslar |
+| `webinar_users` | Vebinarın idarəolunması üçün nəzərdə tutulmuş istifadəçilər (Təşkilatçı) |
 
 ### Miqrasiyalar
 

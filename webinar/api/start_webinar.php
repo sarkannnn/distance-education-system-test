@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 header('Content-Type: application/json');
 
-if (!WebinarAuth::isLoggedIn() || $_SESSION['webinar_role'] !== 'teacher') {
+if (!WebinarAuth::isLoggedIn() || ($_SESSION['webinar_role'] !== 'teacher' && $_SESSION['webinar_role'] !== 'admin')) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
@@ -19,8 +19,12 @@ if (!$id) {
 }
 
 try {
-    // Only the teacher who created it (or any teacher in same faculty depending on business logic, but let's stick to isolation)
-    $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ? AND faculty_id = ?", [$id, $user['faculty_id']]);
+    // Admin can start any webinar, teachers only within their faculty
+    if ($user['role'] === 'admin') {
+        $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ?", [$id]);
+    } else {
+        $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ? AND faculty_id = ?", [$id, $user['faculty_id']]);
+    }
 
     if (!$webinar) {
         echo json_encode(['success' => false, 'message' => 'Webinar not found or access denied']);

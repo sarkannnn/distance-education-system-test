@@ -49,7 +49,7 @@ $totalViews = 0;
 $archivedLessons = [];
 $tmisMatchedLocalLiveIds = []; // TMİS-dən gələn və lokal bazamızda uyğunlaşan ID-ləri saxlayır
 
-$isAdmin = ($_SESSION['user_role'] === 'admin');
+$isAdmin = (($_SESSION['user_role'] ?? '') === 'admin');
 
 // ============================================================
 // Fənləri Yüklə və SubjectMap yarad
@@ -715,8 +715,7 @@ require_once 'includes/header.php';
 
             <div class="page-header flex justify-between items-center mb-8">
                 <div>
-                    <h1 style="font-size: 32px; font-weight: 900; color: var(--text-primary); margin: 0;">Arxiv və
-                        Resurslar</h1>
+                    <h1 style="font-size: 32px; font-weight: 900; color: var(--text-primary); margin: 0;">Distant Təhsil Arxiv və Resurslar</h1>
                     <p style="color: var(--text-muted); font-weight: 500; font-size: 16px;">Keçmiş dərslərin video
                         yazıları və
                         materiallar</p>
@@ -755,11 +754,13 @@ require_once 'includes/header.php';
                         </div>
                     <?php endif; ?>
                 </div>
+                <?php if (!$isAdmin): ?>
                 <button class="btn btn-primary" onclick="openModal('planModal')"
                     style="padding: 14px 28px; border-radius: 16px; font-weight: 700;">
                     <i data-lucide="plus-circle" style="width: 20px; height: 20px;"></i>
                     Yeni Arxiv
                 </button>
+                <?php endif; ?>
             </div>
 
             <!-- Stats -->
@@ -833,6 +834,7 @@ require_once 'includes/header.php';
                         </div>
                     </div>
 
+                    <?php if (!$isAdmin): ?>
                     <select id="courseFilter" class="form-input"
                         style="width: auto; min-width: 180px; height: 55px; border-radius: 15px; max-width: 100%;"
                         onchange="filterArchives()">
@@ -841,6 +843,9 @@ require_once 'includes/header.php';
                             <option value="<?php echo $c['id']; ?>"><?php echo e($c['title']); ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <?php else: ?>
+                    <input type="hidden" id="courseFilter" value="all">
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -862,6 +867,7 @@ require_once 'includes/header.php';
                     ?>
                     <div class="archive-card card p-0 overflow-hidden"
                         data-title="<?php echo strtolower(e($lesson['title'])); ?>"
+                        data-course-name="<?php echo strtolower(e($lesson['course_name'])); ?>"
                         data-course="<?php echo $courseDataAttr; ?>"
                         data-type="<?php echo $isDoc ? 'pdf' : 'video'; ?>"
                         style="background: var(--bg-white) !important; border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
@@ -1121,11 +1127,12 @@ require_once 'includes/header.php';
         const q = document.getElementById('archiveSearch').value.toLowerCase();
         const cid = document.getElementById('courseFilter').value;
         document.querySelectorAll('.archive-card').forEach(c => {
-            const t = c.getAttribute('data-title');
+            const t = c.getAttribute('data-title') || '';
+            const cn = c.getAttribute('data-course-name') || '';
             const co = c.getAttribute('data-course'); // This is now a comma-separated list
             const tp = c.getAttribute('data-type');
             
-            const matchesSearch = t.includes(q);
+            const matchesSearch = t.includes(q) || cn.includes(q);
             const courseIds = co.split(',');
             const matchesCourse = (cid === 'all' || courseIds.includes(cid));
             const matchesType = (currentTypeFilter === 'all' || tp === currentTypeFilter);

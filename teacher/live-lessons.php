@@ -14,7 +14,13 @@ requireInstructor();
 
 $currentUser = $auth->getCurrentUser();
 $db = Database::getInstance();
-$isAdmin = ($_SESSION['user_role'] === 'admin');
+$isAdmin = (($_SESSION['user_role'] ?? '') === 'admin');
+
+// Adminin bu səhifəyə girişi yoxdur
+if ($isAdmin) {
+    header('Location: index.php');
+    exit;
+}
 
 // Müəllimin instructor_id-sini tap (Daha dəqiq axtarış)
 $instructor = null;

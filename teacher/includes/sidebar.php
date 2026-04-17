@@ -3,12 +3,16 @@
  * Sidebar Template for Teacher Portal
  */
 
+$isAdminUser = ($_SESSION['user_role'] ?? 'guest') === 'admin';
+
 $menuItems = [
-    ['id' => 'dashboard', 'label' => 'İdarəetmə Paneli', 'icon' => 'home', 'url' => './'],
-    ['id' => 'live', 'label' => 'Canlı Dərslər', 'icon' => 'video', 'url' => 'live-lessons.php'],
-    ['id' => 'plan', 'label' => 'Arxiv və Resurslar', 'icon' => 'folder-archive', 'url' => 'plan.php'],
-    ['id' => 'analytics', 'label' => 'Analitika', 'icon' => 'bar-chart-3', 'url' => 'analytics.php'],
-    ['id' => 'chatbot_analytics', 'label' => 'Chatbot Analitikası', 'icon' => 'bot', 'url' => 'chatbot_analytics.php'],
+    ['id' => 'dashboard', 'label' => 'İdarəetmə Paneli', 'icon' => 'home', 'url' => './', 'admin_visible' => true],
+    ['id' => 'live', 'label' => 'Canlı Dərslər', 'icon' => 'video', 'url' => 'live-lessons.php', 'admin_visible' => false],
+    ['id' => 'plan', 'label' => ($isAdminUser ? 'Distant Arxiv və Resurslar' : 'Arxiv və Resurslar'), 'icon' => 'folder-archive', 'url' => 'plan.php', 'admin_visible' => true],
+    ['id' => 'webinar_plan', 'label' => 'Vebinar Arxiv və Resurslar', 'icon' => 'library', 'url' => 'webinar_plan.php', 'admin_visible' => true, 'admin_only' => true],
+    ['id' => 'analytics', 'label' => 'Analitika', 'icon' => 'bar-chart-3', 'url' => 'analytics.php', 'admin_visible' => true],
+    ['id' => 'chatbot_analytics', 'label' => 'Chatbot Analitikası', 'icon' => 'bot', 'url' => 'chatbot_analytics.php', 'admin_visible' => true, 'admin_only' => true],
+    ['id' => 'webinar', 'label' => 'Vebinar Portalı', 'icon' => 'radio', 'url' => '../webinar/', 'admin_visible' => true, 'admin_only' => true],
 ];
 
 $currentPage = $currentPage ?? 'dashboard';
@@ -21,20 +25,25 @@ $currentPage = $currentPage ?? 'dashboard';
         </div>
         <div class="logo-details">
             <div class="uni-name">Naxçıvan Dövlət Universiteti</div>
-            <div class="system-name">Müəllim Distant Təhsil Sistemi</div>
+            <div class="system-name"><?php echo $isAdminUser ? 'Sistem Administratoru' : 'Müəllim Distant Təhsil Sistemi'; ?></div>
         </div>
     </div>
 
     <nav class="sidebar-nav">
         <?php foreach ($menuItems as $item): ?>
             <?php 
-                // Skip sensitive items for non-admins
-                if ($item['id'] === 'chatbot_analytics' && ($_SESSION['user_role'] ?? 'guest') !== 'admin') {
+                // Admin only items: show only to admin
+                if (!empty($item['admin_only']) && !$isAdminUser) {
+                    continue;
+                }
+                // Non-admin-visible items: hide from admin
+                if ($isAdminUser && empty($item['admin_visible'])) {
                     continue;
                 }
             ?>
             <a href="<?php echo $item['url']; ?>"
-                class="nav-item <?php echo $currentPage === $item['id'] ? 'active' : ''; ?>">
+                class="nav-item <?php echo $currentPage === $item['id'] ? 'active' : ''; ?>"
+                <?php echo ($item['id'] === 'webinar') ? 'target="_blank"' : ''; ?>>
                 <?php if ($currentPage === $item['id']): ?>
                     <div class="nav-indicator"></div>
                 <?php endif; ?>

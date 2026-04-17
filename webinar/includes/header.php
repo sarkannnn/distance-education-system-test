@@ -44,7 +44,11 @@
                 <div class="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-6 border-l border-white/10">
                     <div class="hidden lg:block text-right">
                         <p class="text-xs font-bold text-white leading-tight"><?php echo e($_SESSION['webinar_full_name']); ?></p>
-                        <p class="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-0.5"><?php echo $_SESSION['webinar_role'] === 'teacher' ? 'Mühazirəçi' : 'İştirakçı'; ?></p>
+                        <p class="text-[9px] font-black uppercase tracking-widest mt-0.5 <?php echo $_SESSION['webinar_role'] === 'admin' ? 'text-amber-400' : 'text-emerald-500'; ?>"><?php 
+                            if ($_SESSION['webinar_role'] === 'admin') echo 'SİSTEM ADMİNİ';
+                            elseif ($_SESSION['webinar_role'] === 'teacher') echo 'Mühazirəçi';
+                            else echo 'İştirakçı';
+                        ?></p>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">
                         <?php 

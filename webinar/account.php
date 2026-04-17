@@ -13,9 +13,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    $dbUser = $db->fetch("SELECT * FROM webinar_users WHERE id = ?", [$user['id']]);
+    // Admin uses main 'users' table, others use 'webinar_users'
+    if ($user['role'] === 'admin') {
+        require_once '../teacher/includes/database.php';
+        $mainDb = Database::getInstance();
+        $dbUser = $mainDb->fetch("SELECT * FROM users WHERE email = ?", [$_SESSION['webinar_username'] ?? 'admin@ndu.edu.az']);
+        $passwordField = 'password';
+    } else {
+        $dbUser = $db->fetch("SELECT * FROM webinar_users WHERE id = ?", [$user['id']]);
+        $passwordField = 'password_hash';
+    }
 
-    if (!$dbUser || !password_verify($oldPassword, $dbUser['password_hash'])) {
+    if (!$dbUser || !password_verify($oldPassword, $dbUser[$passwordField])) {
         $error = 'Köhnə şifrəniz yalnışdır.';
     } elseif ($newPassword !== $confirmPassword) {
         $error = 'Yeni şifrələr uyğun gəlmir.';
@@ -23,7 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Yeni şifrə ən azı 6 simvol uzunluğunda olmalı, tərkibində ən azı 1 böyük hərf və 1 rəqəm olmalıdır.';
     } else {
         $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-        $updated = $db->update('webinar_users', ['password_hash' => $newHash], 'id = ?', [$user['id']]);
+        
+        if ($user['role'] === 'admin') {
+            $updated = $mainDb->execute("UPDATE users SET password = ? WHERE email = ?", [$newHash, $dbUser['email']]);
+        } else {
+            $updated = $db->update('webinar_users', ['password_hash' => $newHash], 'id = ?', [$user['id']]);
+        }
         
         if ($updated !== false) {
             session_destroy();
@@ -50,7 +64,11 @@ require_once 'includes/header.php';
             ?>
         </div>
         <h2 class="text-4xl font-black tracking-tighter italic mb-2"><?php echo e($user['full_name']); ?></h2>
-        <p class="text-emerald-500 font-black uppercase tracking-widest text-sm"><?php echo $user['role'] === 'teacher' ? 'MÜHAZİRƏÇİ' : 'İŞTİRAKÇI'; ?> • <?php echo e($user['faculty_name']); ?></p>
+        <p class="<?php echo $user['role'] === 'admin' ? 'text-amber-400' : 'text-emerald-500'; ?> font-black uppercase tracking-widest text-sm"><?php 
+            if ($user['role'] === 'admin') echo 'SİSTEM ADMİNİ';
+            elseif ($user['role'] === 'teacher') echo 'MÜHAZİRƏÇİ';
+            else echo 'İŞTİRAKÇI';
+        ?> • <?php echo e($user['faculty_name']); ?></p>
         <p class="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-2">İstifadəçi Adı: <?php echo e($user['username']); ?></p>
     </div>
 

@@ -12,14 +12,26 @@ if (!$id) {
     exit;
 }
 
-$webinar = $db->fetch(
-    "SELECT w.*, f.name as faculty_name, u.full_name as teacher_name 
-     FROM webinars w 
-     JOIN webinar_faculties f ON w.faculty_id = f.id 
-     JOIN webinar_users u ON w.teacher_id = u.id
-     WHERE w.id = ? AND w.faculty_id = ?",
-    [$id, $user['faculty_id']]
-);
+// Admin can view any webinar, others restricted to their faculty
+if ($user['role'] === 'admin') {
+    $webinar = $db->fetch(
+        "SELECT w.*, f.name as faculty_name, u.full_name as teacher_name 
+         FROM webinars w 
+         JOIN webinar_faculties f ON w.faculty_id = f.id 
+         JOIN webinar_users u ON w.teacher_id = u.id
+         WHERE w.id = ?",
+        [$id]
+    );
+} else {
+    $webinar = $db->fetch(
+        "SELECT w.*, f.name as faculty_name, u.full_name as teacher_name 
+         FROM webinars w 
+         JOIN webinar_faculties f ON w.faculty_id = f.id 
+         JOIN webinar_users u ON w.teacher_id = u.id
+         WHERE w.id = ? AND w.faculty_id = ?",
+        [$id, $user['faculty_id']]
+    );
+}
 
 if (!$webinar) {
     die("Vebinar tapılmadı və ya giriş icazəniz yoxdur.");

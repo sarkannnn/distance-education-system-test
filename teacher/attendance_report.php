@@ -76,8 +76,11 @@ if ($needsTmisData) {
     $tmisTokenForTitle = TmisApi::getToken();
     if ($tmisTokenForTitle) {
         try {
+            // Adminlər üçün subjects-list bəzən boş ola bilər və ya fərqli ola bilər
+            // Ona görə spesifik dərsi axtarmaq üçün alternativ metodu sınayırıq
             $subjectsList = TmisApi::getSubjectsList($tmisTokenForTitle);
             
+            $foundBySearch = false;
             if ($subjectsList['success'] && !empty($subjectsList['data'])) {
                 $streamIds = array_filter(explode(',', $lesson['stream_course_ids'] ?? ''));
                 $resolvedNames = [];
@@ -86,7 +89,6 @@ if ($needsTmisData) {
                 foreach ($subjectsList['data'] as $subj) {
                     $s_id = $subj['id'] ?? $subj['subject_id'] ?? 0;
                     
-                    // Primary course check
                     if (!$foundPrimary && $s_id == $lesson['course_id']) {
                         if (empty($lesson['course_title'])) {
                             $lesson['course_title'] = $subj['subject_name'] ?? $subj['name'] ?? '';
@@ -96,24 +98,20 @@ if ($needsTmisData) {
                         }
                         $lesson['course_level'] = isset($subj['course']) ? $subj['course'] . '-cü kurs' : 'Təyin edilməyib';
                         $foundPrimary = true;
+                        $foundBySearch = true;
                     }
 
-                    // Stream courses check
                     if ($isStream && in_array($s_id, $streamIds)) {
                         $resolvedNames[] = $subj['profession_name'] ?? ($subj['subject_name'] ?? 'Naməlum');
                     }
                 }
+            }
 
-                if ($isStream && !empty($resolvedNames)) {
-                    $fullName = implode(', ', array_unique($resolvedNames));
-                    $lesson['specialization_name'] = $fullName;
-                    
-                    // Update database so other pages (Plan, Public Schedule) get the fix
-                    try {
-                        $db->query("UPDATE live_classes SET specialty_name = ? WHERE id = ?", [$fullName, $lesson['id']]);
-                    } catch (Exception $updateErr) {
-                        error_log("Failed to persist resolved specialty: " . $updateErr->getMessage());
-                    }
+            // SuperUser üçün əlavə: Əgər dərsin adını və ixtisası hələ də tapa bilməmişiksə, dashboard-dan gələn məlumatı əsas götür
+            if (!$foundBySearch && isset($tmisDashboard)) {
+                if (empty($lesson['course_title'])) $lesson['course_title'] = $tmisDashboard['subject_name'] ?? $lesson['course_title'];
+                if (empty($lesson['specialization_name']) || $lesson['specialization_name'] === 'Təyin edilməyib') {
+                    $lesson['specialization_name'] = $tmisDashboard['profession_name'] ?? $tmisDashboard['faculty_name'] ?? 'Təyin edilməyib';
                 }
             }
         } catch (Exception $e) {
@@ -212,6 +210,36 @@ if ($tmisToken) {
                     if (!empty($s['student_id'])) {
                         $sidMap[$s['student_id']] = $uid;
                     }
+                    
+                    // --- AUTO SYNC FOR SUPER USER ---
+                    // Tələbəni lokal bazada yoxla və ya yenilə ki, Admin sonradan görə bilsin
+                    try {
+                        $existingUser = $db->fetch("SELECT id FROM users WHERE id = ?", [$uid]);
+                        if (!$existingUser) {
+                            $db->insert('users', [
+                                'id' => $uid,
+                                'first_name' => $s['first_name'] ?? ($s['name'] ?? ''),
+                                'last_name' => $s['last_name'] ?? ($s['surname'] ?? ''),
+                                'email' => $s['email'] ?? ($uid . '@t.ndu.edu.az'),
+                                'role' => 'student',
+                                'is_active' => 1,
+                                'created_at' => date('Y-m-d H:i:s')
+                            ]);
+                        }
+                        
+                        // Enrollment-i yoxla
+                        $existingEnroll = $db->fetch("SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?", [$uid, $cId]);
+                        if (!$existingEnroll) {
+                            $db->insert('enrollments', [
+                                'user_id' => $uid,
+                                'course_id' => $cId,
+                                'enrolled_date' => date('Y-m-d'),
+                                'status' => 'active'
+                            ]);
+                        }
+                    } catch (Exception $syncErr) {
+                        // Ignore unique constraint errors
+                    }
                 }
             }
         }
@@ -233,6 +261,34 @@ $localRoster = $db->fetchAll("
     WHERE e.course_id IN ($coursePlaceholders)
 ", $localRosterParams);
 
+// Fallback: SuperUser üçün genişləndirilmiş axtarış
+$isAdmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin');
+if (empty($roster) && $isAdmin) {
+    // 1. Bu dərsə (və ya fənnə) daha əvvəl qoşulmuş hər kəsi tap (Lokal bazadan)
+    $joinedStudents = $db->fetchAll("
+        SELECT DISTINCT u.id as user_id, u.first_name, u.last_name, u.email, u.role as user_role
+        FROM users u
+        JOIN live_attendance la ON u.id = la.user_id
+        WHERE la.live_class_id = ? AND u.role = 'student'
+    ", [$lessonId]);
+
+    foreach ($joinedStudents as $s) {
+        $roster[$s['user_id']] = [
+            'user_id' => $s['user_id'],
+            'first_name' => $s['first_name'],
+            'last_name' => $s['last_name'],
+            'email' => $s['email'],
+            'department' => $lesson['specialization_name'] ?? 'Portal',
+            'user_role' => $s['user_role'],
+            'first_join' => null,
+            'last_seen' => null,
+            'total_seconds' => 0,
+            'is_currently_online' => 0
+        ];
+    }
+}
+
+// Ensure roster exists even if local database entries are sparse
 foreach ($localRoster as $s) {
     if (!isset($roster[$s['user_id']])) {
         // Determine department name from deptMap (TMIS subjects) or course title
@@ -378,6 +434,9 @@ if ($tmisToken) {
         try {
             $attResult = TmisApi::getAttendanceReport($tmisToken, (int) $tmisSessionId);
             
+            // DEBUG: Save TMIS response for SuperUser inspection
+            file_put_contents('debug_tmis.txt', "Token: " . substr($tmisToken, 0, 10) . "...\nResult: " . print_r($attResult, true));
+
             if ($attResult['success'] && isset($attResult['data'])) {
                 $tmisAttendanceData = $attResult['data'];
                 

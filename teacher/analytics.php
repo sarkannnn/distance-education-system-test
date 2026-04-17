@@ -42,7 +42,7 @@ try {
 }
 $myTeacherIds = array_unique($myTeacherIds);
 
-$isAdmin = ($_SESSION['user_role'] === 'admin');
+$isAdmin = (($_SESSION['user_role'] ?? '') === 'admin');
 
 // TMİS Token
 require_once 'includes/tmis_api.php';
@@ -397,21 +397,21 @@ require_once 'includes/header.php';
                 foreach ($metrics as $index => $m):
                     $colorClass = $mockupColors[$index % count($mockupColors)];
                     ?>
-                    <div class="stat-card-mockup <?php echo $colorClass; ?>">
-                        <div class="stat-icon-mockup <?php echo $colorClass; ?>">
-                            <i data-lucide="<?php echo $m['icon']; ?>"></i>
+                        <div class="stat-card-mockup <?php echo $colorClass; ?>">
+                            <div class="stat-icon-mockup <?php echo $colorClass; ?>">
+                                <i data-lucide="<?php echo $m['icon']; ?>"></i>
+                            </div>
+                            <div class="stat-value-mockup">
+                                <?php echo $m['value']; ?>
+                            </div>
+                            <div class="stat-label-mockup <?php echo $colorClass; ?>">
+                                <?php echo $m['label']; ?>
+                            </div>
+                            <p
+                                style="color: <?php echo $m['trend_color']; ?>; font-size: 14px; font-weight: 600; margin-top: 8px;">
+                                <?php echo $m['trend']; ?>
+                            </p>
                         </div>
-                        <div class="stat-value-mockup">
-                            <?php echo $m['value']; ?>
-                        </div>
-                        <div class="stat-label-mockup <?php echo $colorClass; ?>">
-                            <?php echo $m['label']; ?>
-                        </div>
-                        <p
-                            style="color: <?php echo $m['trend_color']; ?>; font-size: 14px; font-weight: 600; margin-top: 8px;">
-                            <?php echo $m['trend']; ?>
-                        </p>
-                    </div>
                 <?php endforeach; ?>
             </div>
 
@@ -429,20 +429,20 @@ require_once 'includes/header.php';
                             $h1 = $ws['att_pct'] ?? 0;
                             $h2 = $ws['perf_pct'] ?? 0;
                             ?>
-                            <div style="text-align: center; width: 40px;">
-                                <div
-                                    style="display: flex; align-items: flex-end; gap: 4px; height: 160px; margin-bottom: 8px;">
-                                    <div style="width: 14px; background: var(--accent); height: <?php echo max(5, $h1); ?>%; border-radius: 4px 4px 0 0; <?php if ($h1 == 0)
-                                            echo 'opacity: 0.2;'; ?>" title="<?php echo $ws['attendance']; ?> tələbə">
+                                <div style="text-align: center; width: 40px;">
+                                    <div
+                                        style="display: flex; align-items: flex-end; gap: 4px; height: 160px; margin-bottom: 8px;">
+                                        <div style="width: 14px; background: var(--accent); height: <?php echo max(5, $h1); ?>%; border-radius: 4px 4px 0 0; <?php if ($h1 == 0)
+                                                echo 'opacity: 0.2;'; ?>" title="<?php echo $ws['attendance']; ?> tələbə">
+                                        </div>
+                                        <div style="width: 14px; background: var(--primary); height: <?php echo max(5, $h2); ?>%; border-radius: 4px 4px 0 0; <?php if ($h2 == 0)
+                                                echo 'opacity: 0.2;'; ?>" title="<?php echo $ws['performance']; ?> dərs">
+                                        </div>
                                     </div>
-                                    <div style="width: 14px; background: var(--primary); height: <?php echo max(5, $h2); ?>%; border-radius: 4px 4px 0 0; <?php if ($h2 == 0)
-                                            echo 'opacity: 0.2;'; ?>" title="<?php echo $ws['performance']; ?> dərs">
-                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-muted);">
+                                        <?php echo $ws['id']; ?>
+                                    </span>
                                 </div>
-                                <span style="font-size: 11px; color: var(--text-muted);">
-                                    <?php echo $ws['id']; ?>
-                                </span>
-                            </div>
                         <?php endfor; ?>
                     </div>
                     <div class="flex gap-4 mt-4 justify-center">
@@ -459,193 +459,197 @@ require_once 'includes/header.php';
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="flex flex-column mb-6">
-                        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
-                            Tələbə
-                            İştirakı (Davamiyyət)</h2>
-                        <p style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Tələbələrin dərslərə
-                            orta qoşulma
-                            səviyyəsi</p>
-                    </div>
+                <?php if (!$isAdmin): ?>
+                    <div class="card">
+                        <div class="flex flex-column mb-6">
+                            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                                Tələbə
+                                İştirakı (Davamiyyət)</h2>
+                            <p style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Tələbələrin dərslərə
+                                orta qoşulma
+                                səviyyəsi</p>
+                        </div>
 
-                    <div
-                        style="min-height: 240px; background: var(--gray-50); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--border-color);">
-                        <?php if (empty($coursePerformance)): ?>
-                            <p style="text-align: center; color: #94A3B8; margin-top: 40px;">Məlumat yoxdur</p>
-                        <?php else: ?>
-                            <?php foreach (array_slice($coursePerformance, 0, 4) as $cp): ?>
-                                <div>
-                                    <div class="flex justify-between mb-2">
-                                        <div style="display: flex; flex-direction: column; overflow: hidden; white-space: nowrap;">
-                                            <span style="font-size: 13px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden;" title="<?php echo htmlspecialchars($cp['course']); ?>">
-                                                <?php echo htmlspecialchars($cp['course']); ?>
-                                            </span>
-                                            <?php if (!empty($cp['profession_name'])): ?>
-                                                <span style="font-size: 11px; font-weight: 500; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; margin-top: 2px;" title="<?php echo htmlspecialchars($cp['profession_name']); ?>">
-                                                    <?php echo htmlspecialchars($cp['profession_name']); ?>
-                                                </span>
-                                            <?php endif; ?>
-                                        </div>
-                                        <span
-                                            style="font-size: 13px; font-weight: 800; color: #3B82F6;"><?php echo $cp['attendance']; ?>%
-                                            <small
-                                                style="font-weight: 500; font-size: 10px; opacity: 0.7;">iştirak</small></span>
-                                    </div>
-                                    <div
-                                        style="height: 6px; background: var(--gray-200); border-radius: 10px; overflow: hidden;">
-                                        <div
-                                            style="width: <?php echo $cp['attendance']; ?>%; height: 100%; background: linear-gradient(90deg, #3B82F6, #60A5FA); border-radius: 10px;">
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        <div
+                            style="min-height: 240px; background: var(--gray-50); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--border-color);">
+                            <?php if (empty($coursePerformance)): ?>
+                                    <p style="text-align: center; color: #94A3B8; margin-top: 40px;">Məlumat yoxdur</p>
+                            <?php else: ?>
+                                    <?php foreach (array_slice($coursePerformance, 0, 4) as $cp): ?>
+                                            <div>
+                                                <div class="flex justify-between mb-2">
+                                                    <div style="display: flex; flex-direction: column; overflow: hidden; white-space: nowrap;">
+                                                        <span style="font-size: 13px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden;" title="<?php echo htmlspecialchars($cp['course']); ?>">
+                                                            <?php echo htmlspecialchars($cp['course']); ?>
+                                                        </span>
+                                                        <?php if (!empty($cp['profession_name'])): ?>
+                                                                <span style="font-size: 11px; font-weight: 500; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; margin-top: 2px;" title="<?php echo htmlspecialchars($cp['profession_name']); ?>">
+                                                                    <?php echo htmlspecialchars($cp['profession_name']); ?>
+                                                                </span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <span
+                                                        style="font-size: 13px; font-weight: 800; color: #3B82F6;"><?php echo $cp['attendance']; ?>%
+                                                        <small
+                                                            style="font-weight: 500; font-size: 10px; opacity: 0.7;">iştirak</small></span>
+                                                </div>
+                                                <div
+                                                    style="height: 6px; background: var(--gray-200); border-radius: 10px; overflow: hidden;">
+                                                    <div
+                                                        style="width: <?php echo $cp['attendance']; ?>%; height: 100%; background: linear-gradient(90deg, #3B82F6, #60A5FA); border-radius: 10px;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Detailed Course Statistics Table -->
-            <div class="card"
-                style="padding: 0; overflow: hidden; border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.06); background: var(--bg-white);">
-                <div
-                    style="padding: 24px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary);">Fənn üzrə Detallı
-                        Statistika</h2>
-                    <button class="btn btn-secondary" onclick="window.location.href='api/download_analytics_report.php'"
-                        style="font-size: 12px; height: 34px; padding: 0 12px; border-radius: 8px; cursor: pointer; background: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
-                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 6px;"></i>
-                        Hesabatı yüklə
-                    </button>
-                </div>
+            <?php if (!$isAdmin): ?>
+                <!-- Detailed Course Statistics Table -->
+                <div class="card"
+                    style="padding: 0; overflow: hidden; border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.06); background: var(--bg-white);">
+                    <div
+                        style="padding: 24px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary);">Fənn üzrə Detallı
+                            Statistika</h2>
+                        <button class="btn btn-secondary" onclick="window.location.href='api/download_analytics_report.php'"
+                            style="font-size: 12px; height: 34px; padding: 0 12px; border-radius: 8px; cursor: pointer; background: var(--bg-primary); border-color: var(--border-color); color: var(--text-primary);">
+                            <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                            Hesabatı yüklə
+                        </button>
+                    </div>
 
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
-                        <thead>
-                            <tr style="background: var(--gray-50); border-bottom: 1px solid var(--border-color);">
-                                <th
-                                    style="text-align: left; padding: 18px 30px; width: 35%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
-                                    Fənn Adı</th>
-                                <th
-                                    style="text-align: left; padding: 18px 15px; width: 15%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
-                                    Tələbələr</th>
-                                <th
-                                    style="text-align: left; padding: 18px 15px; width: 15%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
-                                    Dərs Sayı</th>
-                                <th
-                                    style="text-align: left; padding: 18px 15px; width: 15%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
-                                    Davamiyyət</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($coursePerformance)): ?>
-                                <tr>
-                                    <td colspan="6" style="padding: 60px; text-align: center; color: #94A3B8;">Hələlik heç
-                                        bir məlumat yoxdur.</td>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+                            <thead>
+                                <tr style="background: var(--gray-50); border-bottom: 1px solid var(--border-color);">
+                                    <th
+                                        style="text-align: left; padding: 18px 30px; width: 35%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
+                                        Fənn Adı</th>
+                                    <th
+                                        style="text-align: left; padding: 18px 15px; width: 15%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
+                                        Tələbələr</th>
+                                    <th
+                                        style="text-align: left; padding: 18px 15px; width: 15%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
+                                        Dərs Sayı</th>
+                                    <th
+                                        style="text-align: left; padding: 18px 15px; width: 15%; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
+                                        Davamiyyət</th>
                                 </tr>
-                            <?php else: ?>
-                                <?php foreach ($coursePerformance as $index => $cp):
-                                    $gradientList = [
-                                        ['#4A90E2', '#357ABD'],
-                                        ['#10B981', '#059669'],
-                                        ['#F59E0B', '#D97706'],
-                                        ['#8B5CF6', '#7C3AED'],
-                                        ['#EF4444', '#DC2626']
-                                    ];
-                                    $grad = $gradientList[$index % count($gradientList)];
-                                    ?>
-                                    <tr style="border-bottom: 1px solid var(--gray-50); transition: all 0.2s;"
-                                        onmouseover="this.style.background='var(--gray-100)'"
-                                        onmouseout="this.style.background='transparent'">
-                                        <td style="padding: 20px 30px;">
-                                            <div style="display: flex; align-items: center; gap: 15px;">
-                                                <div
-                                                    style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, <?php echo $grad[0]; ?>, <?php echo $grad[1]; ?>); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                                    <span
-                                                        style="font-weight: 800; font-size: 20px;"><?php echo mb_substr($cp['course'], 0, 1); ?></span>
-                                                </div>
-                                                <div>
-                                                    <div
-                                                        style="font-weight: 700; color: var(--text-primary); font-size: 14px; margin-bottom: 2px;">
-                                                        <?php echo $cp['course']; ?>
-                                                    </div>
-                                                    <?php if (!empty($cp['profession_name']) || !empty($cp['course_level'])): ?>
-                                                        <div
-                                                            style="font-size: 11px; color: #6366F1; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                                                            <i data-lucide="graduation-cap" style="width: 12px; height: 12px;"></i>
-                                                            <?php echo e($cp['profession_name']); ?>
-                                                            <?php if (!empty($cp['course_level'])): ?>
-                                                                &bull; <?php echo $cp['course_level']; ?>-cü kurs
+                            </thead>
+                            <tbody>
+                                <?php if (empty($coursePerformance)): ?>
+                                        <tr>
+                                            <td colspan="6" style="padding: 60px; text-align: center; color: #94A3B8;">Hələlik heç
+                                                bir məlumat yoxdur.</td>
+                                        </tr>
+                                <?php else: ?>
+                                        <?php foreach ($coursePerformance as $index => $cp):
+                                            $gradientList = [
+                                                ['#4A90E2', '#357ABD'],
+                                                ['#10B981', '#059669'],
+                                                ['#F59E0B', '#D97706'],
+                                                ['#8B5CF6', '#7C3AED'],
+                                                ['#EF4444', '#DC2626']
+                                            ];
+                                            $grad = $gradientList[$index % count($gradientList)];
+                                            ?>
+                                                <tr style="border-bottom: 1px solid var(--gray-50); transition: all 0.2s;"
+                                                    onmouseover="this.style.background='var(--gray-100)'"
+                                                    onmouseout="this.style.background='transparent'">
+                                                    <td style="padding: 20px 30px;">
+                                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                                            <div
+                                                                style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, <?php echo $grad[0]; ?>, <?php echo $grad[1]; ?>); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                                                <span
+                                                                    style="font-weight: 800; font-size: 20px;"><?php echo mb_substr($cp['course'], 0, 1); ?></span>
+                                                            </div>
+                                                            <div>
+                                                                <div
+                                                                    style="font-weight: 700; color: var(--text-primary); font-size: 14px; margin-bottom: 2px;">
+                                                                    <?php echo $cp['course']; ?>
+                                                                </div>
+                                                                <?php if (!empty($cp['profession_name']) || !empty($cp['course_level'])): ?>
+                                                                        <div
+                                                                            style="font-size: 11px; color: #6366F1; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                                                                            <i data-lucide="graduation-cap" style="width: 12px; height: 12px;"></i>
+                                                                            <?php echo e($cp['profession_name']); ?>
+                                                                            <?php if (!empty($cp['course_level'])): ?>
+                                                                                    &bull; <?php echo $cp['course_level']; ?>-cü kurs
+                                                                            <?php endif; ?>
+                                                                        </div>
+                                                                <?php endif; ?>
+                                                                <?php if ($isAdmin && !empty($cp['instructor_name'])): ?>
+                                                                        <div
+                                                                            style="font-size: 11px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                                                                            <i data-lucide="user-check" style="width: 12px; height: 12px;"></i>
+                                                                            <?php echo e($cp['instructor_name']); ?>
+                                                                        </div>
+                                                                <?php endif; ?>
+                                                                <div style="font-size: 11px; color: #94A3B8; font-weight: 600;">Fənn ID:
+                                                                    NDU-<?php echo 1000 + ($cp['id'] ?? 0); ?></div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style="padding: 20px 15px;">
+                                                        <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
+                                                            <?php echo $cp['total_students']; ?>
+                                                        </div>
+                                                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">tələbə
+                                                        </div>
+                                                    </td>
+                                                    <td style="padding: 20px 15px;">
+                                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                            <?php if ($cp['m_done'] > 0): ?>
+                                                                    <div style="font-size: 12px; color: var(--text-primary);">
+                                                                        <span style="font-weight: 600; color: var(--text-muted);">Mühazirə:</span>
+                                                                        <span
+                                                                            style="color: #3B82F6; font-weight: 700;"><?php echo $cp['m_done']; ?></span>
+                                                                    </div>
+                                                            <?php endif; ?>
+                                                            <?php if ($cp['s_done'] > 0): ?>
+                                                                    <div style="font-size: 12px; color: var(--text-primary);">
+                                                                        <span style="font-weight: 600; color: var(--text-muted);">Seminar:</span>
+                                                                        <span
+                                                                            style="color: #10B981; font-weight: 700;"><?php echo $cp['s_done']; ?></span>
+                                                                    </div>
+                                                            <?php endif; ?>
+                                                            <?php if ($cp['l_done'] > 0): ?>
+                                                                    <div style="font-size: 12px; color: var(--text-primary);">
+                                                                        <span
+                                                                            style="font-weight: 600; color: var(--text-muted);">Laboratoriya:</span>
+                                                                        <span
+                                                                            style="color: #8B5CF6; font-weight: 700;"><?php echo $cp['l_done']; ?></span>
+                                                                    </div>
+                                                            <?php endif; ?>
+                                                            <?php if ($cp['m_done'] == 0 && $cp['s_done'] == 0 && $cp['l_done'] == 0): ?>
+                                                                    <div style="font-size: 12px; color: var(--text-muted);">0 dərs</div>
                                                             <?php endif; ?>
                                                         </div>
-                                                    <?php endif; ?>
-                                                    <?php if ($isAdmin && !empty($cp['instructor_name'])): ?>
-                                                        <div
-                                                            style="font-size: 11px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                                                            <i data-lucide="user-check" style="width: 12px; height: 12px;"></i>
-                                                            <?php echo e($cp['instructor_name']); ?>
+                                                    </td>
+                                                    <td style="padding: 20px 15px;">
+                                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                                            <span
+                                                                style="font-weight: 800; color: #F59E0B; font-size: 14px;"><?php echo $cp['attendance']; ?>%</span>
+                                                            <div
+                                                                style="width: 40px; height: 4px; background: var(--gray-200); border-radius: 4px;">
+                                                                <div
+                                                                    style="width: <?php echo $cp['attendance']; ?>%; height: 100%; background: #F59E0B; border-radius: 4px;">
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    <?php endif; ?>
-                                                    <div style="font-size: 11px; color: #94A3B8; font-weight: 600;">Fənn ID:
-                                                        NDU-<?php echo 1000 + ($cp['id'] ?? 0); ?></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td style="padding: 20px 15px;">
-                                            <div style="font-weight: 700; color: var(--text-primary); font-size: 15px;">
-                                                <?php echo $cp['total_students']; ?>
-                                            </div>
-                                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">tələbə
-                                            </div>
-                                        </td>
-                                        <td style="padding: 20px 15px;">
-                                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                                <?php if ($cp['m_done'] > 0): ?>
-                                                    <div style="font-size: 12px; color: var(--text-primary);">
-                                                        <span style="font-weight: 600; color: var(--text-muted);">Mühazirə:</span>
-                                                        <span
-                                                            style="color: #3B82F6; font-weight: 700;"><?php echo $cp['m_done']; ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <?php if ($cp['s_done'] > 0): ?>
-                                                    <div style="font-size: 12px; color: var(--text-primary);">
-                                                        <span style="font-weight: 600; color: var(--text-muted);">Seminar:</span>
-                                                        <span
-                                                            style="color: #10B981; font-weight: 700;"><?php echo $cp['s_done']; ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <?php if ($cp['l_done'] > 0): ?>
-                                                    <div style="font-size: 12px; color: var(--text-primary);">
-                                                        <span
-                                                            style="font-weight: 600; color: var(--text-muted);">Laboratoriya:</span>
-                                                        <span
-                                                            style="color: #8B5CF6; font-weight: 700;"><?php echo $cp['l_done']; ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <?php if ($cp['m_done'] == 0 && $cp['s_done'] == 0 && $cp['l_done'] == 0): ?>
-                                                    <div style="font-size: 12px; color: var(--text-muted);">0 dərs</div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                        <td style="padding: 20px 15px;">
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <span
-                                                    style="font-weight: 800; color: #F59E0B; font-size: 14px;"><?php echo $cp['attendance']; ?>%</span>
-                                                <div
-                                                    style="width: 40px; height: 4px; background: var(--gray-200); border-radius: 4px;">
-                                                    <div
-                                                        style="width: <?php echo $cp['attendance']; ?>%; height: 100%; background: #F59E0B; border-radius: 4px;">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                                                    </td>
+                                                </tr>
+                                        <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
     </main>
 </div>

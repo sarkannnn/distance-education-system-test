@@ -7,14 +7,26 @@ $user = WebinarAuth::getCurrentUser();
 $db = WebinarDatabase::getInstance();
 
 // Fetch Webinars for the current faculty
-$webinars = $db->fetchAll(
-    "SELECT w.*, u.full_name as teacher_name 
-     FROM webinars w 
-     JOIN webinar_users u ON w.teacher_id = u.id 
-     WHERE w.faculty_id = ? 
-     ORDER BY w.scheduled_at DESC",
-    [$user['faculty_id']]
-);
+// Fetch Webinars (Admin sees all, others see faculty specific)
+if ($user['role'] === 'admin') {
+    $webinars = $db->fetchAll(
+        "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
+         FROM webinars w 
+         JOIN webinar_users u ON w.teacher_id = u.id 
+         JOIN webinar_faculties f ON w.faculty_id = f.id
+         ORDER BY w.scheduled_at DESC"
+    );
+} else {
+    $webinars = $db->fetchAll(
+        "SELECT w.*, u.full_name as teacher_name 
+         FROM webinars w 
+         JOIN webinar_users u ON w.teacher_id = u.id 
+         WHERE w.faculty_id = ? 
+         ORDER BY w.scheduled_at DESC",
+        [$user['faculty_id']]
+    );
+}
+
 
 $pageTitle = "Ana Panel - " . $user['faculty_name'];
 require_once 'includes/header.php';
@@ -41,7 +53,7 @@ require_once 'includes/header.php';
                 </p>
             </div>
             
-            <?php if ($user['role'] === 'teacher'): ?>
+            <?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
                 <div class="flex flex-col items-center gap-6">
                     <button onclick="document.getElementById('createModal').style.display='flex'" 
                             class="group relative px-10 py-6 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest transition-all shadow-[0_20px_50px_-12px_rgba(16,185,129,0.5)] active:scale-95 overflow-hidden">
@@ -54,6 +66,7 @@ require_once 'includes/header.php';
                     <p class="text-[10px] text-white/20 font-bold uppercase tracking-widest">Cəmi <?php echo count($webinars); ?> vebinar planlaşdırılıb</p>
                 </div>
             <?php endif; ?>
+
         </div>
 
         <!-- Decorative background elements -->
@@ -166,12 +179,12 @@ require_once 'includes/header.php';
                         
                         <div class="flex items-center gap-4 self-end lg:self-center">
                             <?php if ($w['status'] === 'live'): ?>
-                                <a href="<?php echo $user['role'] === 'teacher' ? 'studio.php' : 'view.php'; ?>?id=<?php echo $w['id']; ?>" 
+                                <a href="<?php echo ($user['role'] === 'teacher' || $user['role'] === 'admin') ? 'studio.php' : 'view.php'; ?>?id=<?php echo $w['id']; ?>" 
                                    class="group/btn px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center gap-3 shadow-[0_15px_30px_-12px_rgba(16,185,129,0.5)]">
                                     <i data-lucide="play" class="w-5 h-5 fill-current group-hover/btn:scale-110 transition-transform"></i>
                                     DƏRSƏ QOŞUL
                                 </a>
-                            <?php elseif ($w['status'] === 'scheduled' && $user['role'] === 'teacher'): ?>
+                            <?php elseif ($w['status'] === 'scheduled' && ($user['role'] === 'teacher' || $user['role'] === 'admin')): ?>
                                 <button onclick="startWebinar(<?php echo $w['id']; ?>)"
                                         class="px-10 py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic">
                                     VEBİNARI BAŞLAT
@@ -183,7 +196,7 @@ require_once 'includes/header.php';
                                 </a>
                             <?php endif; ?>
                             
-                            <?php if ($user['role'] === 'teacher'): ?>
+                            <?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
                                 <?php if ($w['status'] === 'scheduled'): ?>
                                     <!-- Edit Button - only for scheduled/pending -->
                                     <button onclick='openEditModal(<?php echo json_encode([
@@ -220,8 +233,8 @@ require_once 'includes/header.php';
     <?php endif; ?>
 </div>
 
-<!-- Create Modal (Mühazirəçi üçün) -->
-<?php if ($user['role'] === 'teacher'): ?>
+<!-- Create Modal (Mühazirəçi və Admin üçün) -->
+<?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
 <div id="createModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300">
     <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[3.5rem] border border-white/10 p-12 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
         <!-- Close Button -->
@@ -280,8 +293,8 @@ require_once 'includes/header.php';
 </div>
 <?php endif; ?>
 
-<!-- Edit Modal (Mühazirəçi üçün) -->
-<?php if ($user['role'] === 'teacher'): ?>
+<!-- Edit Modal (Mühazirəçi və Admin üçün) -->
+<?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
 <div id="editModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300">
     <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[3.5rem] border border-white/10 p-12 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
         <!-- Close Button -->

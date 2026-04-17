@@ -3,13 +3,17 @@ require_once 'database.php';
 
 session_start();
 
-class WebinarAuth {
-    public static function isLoggedIn() {
+class WebinarAuth
+{
+    public static function isLoggedIn()
+    {
         return isset($_SESSION['webinar_user_id']);
     }
 
-    public static function getCurrentUser() {
-        if (!self::isLoggedIn()) return null;
+    public static function getCurrentUser()
+    {
+        if (!self::isLoggedIn())
+            return null;
         return [
             'id' => $_SESSION['webinar_user_id'],
             'username' => $_SESSION['webinar_username'],
@@ -21,14 +25,16 @@ class WebinarAuth {
         ];
     }
 
-    public static function requireLogin() {
+    public static function requireLogin()
+    {
         if (!self::isLoggedIn()) {
             header('Location: login.php');
             exit;
         }
     }
 
-    public static function requireRole($role) {
+    public static function requireRole($role)
+    {
         self::requireLogin();
         if ($_SESSION['webinar_role'] !== $role) {
             header('Location: dashboard.php?error=access_denied');
@@ -36,11 +42,13 @@ class WebinarAuth {
         }
     }
 
-    public static function getFacultyId() {
+    public static function getFacultyId()
+    {
         return $_SESSION['webinar_faculty_id'] ?? null;
     }
 
-    public static function logout() {
+    public static function logout()
+    {
         session_unset();
         session_destroy();
         header('Location: index.php');
@@ -51,14 +59,17 @@ class WebinarAuth {
 /**
  * Global helper functions
  */
-function requireWebinarLogin() {
+function requireWebinarLogin()
+{
     WebinarAuth::requireLogin();
 }
 
-function requireWebinarTeacher() {
+function requireWebinarTeacher()
+{
     WebinarAuth::requireRole('teacher');
 }
 
-function e($string) {
+function e($string)
+{
     return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
