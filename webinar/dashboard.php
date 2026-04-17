@@ -162,9 +162,17 @@ require_once 'includes/header.php';
                                     <?php if ($w['status'] === 'live'): ?>
                                         <span class="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black uppercase rounded-xl tracking-[0.2em] shadow-lg shadow-emerald-500/40">CANLI</span>
                                     <?php elseif ($w['status'] === 'ended'): ?>
-                                        <span class="px-4 py-1.5 bg-white/10 text-white/40 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-white/5">Arxivlənib</span>
+                                        <span class="flex items-center gap-2 px-4 py-1.5 bg-white/10 text-white/40 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-white/5">
+                                            Arxivlənib
+                                            <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                                            <?php echo date('d.m.Y H:i', strtotime($w['ended_at'] ?? $w['scheduled_at'])); ?>
+                                        </span>
                                     <?php else: ?>
-                                        <span class="px-4 py-1.5 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-amber-500/20">Gözləyir</span>
+                                        <span class="flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-amber-500/20">
+                                            Gözləyir
+                                            <span class="w-1 h-1 rounded-full bg-amber-500/50"></span>
+                                            <?php echo date('d.m.Y H:i', strtotime($w['scheduled_at'])); ?>
+                                        </span>
                                     <?php endif; ?>
                                 </div>
 
