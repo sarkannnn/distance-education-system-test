@@ -335,29 +335,29 @@ if ($isAdmin) {
                     </div>
                 <?php else: ?>
                     <!-- Teacher Stats -->
-                    <a href="subjects.php" class="stat-card-mockup pink" style="text-decoration: none;">
+                    <div class="stat-card-mockup pink">
                         <div class="stat-icon-mockup pink"><i data-lucide="book-open"></i></div>
                         <div class="stat-value-mockup"><?php echo $stats['totalCourses']; ?></div>
                         <div class="stat-label-mockup pink">Fənn</div>
-                    </a>
+                    </div>
 
-                    <a href="students.php" class="stat-card-mockup purple" style="text-decoration: none;">
+                    <div class="stat-card-mockup purple">
                         <div class="stat-icon-mockup purple"><i data-lucide="graduation-cap"></i></div>
                         <div class="stat-value-mockup"><?php echo $stats['totalStudents']; ?></div>
                         <div class="stat-label-mockup purple">Tələbə</div>
-                    </a>
+                    </div>
 
-                    <a href="live-classes.php" class="stat-card-mockup blue" style="text-decoration: none;">
+                    <div class="stat-card-mockup blue">
                         <div class="stat-icon-mockup blue"><i data-lucide="video"></i></div>
                         <div class="stat-value-mockup"><?php echo $stats['liveClassesThisMonth']; ?></div>
                         <div class="stat-label-mockup blue">Canlı Dərslər</div>
-                    </a>
+                    </div>
 
-                    <a href="archive.php" class="stat-card-mockup green" style="text-decoration: none;">
+                    <div class="stat-card-mockup green">
                         <div class="stat-icon-mockup green"><i data-lucide="clock"></i></div>
                         <div class="stat-value-mockup"><?php echo $stats['totalHours']; ?></div>
                         <div class="stat-label-mockup green">Tədris Saatı</div>
-                    </a>
+                    </div>
                 <?php endif; ?>
             </div>
 
