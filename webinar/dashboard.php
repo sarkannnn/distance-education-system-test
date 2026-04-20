@@ -16,15 +16,20 @@ if ($user['role'] === 'admin') {
          ORDER BY w.scheduled_at DESC"
     );
 } else {
-    $webinars = $db->fetchAll(
-        "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
+    $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
          FROM webinars w 
          JOIN webinar_users u ON w.teacher_id = u.id 
          JOIN webinar_faculties f ON w.faculty_id = f.id
-         WHERE w.faculty_id = ? 
-         ORDER BY w.scheduled_at DESC",
-        [$user['faculty_id']]
-    );
+         WHERE w.faculty_id = ?";
+    $params = [$user['faculty_id']];
+
+    if ($user['role'] === 'teacher') {
+        $sql .= " AND w.teacher_id = ?";
+        $params[] = $user['id'];
+    }
+
+    $sql .= " ORDER BY w.scheduled_at DESC";
+    $webinars = $db->fetchAll($sql, $params);
 }
 
 // Fetch Faculties (for Admin filter and creation modal)

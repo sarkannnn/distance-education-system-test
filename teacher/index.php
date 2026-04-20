@@ -128,6 +128,13 @@ try {
         }
     }
 
+    $whereClause = "WHERE lc.status IN ('ended', 'completed')";
+    $params = [];
+    if (!$isAdmin && $instructorId) {
+        $whereClause .= " AND lc.instructor_id = ?";
+        $params[] = $instructorId;
+    }
+
     $localActivities = $db->fetchAll("
         SELECT 
             lc.id,
@@ -144,10 +151,10 @@ try {
         FROM live_classes lc
         LEFT JOIN instructors i ON lc.instructor_id = i.id
         LEFT JOIN courses c ON lc.course_id = c.id
-        WHERE lc.status IN ('ended', 'completed')
+        $whereClause
         ORDER BY lc.start_time DESC
         LIMIT 10
-    ");
+    ", $params);
 
     foreach ($localActivities as $item) {
         $cId = (int) $item['course_id'];
@@ -198,17 +205,36 @@ try {
 // ============================================================
 try {
     // 1. Canlı Dərslər (Bütün yekunlaşmış dərslər)
-    $localLiveCount = $db->fetch("SELECT COUNT(*) as total FROM live_classes WHERE status IN ('ended', 'completed')");
+    $countSql = "SELECT COUNT(*) as total FROM live_classes WHERE status IN ('ended', 'completed')";
+    $countParams = [];
+    if (!$isAdmin && $instructorId) {
+        $countSql .= " AND instructor_id = ?";
+        $countParams[] = $instructorId;
+    }
+    $localLiveCount = $db->fetch($countSql, $countParams);
+    
     if ($localLiveCount && $localLiveCount['total'] > 0) {
         $stats['liveClassesThisMonth'] = (int) $localLiveCount['total'];
     }
 
     // 1b. Aktiv Canlı Dərslər
-    $activeLiveCount = $db->fetch("SELECT COUNT(*) as total FROM live_classes WHERE status IN ('live', 'in-progress')");
+    $activeSql = "SELECT COUNT(*) as total FROM live_classes WHERE status IN ('live', 'in-progress')";
+    $activeParams = [];
+    if (!$isAdmin && $instructorId) {
+        $activeSql .= " AND instructor_id = ?";
+        $activeParams[] = $instructorId;
+    }
+    $activeLiveCount = $db->fetch($activeSql, $activeParams);
     $stats['activeLiveClasses'] = (int) ($activeLiveCount['total'] ?? 0);
 
     // 2. Tədris Saatı (Bütün yekunlaşmış dərslərin müddəti)
-    $localDuration = $db->fetch("SELECT SUM(duration_minutes) as total_minutes FROM live_classes WHERE status IN ('ended', 'completed')");
+    $durationSql = "SELECT SUM(duration_minutes) as total_minutes FROM live_classes WHERE status IN ('ended', 'completed')";
+    $durationParams = [];
+    if (!$isAdmin && $instructorId) {
+        $durationSql .= " AND instructor_id = ?";
+        $durationParams[] = $instructorId;
+    }
+    $localDuration = $db->fetch($durationSql, $durationParams);
     $totalMinutes = (int) ($localDuration['total_minutes'] ?? 0);
 
     // Əgər arxivdə daha çox vaxt varsa (TMİS-dən gələn), onu istifadə et, yoxsa lokal bazadakını
