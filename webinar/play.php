@@ -12,14 +12,25 @@ if (!$id) {
     exit;
 }
 
-$webinar = $db->fetch(
-    "SELECT w.*, f.name as faculty_name, u.full_name as teacher_name 
-     FROM webinars w 
-     JOIN webinar_faculties f ON w.faculty_id = f.id 
-     JOIN webinar_users u ON w.teacher_id = u.id
-     WHERE w.id = ? AND w.faculty_id = ?",
-    [$id, $user['faculty_id']]
-);
+if ($user['role'] === 'admin' && !isset($user['department_id'])) {
+    $webinar = $db->fetch(
+        "SELECT w.*, d.name as dept_name, u.full_name as teacher_name 
+         FROM webinars w 
+         LEFT JOIN webinar_departments d ON w.department_id = d.id 
+         LEFT JOIN webinar_users u ON w.teacher_id = u.id
+         WHERE w.id = ?",
+        [$id]
+    );
+} else {
+    $webinar = $db->fetch(
+        "SELECT w.*, d.name as dept_name, u.full_name as teacher_name 
+         FROM webinars w 
+         LEFT JOIN webinar_departments d ON w.department_id = d.id 
+         JOIN webinar_users u ON w.teacher_id = u.id
+         WHERE w.id = ? AND w.department_id = ?",
+        [$id, $user['department_id']]
+    );
+}
 
 if (!$webinar || !$webinar['recording_path']) {
     die("Dərs yazısı tapılmadı.");

@@ -6,28 +6,29 @@ WebinarAuth::requireLogin();
 $user = WebinarAuth::getCurrentUser();
 $db = WebinarDatabase::getInstance();
 
-// Admin sees all faculties' archives, others see their own faculty
-if ($user['role'] === 'admin') {
+// Admin sees all departments' archives, others see their own department
+if ($user['role'] === 'admin' && !isset($user['department_id'])) {
     $archived = $db->fetchAll(
-        "SELECT w.*, u.full_name as teacher_name, f.name as faculty_name 
+        "SELECT w.*, u.full_name as teacher_name, d.name as dept_name 
          FROM webinars w 
          JOIN webinar_users u ON w.teacher_id = u.id 
-         JOIN webinar_faculties f ON w.faculty_id = f.id
+         LEFT JOIN webinar_departments d ON w.department_id = d.id
          WHERE w.status = 'ended'
          ORDER BY w.ended_at DESC"
     );
 } else {
     $archived = $db->fetchAll(
-        "SELECT w.*, u.full_name as teacher_name 
+        "SELECT w.*, u.full_name as teacher_name, d.name as dept_name 
          FROM webinars w 
          JOIN webinar_users u ON w.teacher_id = u.id 
-         WHERE w.faculty_id = ? AND w.status = 'ended'
+         LEFT JOIN webinar_departments d ON w.department_id = d.id
+         WHERE w.department_id = ? AND w.status = 'ended'
          ORDER BY w.ended_at DESC",
-        [$user['faculty_id']]
+        [$user['department_id']]
     );
 }
 
-$pageTitle = "Vebinar Arxivi - " . $user['faculty_name'];
+$pageTitle = "Vebinar Arxivi - " . ($user['department_name'] ?? $user['faculty_name']);
 require_once 'includes/header.php';
 ?>
 
@@ -68,8 +69,8 @@ require_once 'includes/header.php';
                         <div>
                             <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-0.5">Mühazirəçi</p>
                             <p class="text-xs font-bold text-white/80"><?php echo e($w['teacher_name']); ?></p>
-                            <?php if ($user['role'] === 'admin' && !empty($w['faculty_name'])): ?>
-                                <p class="text-[9px] font-bold text-amber-400/70 mt-1 uppercase tracking-widest"><?php echo e($w['faculty_name']); ?></p>
+                            <?php if (!empty($w['dept_name'])): ?>
+                                <p class="text-[9px] font-bold text-amber-400/70 mt-1 uppercase tracking-widest"><?php echo e($w['dept_name']); ?></p>
                             <?php endif; ?>
                         </div>
                     </div>

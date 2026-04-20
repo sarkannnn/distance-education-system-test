@@ -6,24 +6,27 @@ WebinarAuth::requireLogin();
 $user = WebinarAuth::getCurrentUser();
 $db = WebinarDatabase::getInstance();
 
-// Fetch Webinars (Admin sees all, others see faculty specific)
-if ($user['role'] === 'admin') {
+// Fetch Webinars (Admin sees all, others see department specific)
+if ($user['role'] === 'admin' && !isset($user['department_id'])) {
     $webinars = $db->fetchAll(
-        "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
+        "SELECT w.*, u.full_name as teacher_name, d.name as dept_name, f.name as fac_name 
          FROM webinars w 
-         JOIN webinar_users u ON w.teacher_id = u.id 
-         JOIN webinar_faculties f ON w.faculty_id = f.id
+         LEFT JOIN webinar_users u ON w.teacher_id = u.id 
+         LEFT JOIN webinar_departments d ON w.department_id = d.id
+         LEFT JOIN webinar_faculties f ON w.faculty_id = f.id
          ORDER BY w.scheduled_at DESC"
     );
 } else {
+    // Normal user or Admin logged in as Department
     $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
          FROM webinars w 
          JOIN webinar_users u ON w.teacher_id = u.id 
          JOIN webinar_faculties f ON w.faculty_id = f.id
-         WHERE w.faculty_id = ?";
-    $params = [$user['faculty_id']];
+         WHERE w.department_id = ?";
+    $params = [$user['department_id']];
 
     if ($user['role'] === 'teacher') {
+        // Teachers only see their own within the department
         $sql .= " AND w.teacher_id = ?";
         $params[] = $user['id'];
     }
@@ -32,14 +35,19 @@ if ($user['role'] === 'admin') {
     $webinars = $db->fetchAll($sql, $params);
 }
 
-// Fetch Faculties (for Admin filter and creation modal)
-$faculties = [];
-if ($user['role'] === 'admin') {
-    $faculties = $db->fetchAll("SELECT * FROM webinar_faculties ORDER BY name ASC");
+// Fetch Departments (for Admin filter and creation modal)
+$filterItems = [];
+if ($user['role'] === 'admin' && !isset($user['department_id'])) {
+    $filterItems = $db->fetchAll("
+        SELECT d.*, f.name as fac_name 
+        FROM webinar_departments d 
+        JOIN webinar_faculties f ON d.faculty_id = f.id 
+        ORDER BY f.name, d.name ASC
+    ");
 }
 
 
-$pageTitle = "Ana Panel - " . $user['faculty_name'];
+$pageTitle = "Dashboard - " . ($user['department_name'] ?? $user['faculty_name']);
 require_once 'includes/header.php';
 ?>
 
@@ -60,7 +68,7 @@ require_once 'includes/header.php';
                     <span class="text-emerald-500 italic"><?php echo e($user['full_name']); ?>!</span>
                 </h2>
                 <p class="text-white/40 text-sm md:text-base font-medium max-w-md">
-                    Fakültə daxili vebinar dərslərini və arxivləri buradan asanlıqla idarə edə bilərsiniz.
+                    Kafedra daxili vebinar dərslərini və arxivləri buradan asanlıqla idarə edə bilərsiniz.
                 </p>
             </div>
             
@@ -129,31 +137,32 @@ require_once 'includes/header.php';
     <!-- Webinar List Title Section -->
     </div>
     
-    <?php if ($user['role'] === 'admin' && !empty($faculties)): ?>
-    <!-- Faculty Filter (Admin Only) -->
+    <?php if ($user['role'] === 'admin' && !empty($filterItems)): ?>
+    <!-- Department Filter (Admin Only) -->
     <div class="mb-10 space-y-4">
         <div class="px-4 flex items-center justify-between gap-4">
             <div class="relative w-full max-w-xs group">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-emerald-500 transition-colors"></i>
-                <input type="text" id="facultySearchInput" placeholder="Fakültə axtar..." 
+                <input type="text" id="deptSearchInput" placeholder="Kafedra axtar..." 
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-[11px] font-bold text-white focus:outline-none focus:border-emerald-500/50 transition-all"
-                       onkeyup="searchFaculties()">
+                       onkeyup="searchDepartments()">
             </div>
             <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] hidden sm:block">
-                Cəmi <?php echo count($faculties); ?> Fakültə
+                Cəmi <?php echo count($filterItems); ?> Kafedra
             </div>
         </div>
 
         <div class="relative group/filter px-4">
-            <div class="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar" id="facultyScroll">
-                <button onclick="filterByFaculty(0)" class="faculty-pill active whitespace-nowrap px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest transition-all">
-                    BÜTÜN FAKÜLTƏLƏR
+            <div class="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar" id="deptScroll">
+                <button onclick="filterByDept(0)" class="dept-pill active whitespace-nowrap px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest transition-all">
+                    BÜTÜN KAFEDRALAR
                 </button>
-                <?php foreach ($faculties as $fac): ?>
-                    <button onclick="filterByFaculty(<?php echo $fac['id']; ?>)" 
-                            data-name="<?php echo strtolower($fac['name']); ?>"
-                            class="faculty-pill whitespace-nowrap px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-white/5">
-                        <?php echo e($fac['name']); ?>
+                <?php foreach ($filterItems as $item): ?>
+                    <button onclick="filterByDept(<?php echo $item['id']; ?>)" 
+                            data-name="<?php echo strtolower($item['name'] . ' ' . $item['fac_name']); ?>"
+                            class="dept-pill whitespace-nowrap px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-white/5">
+                        <span class="opacity-50 text-[8px] block mb-0.5"><?php echo e($item['fac_name']); ?></span>
+                        <?php echo e($item['name']); ?>
                     </button>
                 <?php endforeach; ?>
             </div>
@@ -164,25 +173,25 @@ require_once 'includes/header.php';
     </div>
     
     <style>
-        #facultyScroll {
+        #deptScroll {
             scrollbar-width: thin;
             scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
         }
-        #facultyScroll::-webkit-scrollbar {
+        #deptScroll::-webkit-scrollbar {
             height: 4px;
         }
-        #facultyScroll::-webkit-scrollbar-track {
+        #deptScroll::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.02);
             border-radius: 10px;
         }
-        #facultyScroll::-webkit-scrollbar-thumb {
+        #deptScroll::-webkit-scrollbar-thumb {
             background: rgba(16, 185, 129, 0.3);
             border-radius: 10px;
         }
-        #facultyScroll::-webkit-scrollbar-thumb:hover {
+        #deptScroll::-webkit-scrollbar-thumb:hover {
             background: rgba(16, 185, 129, 0.5);
         }
-        .faculty-pill.active { background-color: #10b981 !important; color: white !important; box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4); border-color: transparent !important; }
+        .dept-pill.active { background-color: #10b981 !important; color: white !important; box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4); border-color: transparent !important; }
     </style>
     <?php endif; ?>
     
@@ -198,7 +207,7 @@ require_once 'includes/header.php';
     <div class="grid grid-cols-1 gap-6" id="webinarList">
             <?php foreach ($webinars as $w): ?>
                 <div class="webinar-card group relative bg-[#0a1f44]/40 hover:bg-[#0a1f44]/80 border border-white/5 hover:border-emerald-500/30 rounded-[2.5rem] p-8 transition-all duration-500 hover:-translate-y-1"
-                     data-faculty-id="<?php echo $w['faculty_id']; ?>">
+                     data-dept-id="<?php echo $w['department_id']; ?>">
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                         <div class="flex items-start gap-8">
                             <!-- Status Icon -->
@@ -234,10 +243,15 @@ require_once 'includes/header.php';
                                         </span>
                                     <?php endif; ?>
                                     
-                                    <?php if ($user['role'] === 'admin' && isset($w['fac_name'])): ?>
-                                        <span class="px-4 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-blue-500/20">
-                                            <?php echo e($w['fac_name']); ?>
-                                        </span>
+                                    <?php if ($user['role'] === 'admin'): ?>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-4 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-blue-500/20">
+                                                <?php echo e($w['fac_name']); ?>
+                                            </span>
+                                            <span class="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-emerald-500/20">
+                                                <?php echo e($w['dept_name']); ?>
+                                            </span>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
 
@@ -335,14 +349,22 @@ require_once 'includes/header.php';
         </div>
         
         <form action="api/create_webinar.php" method="POST" class="space-y-8">
-            <?php if ($user['role'] === 'admin' && !empty($faculties)): ?>
+            <?php if ($user['role'] === 'admin' && !empty($filterItems)): ?>
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Fakültə Seçin</label>
-                <select name="faculty_id" required 
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Kafedra Seçin</label>
+                <select name="department_id" required 
                         class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold text-white appearance-none">
-                    <?php foreach ($faculties as $fac): ?>
-                        <option value="<?php echo $fac['id']; ?>" class="bg-[#0a1f44] text-white"><?php echo e($fac['name']); ?></option>
-                    <?php endforeach; ?>
+                    <?php 
+                    $currFac = "";
+                    foreach ($filterItems as $item): 
+                        if ($currFac !== $item['fac_name']):
+                            if ($currFac !== "") echo "</optgroup>";
+                            $currFac = $item['fac_name'];
+                            echo "<optgroup label='" . e($currFac) . "' class='bg-[#0a1f44] text-emerald-400'>";
+                        endif;
+                    ?>
+                        <option value="<?php echo $item['id']; ?>" class="bg-[#0a1f44] text-white"><?php echo e($item['name']); ?></option>
+                    <?php endforeach; echo "</optgroup>"; ?>
                 </select>
             </div>
             <?php endif; ?>
@@ -578,13 +600,13 @@ function showToast(message, type) {
         setTimeout(() => toast.remove(), 400);
     }, 3000);
 }
-// ===== FACULTY FILTERING =====
-function searchFaculties() {
-    const query = document.getElementById('facultySearchInput').value.toLowerCase();
-    const pills = document.querySelectorAll('.faculty-pill');
+// ===== DEPARTMENT FILTERING =====
+function searchDepartments() {
+    const query = document.getElementById('deptSearchInput').value.toLowerCase();
+    const pills = document.querySelectorAll('.dept-pill');
     
     pills.forEach(pill => {
-        if (!pill.getAttribute('data-name')) return; // Skip "Bütün Fakültələr"
+        if (!pill.getAttribute('data-name')) return; // Skip "Bütün Kafedralar"
         const name = pill.getAttribute('data-name').toLowerCase();
         if (name.includes(query)) {
             pill.style.display = 'block';
@@ -594,9 +616,9 @@ function searchFaculties() {
     });
 }
 
-function filterByFaculty(facultyId) {
+function filterByDept(deptId) {
     // Update active state of pills
-    document.querySelectorAll('.faculty-pill').forEach(pill => {
+    document.querySelectorAll('.dept-pill').forEach(pill => {
         pill.classList.remove('active', 'bg-emerald-500', 'text-white');
         pill.classList.add('bg-white/5', 'text-white/40');
     });
@@ -609,7 +631,7 @@ function filterByFaculty(facultyId) {
     let visibleCount = 0;
     
     cards.forEach(card => {
-        if (facultyId === 0 || card.getAttribute('data-faculty-id') == facultyId) {
+        if (deptId === 0 || card.getAttribute('data-dept-id') == deptId) {
             card.style.display = 'block';
             visibleCount++;
         } else {
@@ -631,7 +653,7 @@ function filterByFaculty(facultyId) {
                 <i data-lucide="calendar-x" class="w-10 h-10 text-white/10"></i>
             </div>
             <h4 class="text-xl font-bold mb-2">Vebinar tapılmadı</h4>
-            <p class="text-white/30 text-sm font-medium">Bu fakültə üçün hələ ki, hər hansı bir vebinar planlaşdırılmayıb.</p>
+            <p class="text-white/30 text-sm font-medium">Bu kafedra üçün hələ ki, hər hansı bir vebinar planlaşdırılmayıb.</p>
         `;
         webinarList.appendChild(msg);
         if (window.lucide) window.lucide.createIcons();

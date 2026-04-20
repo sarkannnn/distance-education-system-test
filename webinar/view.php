@@ -12,24 +12,24 @@ if (!$id) {
     exit;
 }
 
-// Admin can view any webinar, others restricted to their faculty
-if ($user['role'] === 'admin') {
+// Admin can view any webinar, others restricted to their department
+if ($user['role'] === 'admin' && !isset($user['department_id'])) {
     $webinar = $db->fetch(
-        "SELECT w.*, f.name as faculty_name, u.full_name as teacher_name 
+        "SELECT w.*, d.name as dept_name, u.full_name as teacher_name 
          FROM webinars w 
-         JOIN webinar_faculties f ON w.faculty_id = f.id 
+         LEFT JOIN webinar_departments d ON w.department_id = d.id 
          JOIN webinar_users u ON w.teacher_id = u.id
          WHERE w.id = ?",
         [$id]
     );
 } else {
     $webinar = $db->fetch(
-        "SELECT w.*, f.name as faculty_name, u.full_name as teacher_name 
+        "SELECT w.*, d.name as dept_name, u.full_name as teacher_name 
          FROM webinars w 
-         JOIN webinar_faculties f ON w.faculty_id = f.id 
+         LEFT JOIN webinar_departments d ON w.department_id = d.id 
          JOIN webinar_users u ON w.teacher_id = u.id
-         WHERE w.id = ? AND w.faculty_id = ?",
-        [$id, $user['faculty_id']]
+         WHERE w.id = ? AND w.department_id = ?",
+        [$id, $user['department_id']]
     );
 }
 
@@ -303,7 +303,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                     <div
                         class="glass-panel px-6 py-3 rounded-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest">
                         <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                        <?php echo e($webinar['faculty_name']); ?>
+                        <?php echo e($webinar['dept_name']); ?>
                     </div>
                 </div>
 

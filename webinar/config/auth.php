@@ -30,9 +30,9 @@ class WebinarAuth
                 'username' => 'admin',
                 'full_name' => 'Super User',
                 'role' => 'admin',
-                'faculty_id' => 1, // Default faculty or handle appropriately
+                'faculty_id' => 0,
                 'faculty_slug' => 'all',
-                'faculty_name' => 'Bütün Fakültələr'
+                'faculty_name' => 'Bütün Kafedralar'
             ];
         }
 
@@ -43,7 +43,9 @@ class WebinarAuth
             'role' => $_SESSION['webinar_role'],
             'faculty_id' => $_SESSION['webinar_faculty_id'],
             'faculty_slug' => $_SESSION['webinar_faculty_slug'],
-            'faculty_name' => $_SESSION['webinar_faculty_name']
+            'faculty_name' => $_SESSION['webinar_faculty_name'],
+            'department_id' => $_SESSION['webinar_department_id'] ?? null,
+            'department_name' => $_SESSION['webinar_department_name'] ?? null
         ];
     }
 
@@ -52,6 +54,18 @@ class WebinarAuth
         if (!self::isLoggedIn()) {
             header('Location: login.php');
             exit;
+        }
+
+        // Real-time bypass check for deactivated accounts
+        if (isset($_SESSION['webinar_user_id'])) {
+            $db = WebinarDatabase::getInstance()->getConnection();
+            $stmt = $db->prepare("SELECT is_active FROM webinar_users WHERE id = ?");
+            $stmt->execute([$_SESSION['webinar_user_id']]);
+            $is_active = $stmt->fetchColumn();
+            
+            if ($is_active == 0) {
+                self::logout();
+            }
         }
     }
 

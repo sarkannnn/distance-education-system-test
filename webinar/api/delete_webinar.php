@@ -22,12 +22,12 @@ if (!$id) {
 
 try {
     // Admin can delete any webinar, teachers only their own
-    if ($user['role'] === 'admin') {
+    if ($user['role'] === 'admin' && !isset($user['department_id'])) {
         $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ?", [$id]);
     } else {
         $webinar = $db->fetch(
-            "SELECT * FROM webinars WHERE id = ? AND teacher_id = ? AND faculty_id = ?",
-            [$id, $user['id'], $user['faculty_id']]
+            "SELECT * FROM webinars WHERE id = ? AND teacher_id = ? AND department_id = ?",
+            [$id, $user['id'], $user['department_id']]
         );
     }
 

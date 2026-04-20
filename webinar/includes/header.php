@@ -27,7 +27,9 @@ if ($user_info):
                 </div>
                 <div class="hidden sm:block">
                     <h1 class="text-sm font-black uppercase tracking-widest text-white/90">Vebinar <span class="text-emerald-500">Portalı</span></h1>
-                    <p class="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5 leading-none"><?php echo e($user_info['faculty_name']); ?></p>
+                    <p class="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5 leading-none">
+                        <?php echo e($user_info['department_name'] ?? $user_info['faculty_name']); ?>
+                    </p>
                 </div>
             </div>
             
@@ -38,6 +40,11 @@ if ($user_info):
                 <a href="archive.php" class="px-3 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center whitespace-nowrap <?php echo strpos($_SERVER['PHP_SELF'], 'archive.php') !== false ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-white/40 hover:text-white'; ?>">
                     Arxiv
                 </a>
+                <?php if ($user_info['role'] === 'admin'): ?>
+                    <a href="admin_users.php" class="px-3 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center whitespace-nowrap <?php echo strpos($_SERVER['PHP_SELF'], 'admin_users.php') !== false ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'; ?>">
+                        Hesablar
+                    </a>
+                <?php endif; ?>
                 <a href="account.php" class="px-3 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center whitespace-nowrap <?php echo strpos($_SERVER['PHP_SELF'], 'account.php') !== false ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-white/40 hover:text-white'; ?>">
                     Hesabım
                 </a>

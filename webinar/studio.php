@@ -12,13 +12,23 @@ if (!$id) {
     exit;
 }
 
-$webinar = $db->fetch(
-    "SELECT w.*, f.name as faculty_name 
+if ($user['role'] === 'admin' && !isset($user['department_id'])) {
+    $webinar = $db->fetch(
+        "SELECT w.*, d.name as dept_name 
          FROM webinars w 
-         JOIN webinar_faculties f ON w.faculty_id = f.id 
-         WHERE w.id = ? AND w.faculty_id = ?",
-    [$id, $user['faculty_id']]
-);
+         LEFT JOIN webinar_departments d ON w.department_id = d.id 
+         WHERE w.id = ?",
+        [$id]
+    );
+} else {
+    $webinar = $db->fetch(
+        "SELECT w.*, d.name as dept_name 
+         FROM webinars w 
+         LEFT JOIN webinar_departments d ON w.department_id = d.id 
+         WHERE w.id = ? AND w.department_id = ?",
+        [$id, $user['department_id']]
+    );
+}
 
 if (!$webinar) {
     die("Vebinar tapılmadı və ya giriş icazəniz yoxdur.");
@@ -88,7 +98,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             <div>
                 <h1 class="text-sm font-bold leading-none"><?php echo e($webinar['title']); ?></h1>
                 <p class="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">
-                    <?php echo e($webinar['faculty_name']); ?></p>
+                    <?php echo e($webinar['dept_name']); ?></p>
             </div>
         </div>
 
