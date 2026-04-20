@@ -4,8 +4,14 @@ require_once '../config/database.php';
 
 header('Content-Type: application/json');
 
-WebinarAuth::requireRole('teacher');
+WebinarAuth::requireLogin();
 $user = WebinarAuth::getCurrentUser();
+
+if ($user['role'] !== 'teacher' && $user['role'] !== 'admin') {
+    echo json_encode(['success' => false, 'message' => 'Bu əməliyyat üçün icazəniz yoxdur.']);
+    exit;
+}
+
 $db = WebinarDatabase::getInstance();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -40,17 +46,22 @@ try {
         exit;
     }
 
-    if ($webinar['status'] !== 'scheduled') {
-        echo json_encode(['success' => false, 'message' => 'Yalnız gözləyən statusda olan vebinarlar redaktə edilə bilər.']);
+    if (!in_array($webinar['status'], ['scheduled', 'ended'])) {
+        echo json_encode(['success' => false, 'message' => 'Yalnız gözləyən və ya arxivləşdirilmiş vebinarlar redaktə edilə bilər.']);
         exit;
     }
 
-    $db->update('webinars', [
+    $updateData = [
         'title' => $title,
-        'description' => $description,
-        'scheduled_at' => $scheduled_at,
-        'duration' => $duration
-    ], 'id = ?', [$id]);
+        'description' => $description
+    ];
+
+    if ($webinar['status'] === 'scheduled') {
+        $updateData['scheduled_at'] = $scheduled_at;
+        $updateData['duration'] = $duration;
+    }
+
+    $db->update('webinars', $updateData, 'id = ?', [$id]);
 
     echo json_encode(['success' => true, 'message' => 'Vebinar uğurla yeniləndi.']);
 } catch (Exception $e) {

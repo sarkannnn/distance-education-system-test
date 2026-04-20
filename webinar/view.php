@@ -55,7 +55,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/studio.css">
+    <link rel="stylesheet" href="assets/css/studio.css?v=<?php echo time(); ?>">
     <style>
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
@@ -128,9 +128,9 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
             </div>
 
             <button id="btnJoinStage" onclick="toggleStudentStage()"
-                class="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-6 sm:py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all border border-emerald-500/20 gap-1.5 sm:gap-2">
-                <i data-lucide="video" class="w-4 h-4 sm:w-3.5 sm:h-3.5"></i>
-                <span class="hidden sm:inline">Səhnəyə Qoşul</span>
+                class="flex items-center justify-center px-3 py-1.5 sm:w-auto sm:px-6 sm:py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-[9px] sm:text-[11px] font-black uppercase tracking-widest transition-all border border-emerald-500/20 gap-1.5 sm:gap-2 shrink-0">
+                <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                <span class="whitespace-nowrap">Səhnəyə Qoşul</span>
             </button>
 
             <a href="dashboard.php"

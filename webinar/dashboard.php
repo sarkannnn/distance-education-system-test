@@ -6,7 +6,6 @@ WebinarAuth::requireLogin();
 $user = WebinarAuth::getCurrentUser();
 $db = WebinarDatabase::getInstance();
 
-// Fetch Webinars for the current faculty
 // Fetch Webinars (Admin sees all, others see faculty specific)
 if ($user['role'] === 'admin') {
     $webinars = $db->fetchAll(
@@ -18,13 +17,20 @@ if ($user['role'] === 'admin') {
     );
 } else {
     $webinars = $db->fetchAll(
-        "SELECT w.*, u.full_name as teacher_name 
+        "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
          FROM webinars w 
          JOIN webinar_users u ON w.teacher_id = u.id 
+         JOIN webinar_faculties f ON w.faculty_id = f.id
          WHERE w.faculty_id = ? 
          ORDER BY w.scheduled_at DESC",
         [$user['faculty_id']]
     );
+}
+
+// Fetch Faculties (for Admin filter and creation modal)
+$faculties = [];
+if ($user['role'] === 'admin') {
+    $faculties = $db->fetchAll("SELECT * FROM webinar_faculties ORDER BY name ASC");
 }
 
 
@@ -116,17 +122,64 @@ require_once 'includes/header.php';
     </div>
 
     <!-- Webinar List Title Section -->
-    <div class="flex items-center justify-between mb-8 px-4">
-        <h3 class="text-xs font-black uppercase tracking-[0.3em] text-white/20 flex items-center gap-4 italic">
-            <span class="w-12 h-px bg-white/10"></span>
-            Vebinar Siyahısı
-            <span class="w-12 h-px bg-white/10"></span>
-        </h3>
-        <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-            <span class="text-[10px] font-bold text-white/40 uppercase tracking-widest">Real Vaxt Yenilənmə</span>
+    </div>
+    
+    <?php if ($user['role'] === 'admin' && !empty($faculties)): ?>
+    <!-- Faculty Filter (Admin Only) -->
+    <div class="mb-10 space-y-4">
+        <div class="px-4 flex items-center justify-between gap-4">
+            <div class="relative w-full max-w-xs group">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-emerald-500 transition-colors"></i>
+                <input type="text" id="facultySearchInput" placeholder="Fakültə axtar..." 
+                       class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-[11px] font-bold text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+                       onkeyup="searchFaculties()">
+            </div>
+            <div class="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] hidden sm:block">
+                Cəmi <?php echo count($faculties); ?> Fakültə
+            </div>
+        </div>
+
+        <div class="relative group/filter px-4">
+            <div class="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar" id="facultyScroll">
+                <button onclick="filterByFaculty(0)" class="faculty-pill active whitespace-nowrap px-5 py-3 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest transition-all">
+                    BÜTÜN FAKÜLTƏLƏR
+                </button>
+                <?php foreach ($faculties as $fac): ?>
+                    <button onclick="filterByFaculty(<?php echo $fac['id']; ?>)" 
+                            data-name="<?php echo strtolower($fac['name']); ?>"
+                            class="faculty-pill whitespace-nowrap px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-white/5">
+                        <?php echo e($fac['name']); ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+            <!-- Gradient Fades -->
+            <div class="absolute left-0 top-0 bottom-6 w-12 bg-gradient-to-r from-[#060f23] to-transparent pointer-events-none opacity-0 group-hover/filter:opacity-100 transition-opacity"></div>
+            <div class="absolute right-0 top-0 bottom-6 w-12 bg-gradient-to-l from-[#060f23] to-transparent pointer-events-none"></div>
         </div>
     </div>
+    
+    <style>
+        #facultyScroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
+        }
+        #facultyScroll::-webkit-scrollbar {
+            height: 4px;
+        }
+        #facultyScroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        #facultyScroll::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+        }
+        #facultyScroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.5);
+        }
+        .faculty-pill.active { background-color: #10b981 !important; color: white !important; box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4); border-color: transparent !important; }
+    </style>
+    <?php endif; ?>
     
     <?php if (empty($webinars)): ?>
         <div class="bg-white/[0.02] border border-dashed border-white/10 rounded-[3rem] p-24 text-center">
@@ -137,9 +190,10 @@ require_once 'includes/header.php';
             <p class="text-white/30 text-sm font-medium">Hələ ki, hər hansı bir vebinar planlaşdırılmayıb.</p>
         </div>
     <?php else: ?>
-        <div class="grid grid-cols-1 gap-6">
+    <div class="grid grid-cols-1 gap-6" id="webinarList">
             <?php foreach ($webinars as $w): ?>
-                <div class="group relative bg-[#0a1f44]/40 hover:bg-[#0a1f44]/80 border border-white/5 hover:border-emerald-500/30 rounded-[2.5rem] p-8 transition-all duration-500 hover:-translate-y-1">
+                <div class="webinar-card group relative bg-[#0a1f44]/40 hover:bg-[#0a1f44]/80 border border-white/5 hover:border-emerald-500/30 rounded-[2.5rem] p-8 transition-all duration-500 hover:-translate-y-1"
+                     data-faculty-id="<?php echo $w['faculty_id']; ?>">
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                         <div class="flex items-start gap-8">
                             <!-- Status Icon -->
@@ -162,9 +216,23 @@ require_once 'includes/header.php';
                                     <?php if ($w['status'] === 'live'): ?>
                                         <span class="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black uppercase rounded-xl tracking-[0.2em] shadow-lg shadow-emerald-500/40">CANLI</span>
                                     <?php elseif ($w['status'] === 'ended'): ?>
-                                        <span class="px-4 py-1.5 bg-white/10 text-white/40 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-white/5">Arxivlənib</span>
+                                        <span class="flex items-center gap-2 px-4 py-1.5 bg-white/10 text-white/40 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-white/5">
+                                            Arxivlənib
+                                            <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                                            <?php echo date('d.m.Y H:i', strtotime($w['ended_at'] ?? $w['scheduled_at'])); ?>
+                                        </span>
                                     <?php else: ?>
-                                        <span class="px-4 py-1.5 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-amber-500/20">Gözləyir</span>
+                                        <span class="flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-amber-500/20">
+                                            Gözləyir
+                                            <span class="w-1 h-1 rounded-full bg-amber-500/50"></span>
+                                            <?php echo date('d.m.Y H:i', strtotime($w['scheduled_at'])); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($user['role'] === 'admin' && isset($w['fac_name'])): ?>
+                                        <span class="px-4 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-blue-500/20">
+                                            <?php echo e($w['fac_name']); ?>
+                                        </span>
                                     <?php endif; ?>
                                 </div>
 
@@ -217,6 +285,19 @@ require_once 'includes/header.php';
                                         <i data-lucide="trash-2" class="w-6 h-6 group-hover/del:scale-110 transition-transform"></i>
                                     </button>
                                 <?php elseif ($w['status'] === 'ended'): ?>
+                                    <!-- Edit Button array for ended webinars -->
+                                    <button onclick='openEditModal(<?php echo json_encode([
+                                        "id" => $w["id"],
+                                        "title" => $w["title"],
+                                        "description" => $w["description"] ?? "",
+                                        "scheduled_at" => date("Y-m-d\TH:i", strtotime($w["ended_at"] ?? $w["scheduled_at"] ?? date("Y-m-d H:i"))),
+                                        "duration" => $w["duration"] ?? 90,
+                                        "status" => "ended"
+                                    ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'
+                                            class="w-14 h-14 bg-white/5 hover:bg-blue-500/20 text-white/20 hover:text-blue-400 border border-white/5 rounded-2xl transition-all flex items-center justify-center group/edit shadow-xl"
+                                            title="Mövzu Adını Redaktə et">
+                                        <i data-lucide="pencil" class="w-6 h-6 group-hover/edit:scale-110 transition-transform"></i>
+                                    </button>
                                     <!-- Delete Button - disabled for archived -->
                                     <button disabled 
                                             class="w-14 h-14 bg-white/[0.02] text-white/10 border border-white/5 rounded-2xl flex items-center justify-center cursor-not-allowed opacity-40"
@@ -249,6 +330,18 @@ require_once 'includes/header.php';
         </div>
         
         <form action="api/create_webinar.php" method="POST" class="space-y-8">
+            <?php if ($user['role'] === 'admin' && !empty($faculties)): ?>
+            <div class="space-y-3">
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Fakültə Seçin</label>
+                <select name="faculty_id" required 
+                        class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold text-white appearance-none">
+                    <?php foreach ($faculties as $fac): ?>
+                        <option value="<?php echo $fac['id']; ?>" class="bg-[#0a1f44] text-white"><?php echo e($fac['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php endif; ?>
+
             <div class="space-y-3">
                 <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Vebinar Mövzusu</label>
                 <input type="text" name="title" required 
@@ -480,6 +573,74 @@ function showToast(message, type) {
         setTimeout(() => toast.remove(), 400);
     }, 3000);
 }
+// ===== FACULTY FILTERING =====
+function searchFaculties() {
+    const query = document.getElementById('facultySearchInput').value.toLowerCase();
+    const pills = document.querySelectorAll('.faculty-pill');
+    
+    pills.forEach(pill => {
+        if (!pill.getAttribute('data-name')) return; // Skip "Bütün Fakültələr"
+        const name = pill.getAttribute('data-name').toLowerCase();
+        if (name.includes(query)) {
+            pill.style.display = 'block';
+        } else {
+            pill.style.display = 'none';
+        }
+    });
+}
+
+function filterByFaculty(facultyId) {
+    // Update active state of pills
+    document.querySelectorAll('.faculty-pill').forEach(pill => {
+        pill.classList.remove('active', 'bg-emerald-500', 'text-white');
+        pill.classList.add('bg-white/5', 'text-white/40');
+    });
+    
+    const currentPill = event.currentTarget;
+    currentPill.classList.add('active', 'bg-emerald-500', 'text-white');
+    currentPill.classList.remove('bg-white/5', 'text-white/40');
+
+    const cards = document.querySelectorAll('.webinar-card');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        if (facultyId === 0 || card.getAttribute('data-faculty-id') == facultyId) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Handle empty state
+    let existingMsg = document.getElementById('noWebinarsMsg');
+    if (existingMsg) existingMsg.remove();
+
+    if (visibleCount === 0) {
+        const webinarList = document.getElementById('webinarList');
+        const msg = document.createElement('div');
+        msg.id = 'noWebinarsMsg';
+        msg.className = 'col-span-full bg-white/[0.02] border border-dashed border-white/10 rounded-[3rem] p-24 text-center animate-in fade-in duration-500';
+        msg.innerHTML = `
+            <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 border border-white/5">
+                <i data-lucide="calendar-x" class="w-10 h-10 text-white/10"></i>
+            </div>
+            <h4 class="text-xl font-bold mb-2">Vebinar tapılmadı</h4>
+            <p class="text-white/30 text-sm font-medium">Bu fakültə üçün hələ ki, hər hansı bir vebinar planlaşdırılmayıb.</p>
+        `;
+        webinarList.appendChild(msg);
+        if (window.lucide) window.lucide.createIcons();
+    }
+}
+
+// Auto-open create modal if action=create is in URL
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'create') {
+        const createModal = document.getElementById('createModal');
+        if (createModal) createModal.style.display = 'flex';
+    }
+});
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

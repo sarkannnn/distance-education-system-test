@@ -38,13 +38,11 @@ $currentPage = $currentPage ?? 'dashboard';
                 </span>
             </a>
         <?php endforeach; ?>
-    </nav>
 
-    <div class="sidebar-footer">
         <!-- Logout Item (Responsive) -->
         <a href="logout.php?action=exit" class="nav-item sidebar-logout-item">
             <i data-lucide="log-out"></i>
             <span>Distant təhsildən çıx</span>
         </a>
-    </div>
+    </nav>
 </aside>

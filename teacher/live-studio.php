@@ -878,11 +878,13 @@ require_once 'includes/header.php';
             <button class="mobile-toggle-btn" onclick="toggleMobilePanel('right')" id="mobileChatBtn">
                 💬 Çat
             </button>
+            <?php if (($_SESSION['user_role'] ?? '') !== 'admin'): ?>
             <button
                 onclick="window.open('attendance_report.php?id=<?php echo $lessonId; ?>&minimal=1', 'AttendanceReport', 'width=1000,height=800,scrollbars=yes,resizable=yes')"
                 style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer;">
                 📋 İştirakçı Jurnalı
             </button>
+            <?php endif; ?>
             <button onclick="stopAndUpload()"
                 style="background: #ef4444; color: white; border: none; padding: 8px 22px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
                 Dərsi Bitir

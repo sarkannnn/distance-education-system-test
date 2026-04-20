@@ -15,7 +15,10 @@
     </style>
 </head>
 <body class="bg-[#060f23] text-white min-h-screen">
-<?php if (WebinarAuth::isLoggedIn()): ?>
+<?php 
+$user_info = WebinarAuth::getCurrentUser();
+if ($user_info): 
+?>
     <header class="border-b border-white/5 bg-[#0a1f44]/80 backdrop-blur-xl sticky top-0 z-50">
         <div class="container mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center gap-4 group cursor-pointer" onclick="window.location.href='dashboard.php'">
@@ -24,7 +27,7 @@
                 </div>
                 <div class="hidden sm:block">
                     <h1 class="text-sm font-black uppercase tracking-widest text-white/90">Vebinar <span class="text-emerald-500">Portalı</span></h1>
-                    <p class="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5 leading-none"><?php echo e($_SESSION['webinar_faculty_name']); ?></p>
+                    <p class="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5 leading-none"><?php echo e($user_info['faculty_name']); ?></p>
                 </div>
             </div>
             
@@ -39,20 +42,20 @@
                     Hesabım
                 </a>
             </nav>
-
+            
             <div class="flex items-center gap-2 sm:gap-6">
                 <div class="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-6 border-l border-white/10">
                     <div class="hidden lg:block text-right">
-                        <p class="text-xs font-bold text-white leading-tight"><?php echo e($_SESSION['webinar_full_name']); ?></p>
-                        <p class="text-[9px] font-black uppercase tracking-widest mt-0.5 <?php echo $_SESSION['webinar_role'] === 'admin' ? 'text-amber-400' : 'text-emerald-500'; ?>"><?php 
-                            if ($_SESSION['webinar_role'] === 'admin') echo 'SİSTEM ADMİNİ';
-                            elseif ($_SESSION['webinar_role'] === 'teacher') echo 'Mühazirəçi';
+                        <p class="text-xs font-bold text-white leading-tight"><?php echo e($user_info['full_name']); ?></p>
+                        <p class="text-[9px] font-black uppercase tracking-widest mt-0.5 <?php echo $user_info['role'] === 'admin' ? 'text-amber-400' : 'text-emerald-500'; ?>"><?php 
+                            if ($user_info['role'] === 'admin') echo 'SİSTEM ADMİNİ';
+                            elseif ($user_info['role'] === 'teacher') echo 'Mühazirəçi';
                             else echo 'İştirakçı';
                         ?></p>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">
                         <?php 
-                            $names = explode(' ', $_SESSION['webinar_full_name']);
+                            $names = explode(' ', $user_info['full_name']);
                             echo strtoupper(substr($names[0] ?? '', 0, 1) . substr($names[1] ?? '', 0, 1));
                         ?>
                     </div>

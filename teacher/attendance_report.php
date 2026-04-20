@@ -8,6 +8,10 @@ require_once 'includes/helpers.php';
 require_once 'includes/tmis_api.php';
 
 $auth = new Auth();
+if (($_SESSION['user_role'] ?? '') === 'admin') {
+    header('Location: index.php?error=' . urlencode('Bu hesabat Super User hesabı üçün əlçatan deyil.'));
+    exit;
+}
 requireInstructor();
 $db = Database::getInstance();
 

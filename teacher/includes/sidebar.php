@@ -12,7 +12,7 @@ $menuItems = [
     ['id' => 'webinar_plan', 'label' => 'Vebinar Arxiv və Resurslar', 'icon' => 'library', 'url' => 'webinar_plan.php', 'admin_visible' => true, 'admin_only' => true],
     ['id' => 'analytics', 'label' => 'Analitika', 'icon' => 'bar-chart-3', 'url' => 'analytics.php', 'admin_visible' => true],
     ['id' => 'chatbot_analytics', 'label' => 'Chatbot Analitikası', 'icon' => 'bot', 'url' => 'chatbot_analytics.php', 'admin_visible' => true, 'admin_only' => true],
-    ['id' => 'webinar', 'label' => 'Vebinar Portalı', 'icon' => 'radio', 'url' => '../webinar/', 'admin_visible' => true, 'admin_only' => true],
+    ['id' => 'webinar', 'label' => 'Vebinar Portalı', 'icon' => 'radio', 'url' => '../webinar/dashboard.php', 'admin_visible' => true, 'admin_only' => true],
 ];
 
 $currentPage = $currentPage ?? 'dashboard';
@@ -53,13 +53,11 @@ $currentPage = $currentPage ?? 'dashboard';
                 </span>
             </a>
         <?php endforeach; ?>
-    </nav>
 
-    <div class="sidebar-footer">
         <!-- Logout Item (Visible only on mobile) -->
         <a href="logout.php?action=exit" class="nav-item sidebar-logout-item">
             <i data-lucide="log-out"></i>
             <span>Distant təhsildən çıx</span>
         </a>
-    </div>
+    </nav>
 </aside>
