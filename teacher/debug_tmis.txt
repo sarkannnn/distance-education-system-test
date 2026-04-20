@@ -1,7 +1,0 @@
-Token: eyJ0eXAiOi...
-Result: Array
-(
-    [success] => 
-    [message] => Dərs hesabatı tapılmadı.
-    [code] => 404
-)
