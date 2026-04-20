@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NDU Chatbot — Optimized Fallback Architecture
  * 
@@ -51,9 +52,9 @@ if (!$input) {
 $portalHint = $input['portal'] ?? 'guest';
 
 // Handle Session Detection (Supporting multiple session types)
-$sessionNames = ['DISTANT_TEACHER_SESSION', 'DISTANT_STUDENT_SESSION'];
+$sessionNames = ['DISTANT_T_SESSION_V4', 'DISTANT_STUDENT_SESSION'];
 if ($portalHint === 'student') {
-    $sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_TEACHER_SESSION'];
+    $sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_T_SESSION_V4'];
 }
 
 $sessionFound = false;
@@ -66,7 +67,7 @@ foreach ($sessionNames as $sn) {
             // Validate if this session is actually logged in
             if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                 $sessionFound = true;
-                break; 
+                break;
             }
             @session_write_close();
         }
@@ -101,10 +102,10 @@ if (empty($userMessage)) {
 try {
     // Initialize Fallback Manager
     $manager = new FallbackManager($GEMINI_API_KEY, $OPENAI_API_KEY, $systemInstruction);
-    
+
     // Process the message
     $result = $manager->process($userMessage, $history);
-    
+
     if ($result) {
         // Log the interaction
         LoggerService::log($userMessage, $result['reply'], $result['source'], $result['model'] ?? null);
@@ -118,7 +119,6 @@ try {
     } else {
         throw new Exception("Cavab alına bilmədi.");
     }
-
 } catch (Exception $e) {
     error_log("Chatbot Main Error: " . $e->getMessage());
     http_response_code(502);
