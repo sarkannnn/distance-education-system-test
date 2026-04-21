@@ -35,7 +35,7 @@ if ($user_info):
                 </div>
             </div>
             
-            <nav class="flex items-center flex-1 min-w-[120px] bg-white/5 p-1 rounded-xl md:rounded-2xl border border-white/5 mx-1 sm:mx-4 overflow-x-auto no-scrollbar">
+            <nav class="flex items-center justify-center bg-white/5 p-1 rounded-xl md:rounded-2xl border border-white/5 mx-auto max-w-[calc(100vw-130px)] md:max-w-none overflow-x-auto no-scrollbar">
                 <a href="dashboard.php" class="px-2 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center whitespace-nowrap <?php echo strpos($_SERVER['PHP_SELF'], 'dashboard.php') !== false ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-white/40 hover:text-white'; ?>">
                     <span class="md:hidden">ANA</span><span class="hidden md:inline">ANA PANEL</span>
                 </a>

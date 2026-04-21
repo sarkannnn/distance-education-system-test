@@ -270,8 +270,8 @@ require_once 'includes/header.php';
                                 </a>
                             <?php elseif ($w['status'] === 'scheduled' && ($user['role'] === 'teacher' || $user['role'] === 'admin')): ?>
                                 <button onclick="startWebinar(<?php echo $w['id']; ?>)"
-                                        class="flex-1 lg:flex-none justify-center px-6 md:px-10 py-4 md:py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic">
-                                    VEBİNARI B.
+                                        class="flex-1 lg:flex-none justify-center px-6 md:px-10 py-4 md:py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic flex items-center justify-center">
+                                    <span class="md:hidden">BAŞLAT</span><span class="hidden md:inline">VEBİNARI BAŞLAT</span>
                                 </button>
                             <?php elseif ($w['status'] === 'ended'): ?>
                                 <a href="play.php?id=<?php echo $w['id']; ?>" 
