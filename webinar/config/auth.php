@@ -4,6 +4,12 @@ require_once 'database.php';
 session_name('DISTANT_T_SESSION_V4');
 session_start();
 
+function logDebug($msg) {
+    $logFile = __DIR__ . '/debug_auth.txt';
+    $timestamp = date('Y-m-d H:i:s');
+    file_put_contents($logFile, "[$timestamp] $msg\n", FILE_APPEND);
+}
+
 class WebinarAuth
 {
     public static function isLoggedIn()
@@ -20,33 +26,83 @@ class WebinarAuth
 
     public static function getCurrentUser()
     {
-        if (!self::isLoggedIn())
+        logDebug("getCurrentUser Called. Session: " . json_encode($_SESSION));
+        if (!self::isLoggedIn()) {
+            logDebug("isLoggedIn returned false.");
             return null;
+        }
 
-        // If it's a main portal admin session
-        if (!isset($_SESSION['webinar_user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+        $db = WebinarDatabase::getInstance();
+
+        // Priority 1: User from main portal (Admin or Instructor)
+        if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'instructor'])) {
+            $mainUserId = $_SESSION['user_id'] ?? 1;
+            
+            // Check if this user exists in webinar_users
+            $webinarUser = $db->fetch("SELECT * FROM webinar_users WHERE id = ?", [$mainUserId]);
+            
+            if (!$webinarUser) {
+                logDebug("WebinarAuth: User {$mainUserId} ({$_SESSION['user_role']}) not found in webinar_users. Syncing...");
+                
+                // Get more info from session for sync
+                $role = ($_SESSION['user_role'] === 'admin') ? 'admin' : 'teacher';
+                $fullName = $_SESSION['user_name'] ?? ($_SESSION['user_role'] === 'admin' ? 'Super User' : 'Müəllim');
+                
+                try {
+                    $db->insert('webinar_users', [
+                        'id' => $mainUserId,
+                        'username' => strtolower($role) . '_' . $mainUserId,
+                        'password_hash' => '$2y$10$O0NSKsQUtpcJSG0OsVYPQ.j0Z3J9rIK3iGdglkFGdJypS5Z6ixJdK',
+                        'full_name' => $fullName,
+                        'role' => $role,
+                        'faculty_id' => null, 
+                        'is_active' => 1
+                    ]);
+                    logDebug("WebinarAuth: User {$mainUserId} synced successfully.");
+                } catch (Exception $e) {
+                    logDebug("WebinarAuth: Failed to sync User to webinar_users: " . $e->getMessage());
+                }
+            }
+
+            if ($_SESSION['user_role'] === 'admin') {
+                return [
+                    'id' => $mainUserId,
+                    'username' => 'admin',
+                    'full_name' => $_SESSION['user_name'] ?? 'Super User',
+                    'role' => 'admin',
+                    'faculty_id' => null,
+                    'faculty_slug' => 'all',
+                    'faculty_name' => 'Bütün Kafedralar'
+                ];
+            } else {
+                // Return teacher data (faculty/department handled by session later or defaults)
+                return [
+                    'id' => $mainUserId,
+                    'username' => 'teacher',
+                    'full_name' => $_SESSION['user_name'] ?? 'Müəllim',
+                    'role' => 'teacher',
+                    'faculty_id' => $_SESSION['teacher_faculty_id'] ?? null,
+                    'department_id' => $_SESSION['teacher_department_id'] ?? null
+                ];
+            }
+        }
+
+        // Priority 2: Standard webinar session
+        if (isset($_SESSION['webinar_user_id'])) {
             return [
-                'id' => $_SESSION['user_id'] ?? 1,
-                'username' => 'admin',
-                'full_name' => 'Super User',
-                'role' => 'admin',
-                'faculty_id' => 0,
-                'faculty_slug' => 'all',
-                'faculty_name' => 'Bütün Kafedralar'
+                'id' => $_SESSION['webinar_user_id'],
+                'username' => $_SESSION['webinar_username'],
+                'full_name' => $_SESSION['webinar_full_name'],
+                'role' => $_SESSION['webinar_role'],
+                'faculty_id' => $_SESSION['webinar_faculty_id'],
+                'faculty_slug' => $_SESSION['webinar_faculty_slug'],
+                'faculty_name' => $_SESSION['webinar_faculty_name'],
+                'department_id' => $_SESSION['webinar_department_id'] ?? null,
+                'department_name' => $_SESSION['webinar_department_name'] ?? null
             ];
         }
 
-        return [
-            'id' => $_SESSION['webinar_user_id'],
-            'username' => $_SESSION['webinar_username'],
-            'full_name' => $_SESSION['webinar_full_name'],
-            'role' => $_SESSION['webinar_role'],
-            'faculty_id' => $_SESSION['webinar_faculty_id'],
-            'faculty_slug' => $_SESSION['webinar_faculty_slug'],
-            'faculty_name' => $_SESSION['webinar_faculty_name'],
-            'department_id' => $_SESSION['webinar_department_id'] ?? null,
-            'department_name' => $_SESSION['webinar_department_name'] ?? null
-        ];
+        return null;
     }
 
     public static function requireLogin()

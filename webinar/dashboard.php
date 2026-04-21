@@ -7,7 +7,7 @@ $user = WebinarAuth::getCurrentUser();
 $db = WebinarDatabase::getInstance();
 
 // Fetch Webinars (Admin sees all, others see department specific)
-if ($user['role'] === 'admin' && !isset($user['department_id'])) {
+if ($user['role'] === 'admin' && empty($user['department_id'])) {
     $webinars = $db->fetchAll(
         "SELECT w.*, u.full_name as teacher_name, d.name as dept_name, f.name as fac_name 
          FROM webinars w 
@@ -17,19 +17,16 @@ if ($user['role'] === 'admin' && !isset($user['department_id'])) {
          ORDER BY w.scheduled_at DESC"
     );
 } else {
-    // Normal user or Admin logged in as Department
-    $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
-         FROM webinars w 
-         JOIN webinar_users u ON w.teacher_id = u.id 
-         JOIN webinar_faculties f ON w.faculty_id = f.id
-         WHERE w.department_id = ?";
+// Normal user or Admin logged in as Department
+$sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
+     FROM webinars w 
+     LEFT JOIN webinar_users u ON w.teacher_id = u.id 
+     LEFT JOIN webinar_faculties f ON w.faculty_id = f.id
+     WHERE w.department_id = ?";
     $params = [$user['department_id']];
 
-    if ($user['role'] === 'teacher') {
-        // Teachers only see their own within the department
-        $sql .= " AND w.teacher_id = ?";
-        $params[] = $user['id'];
-    }
+    // Teachers see all webinars in their department regardless of who created them
+    // This allows Super Users to schedule webinars for specific departments.
 
     $sql .= " ORDER BY w.scheduled_at DESC";
     $webinars = $db->fetchAll($sql, $params);

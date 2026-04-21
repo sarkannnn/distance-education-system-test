@@ -20,6 +20,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $teacherId = $user['id'];
+        
+        // Ensure teacher exists in webinar_users to satisfy foreign key
+        $checkTeacher = $db->fetch("SELECT id FROM webinar_users WHERE id = ?", [$teacherId]);
+        if (!$checkTeacher) {
+            logDebug("CreateWebinar Critical: Teacher ID $teacherId not found in webinar_users for user " . ($user['username'] ?? 'unknown'));
+            // Try to force sync if it's an admin
+            if ($user['role'] === 'admin') {
+                logDebug("CreateWebinar: Attempting emergency sync for Admin $teacherId");
+                $db->insert('webinar_users', [
+                    'id' => $teacherId,
+                    'username' => 'admin_' . $teacherId,
+                    'password_hash' => '$2y$10$O0NSKsQUtpcJSG0OsVYPQ.j0Z3J9rIK3iGdglkFGdJypS5Z6ixJdK',
+                    'full_name' => $user['full_name'] ?? 'Super User',
+                    'role' => 'admin',
+                    'faculty_id' => null,
+                    'is_active' => 1
+                ]);
+                logDebug("CreateWebinar: Emergency sync successful.");
+            } else {
+                throw new Exception("Sizin hesabınız vebinar bazasında tapılmadı (ID: $teacherId). Lütfən çıxış edib yenidən daxil olun.");
+            }
+        }
+
         if ($user['role'] === 'admin') {
             if (!empty($_POST['department_id'])) {
                 $deptId = intval($_POST['department_id']);
@@ -33,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        logDebug("CreateWebinar: Inserting with TeacherID: $teacherId, FacultyID: " . ($facultyId ?? 'NULL') . ", DeptID: " . ($deptId ?? 'NULL'));
+
         $db->insert('webinars', [
             'faculty_id' => $facultyId,
             'department_id' => $deptId,
@@ -45,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         header('Location: ../dashboard.php?success=webinar_created');
     } catch (Exception $e) {
+        logDebug("CreateWebinar Error: " . $e->getMessage() . " | TeacherID: $teacherId | FacultyID: $facultyId");
         header('Location: ../dashboard.php?error=' . urlencode($e->getMessage()));
     }
 } else {
