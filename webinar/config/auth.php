@@ -1,6 +1,11 @@
 <?php
 require_once 'database.php';
 
+// Sessiya müddəti (8 saat)
+ini_set('session.gc_maxlifetime', 28800);
+ini_set('session.cookie_lifetime', 28800);
+session_set_cookie_params(28800);
+
 session_name('DISTANT_T_SESSION_V4');
 session_start();
 
