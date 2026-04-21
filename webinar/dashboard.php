@@ -60,7 +60,7 @@ require_once 'includes/header.php';
                     </span>
                     Sistem Aktivdir
                 </div>
-                <h2 class="text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-none">
+                <h2 class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-4 leading-none">
                     Xoş gəldiniz,<br/>
                     <span class="text-emerald-500 italic"><?php echo e($user['full_name']); ?>!</span>
                 </h2>
@@ -205,8 +205,8 @@ require_once 'includes/header.php';
             <?php foreach ($webinars as $w): ?>
                 <div class="webinar-card group relative bg-[#0a1f44]/40 hover:bg-[#0a1f44]/80 border border-white/5 hover:border-emerald-500/30 rounded-[2.5rem] p-8 transition-all duration-500 hover:-translate-y-1"
                      data-dept-id="<?php echo $w['department_id']; ?>">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                        <div class="flex items-start gap-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
+                        <div class="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 w-full">
                             <!-- Status Icon -->
                             <div class="relative flex-shrink-0">
                                 <div class="w-20 h-20 rounded-3xl <?php echo $w['status'] === 'live' ? 'bg-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'bg-white/5'; ?> flex items-center justify-center transition-all duration-500 group-hover:scale-105 border border-white/5">
@@ -241,46 +241,47 @@ require_once 'includes/header.php';
                                     <?php endif; ?>
                                     
                                     <?php if ($user['role'] === 'admin'): ?>
-                                        <div class="flex items-center gap-2">
-                                            <span class="px-4 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-blue-500/20">
+                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 w-full">
+                                            <span class="px-3 md:px-4 py-1.5 md:py-1.5 bg-blue-500/10 text-blue-400 text-[8px] md:text-[10px] font-black uppercase rounded-lg md:rounded-xl tracking-[0.1em] md:tracking-[0.2em] border border-blue-500/20 whitespace-normal break-words leading-snug w-full sm:w-auto text-center sm:text-left">
                                                 <?php echo e($w['fac_name']); ?>
                                             </span>
-                                            <span class="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase rounded-xl tracking-[0.2em] border border-emerald-500/20">
+                                            <span class="px-3 md:px-4 py-1.5 md:py-1.5 bg-emerald-500/10 text-emerald-400 text-[8px] md:text-[10px] font-black uppercase rounded-lg md:rounded-xl tracking-[0.1em] md:tracking-[0.2em] border border-emerald-500/20 whitespace-normal break-words leading-snug w-full sm:w-auto text-center sm:text-left">
                                                 <?php echo e($w['dept_name']); ?>
                                             </span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
 
-                                    <div class="flex items-center gap-3 text-sm text-white/40 font-bold uppercase tracking-widest pl-10 border-l border-white/5">
-                                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                                    <div class="flex items-center gap-3 text-sm text-white/40 font-bold uppercase tracking-widest md:pl-10 md:border-l border-white/5 pt-2 md:pt-0 w-full sm:w-auto">
+                                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
                                             <i data-lucide="user" class="w-4 h-4 text-emerald-500"></i>
                                         </div>
-                                        <?php echo e($w['teacher_name']); ?>
+                                        <span class="truncate"><?php echo e($w['teacher_name']); ?></span>
                                     </div>
                             </div>
                         </div>
                         
-                        <div class="flex items-center gap-4 self-end lg:self-center">
+                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0 lg:justify-end">
                             <?php if ($w['status'] === 'live'): ?>
                                 <a href="<?php echo ($user['role'] === 'teacher' || $user['role'] === 'admin') ? 'studio.php' : 'view.php'; ?>?id=<?php echo $w['id']; ?>" 
-                                   class="group/btn px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center gap-3 shadow-[0_15px_30px_-12px_rgba(16,185,129,0.5)]">
-                                    <i data-lucide="play" class="w-5 h-5 fill-current group-hover/btn:scale-110 transition-transform"></i>
+                                   class="flex-1 lg:flex-none justify-center group/btn px-6 md:px-10 py-4 md:py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center gap-2 md:gap-3 shadow-[0_15px_30px_-12px_rgba(16,185,129,0.5)]">
+                                    <i data-lucide="play" class="w-4 h-4 md:w-5 md:h-5 fill-current group-hover/btn:scale-110 transition-transform"></i>
                                     DƏRSƏ QOŞUL
                                 </a>
                             <?php elseif ($w['status'] === 'scheduled' && ($user['role'] === 'teacher' || $user['role'] === 'admin')): ?>
                                 <button onclick="startWebinar(<?php echo $w['id']; ?>)"
-                                        class="px-10 py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic">
-                                    VEBİNARI BAŞLAT
+                                        class="flex-1 lg:flex-none justify-center px-6 md:px-10 py-4 md:py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic">
+                                    VEBİNARI B.
                                 </button>
                             <?php elseif ($w['status'] === 'ended'): ?>
                                 <a href="play.php?id=<?php echo $w['id']; ?>" 
-                                   class="px-10 py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl">
+                                   class="flex-1 lg:flex-none justify-center px-6 md:px-10 py-4 md:py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all shadow-xl">
                                     VİDEOYA BAX
                                 </a>
                             <?php endif; ?>
                             
                             <?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
+                                <div class="flex items-center gap-2 shrink-0">
                                 <?php if ($w['status'] === 'scheduled'): ?>
                                     <!-- Edit Button - only for scheduled/pending -->
                                     <button onclick='openEditModal(<?php echo json_encode([
@@ -321,6 +322,7 @@ require_once 'includes/header.php';
                                         <i data-lucide="trash-2" class="w-6 h-6"></i>
                                     </button>
                                 <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>

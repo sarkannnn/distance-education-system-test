@@ -60,7 +60,7 @@ require_once 'includes/header.php';
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="adminDeptGrid">
         <?php foreach ($departments as $dept): ?>
-        <div class="dept-card group bg-[#0a1f44] border border-white/5 rounded-[3rem] p-10 hover:border-emerald-500/20 transition-all duration-500"
+        <div class="dept-card group bg-[#0a1f44] border border-white/5 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 hover:border-emerald-500/20 transition-all duration-500"
              data-name="<?php echo strtolower($dept['name'] . ' ' . $dept['faculty']); ?>">
             <div class="mb-8">
                 <span class="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] block mb-2 opacity-50"><?php echo e($dept['faculty']); ?></span>
@@ -69,18 +69,18 @@ require_once 'includes/header.php';
 
             <div class="space-y-6">
                 <?php foreach ($dept['users'] as $u): ?>
-                <div class="flex items-center justify-between p-6 bg-white/5 rounded-2xl border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 md:p-6 bg-white/5 rounded-2xl border border-white/5 gap-4">
+                    <div class="flex items-start sm:items-center gap-3 md:gap-4 overflow-hidden w-full">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                             <i data-lucide="<?php echo $u['role'] === 'teacher' ? 'user' : 'users'; ?>" class="w-5 h-5 text-white/30"></i>
                         </div>
-                        <div>
-                            <p class="text-xs font-black uppercase tracking-widest text-white/80"><?php echo e($u['role'] === 'teacher' ? 'Mühazirəçi' : 'İştirakçı'); ?></p>
-                            <p class="text-[10px] font-bold text-white/30">@<?php echo e($u['username']); ?></p>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] md:text-xs font-black uppercase tracking-widest text-white/80"><?php echo e($u['role'] === 'teacher' ? 'Mühazirəçi' : 'İştirakçı'); ?></p>
+                            <p class="text-[9px] md:text-[10px] font-bold text-white/30 break-all pr-2">@<?php echo e($u['username']); ?></p>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-end gap-2 w-full sm:w-auto">
                         <!-- Status Toggle -->
                         <button onclick="toggleUserStatus(<?php echo $u['id']; ?>, <?php echo $u['is_active']; ?>)" 
                                 class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all <?php echo $u['is_active'] ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'; ?>">
@@ -89,7 +89,7 @@ require_once 'includes/header.php';
                         
                         <!-- PWD Reset -->
                         <button onclick="openPasswordModal(<?php echo $u['id']; ?>, '<?php echo e($u['username']); ?>')"
-                                class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/30 hover:text-white flex items-center justify-center transition-all">
+                                class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/30 hover:text-white flex items-center justify-center transition-all shrink-0">
                             <i data-lucide="key-round" class="w-4 h-4"></i>
                         </button>
                     </div>
