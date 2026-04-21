@@ -575,7 +575,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: bestType,
-                    videoBitsPerSecond: 1500000 // 1.5 Mbps
+                    videoBitsPerSecond: 3000000 // 3.0 Mbps for better quality (especially for screen sharing)
                 });
 
                 mediaRecorder.ondataavailable = (event) => {
@@ -782,21 +782,11 @@ $pageTitle = "Studio: " . $webinar['title'];
 
             function draw() {
                 const canvasEl = document.getElementById('outputCanvas');
-
-                // Dynamic Canvas Resolution
-                let targetW = 1280;
-                let targetH = 720;
-
-                if (isScreenOn && screenVid && screenVid.videoWidth) {
-                    targetW = screenVid.videoWidth;
-                    targetH = screenVid.videoHeight;
-                } else if (isStudentMain && activeStudentCall) {
-                    const studentVid = document.getElementById('studentSource');
-                    if (studentVid && studentVid.videoWidth) {
-                        targetW = studentVid.videoWidth;
-                        targetH = studentVid.videoHeight;
-                    }
-                }
+                // Fixed Broadcast/Recording Resolution (1080p)
+                // This prevents pixelation and "glitches" during screen share or camera switching
+                // by maintaining a constant resolution for the encoder.
+                const targetW = 1920;
+                const targetH = 1080;
 
                 if (canvas.width !== targetW || canvas.height !== targetH) {
                     canvas.width = targetW;
