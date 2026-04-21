@@ -720,6 +720,10 @@ $pageTitle = "Studio: " . $webinar['title'];
                         }
                     });
 
+                    conn.on('error', (err) => {
+                        LOG(`❌ Bağlantı xətası (${conn.metadata.name}): ${err}`, "red");
+                    });
+
                     conn.on('close', () => {
                         allDataConns = allDataConns.filter(c => c.peer !== conn.peer);
                         updateViewerCount();
@@ -990,7 +994,13 @@ $pageTitle = "Studio: " . $webinar['title'];
 
         function broadcast(data, exclude = null) {
             allDataConns.forEach(c => {
-                if (c.open && c.peer !== exclude) c.send(data);
+                try {
+                    if (c.open && c.peer !== exclude) {
+                        c.send(data);
+                    }
+                } catch(e) {
+                    console.error("Broadcast failed for peer:", c.peer, e);
+                }
             });
         }
 

@@ -481,7 +481,23 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
             });
 
             dataConn.on('open', () => {
-                appendChat('Sistem', 'Mühazirəçiyə qoşuldu!', '#94a3b8');
+                appendChat('Sistem', 'Mühazirəçiyə qoşuldu!', '#10b981');
+                document.getElementById('chatInput').placeholder = "Mesaj yazın...";
+                document.getElementById('chatInput').disabled = false;
+            });
+
+            dataConn.on('error', (err) => {
+                LOG("❌ Çat Xətası: " + err, "red");
+                document.getElementById('chatInput').placeholder = "Bağlantı xətası...";
+                document.getElementById('chatInput').disabled = true;
+            });
+
+            dataConn.on('close', () => {
+                LOG("🔌 Çat bağlantısı kəsildi.", "#f59e0b");
+                appendChat('Sistem', 'Mühazirəçi ilə bağlantı kəsildi. Yenidən qoşulmağa cəhd edilir...', '#f59e0b');
+                document.getElementById('chatInput').placeholder = "Yenidən qoşulur...";
+                document.getElementById('chatInput').disabled = true;
+                setTimeout(init, 3000);
             });
 
             dataConn.on('data', (data) => {
@@ -1123,12 +1139,23 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
         function sendChat() {
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
-            if (!msg || !dataConn || !dataConn.open) return;
+            
+            if (!msg) return;
+            
+            if (!dataConn || !dataConn.open) {
+                alert("Mühazirəçiyə hələ qoşulmayıb. Zəhmət olmasa bir neçə saniyə gözləyin.");
+                return;
+            }
 
-            const data = { type: 'chat', sender: uName, message: msg };
-            dataConn.send(data);
-            appendChat('Mən', msg, '#3b82f6');
-            input.value = '';
+            try {
+                const data = { type: 'chat', sender: uName, message: msg };
+                dataConn.send(data);
+                appendChat('Mən', msg, '#3b82f6');
+                input.value = '';
+            } catch(e) {
+                console.error("Chat send error:", e);
+                alert("Mesaj göndərilmədi. Bağlantını yoxlayın.");
+            }
         }
 
         function appendChat(sender, msg, color = '#3b82f6') {
@@ -1182,6 +1209,8 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
         window.onload = () => {
             init();
             lucide.createIcons();
+            // Start polling for teacher status/ID changes
+            setInterval(checkTeacherPeer, 10000);
         };
     </script>
 </body>
