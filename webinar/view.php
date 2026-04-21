@@ -773,6 +773,7 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                 ctx.fillStyle = "#000";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+                let isMainDrawn = false;
                 if (isWBActive && wbCanvas) {
                     ctx.fillStyle = "#ffffff";
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -791,8 +792,37 @@ $pageTitle = "Canlı İzle: " . $webinar['title'];
                         ctx.stroke();
                     }
                     drawImageFit(ctx, wbCanvas, 0, 0, canvas.width, canvas.height);
+                    isMainDrawn = true;
                 } else if (isScreenOn && screenVid.readyState >= 2) {
                     drawImageFit(ctx, screenVid, 0, 0, canvas.width, canvas.height);
+                    isMainDrawn = true;
+                }
+
+                if (isMainDrawn) {
+                    // PiP: Draw Student Camera in corner
+                    if (isCamOn && camVid.readyState >= 2) {
+                        const pipW = canvas.width * 0.2;
+                        const pipH = (pipW * 9) / 16;
+                        const margin = 20;
+                        const px = canvas.width - pipW - margin;
+                        const py = canvas.height - pipH - margin;
+
+                        ctx.save();
+                        ctx.shadowBlur = 15;
+                        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                        ctx.fillStyle = '#0a1f44';
+                        ctx.beginPath();
+                        ctx.roundRect(px - 1, py - 1, pipW + 2, pipH + 2, 8);
+                        ctx.fill();
+                        ctx.restore();
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.roundRect(px, py, pipW, pipH, 8);
+                        ctx.clip();
+                        drawImageCover(ctx, camVid, px, py, pipW, pipH);
+                        ctx.restore();
+                    }
                 } else if (isCamOn && camVid.readyState >= 2) {
                     drawImageCover(ctx, camVid, 0, 0, canvas.width, canvas.height);
                 }

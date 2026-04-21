@@ -131,9 +131,16 @@ $pageTitle = "Studio: " . $webinar['title'];
     <div class="studio-grid">
         <!-- Main Stage -->
         <div class="video-section">
-            <div class="main-video-container">
-                <!-- Main Feed -->
-                <canvas id="outputCanvas" class="w-full h-full object-contain"></canvas>
+            <div class="main-video-container relative" id="mainStageContainer">
+                <canvas id="outputCanvas" class="w-full h-full object-cover bg-black mirrored-canvas"></canvas>
+                
+                <!-- Draggable PiP Overlay (Studio UI Only) -->
+                <div id="pipDraggable" class="absolute cursor-move border-2 border-dashed border-emerald-500/50 bg-emerald-500/10 hidden z-50 transition-[box-shadow,border-color] hover:border-emerald-500 hover:shadow-2xl active:scale-[1.02]">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <i data-lucide="move" class="w-6 h-6 text-emerald-400 opacity-40"></i>
+                    </div>
+                    <div class="absolute -top-6 left-0 bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-widest rounded-t-lg">KAMERA PƏNCƏRƏSİ</div>
+                </div>
                 <video id="localMainVid" autoplay playsinline class="hidden w-full h-full object-contain"></video>
 
                 <!-- Whiteboard Overlay -->
@@ -354,6 +361,13 @@ $pageTitle = "Studio: " . $webinar['title'];
                         <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">Video</span>
                     </div>
 
+                    <div class="flex flex-col items-center gap-2">
+                        <button id="btnPiP" onclick="toggleNativePiP()" class="btn-ctrl" title="Üzən Pəncərə (PiP)">
+                            <i data-lucide="external-link" class="w-5 h-5 text-white"></i>
+                        </button>
+                        <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">PiP</span>
+                    </div>
+
                     <div class="w-px h-8 bg-white/10 mx-2"></div>
 
                     <div class="flex flex-col items-center gap-2">
@@ -518,6 +532,12 @@ $pageTitle = "Studio: " . $webinar['title'];
         let allDataConns = [];
         let isCamOn = true, isMicOn = true, isScreenOn = false;
         let activeStudentCall = null, isStudentExpanded = false, isStudentMain = false;
+
+        // --- PIP STATE (Draggable Camera) ---
+        let pipW = 384, pipH = 216; // 20% of 1920x1080 (1920*0.2 = 384)
+        let pipX = 1920 - 384 - 40; // Default Position (Bottom Right)
+        let pipY = 1080 - 216 - 40;
+        let isDraggingPiP = false, pipDragStartX = 0, pipDragStartY = 0, pipInitX = 0, pipInitY = 0;
 
         // --- WHITEBOARD STATE (V2.1) ---
         let isWBActive = false, isDrawing = false;
@@ -878,11 +898,43 @@ $pageTitle = "Studio: " . $webinar['title'];
                     isMainDrawn = true;
                 }
 
-                if (!isMainDrawn && isCamOn && camVid.readyState >= 2) {
-                    drawImageCover(ctx, camVid, 0, 0, canvas.width, canvas.height);
+                if (isMainDrawn) {
+                    // PiP: Draw Camera at its draggable position
+                    if (isCamOn && camVid.readyState >= 2) {
+                        // Drawing logic for PiP
+                        const margin = 4;
+                        
+                        // Draw Shadow/Frame
+                        ctx.save();
+                        ctx.shadowBlur = 25;
+                        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                        ctx.fillStyle = '#1e293b'; // Slate 800
+                        ctx.beginPath();
+                        ctx.roundRect(pipX - margin, pipY - margin, pipW + (margin*2), pipH + (margin*2), 16);
+                        ctx.fill();
+                        ctx.restore();
+
+                        // Draw Camera
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.roundRect(pipX, pipY, pipW, pipH, 12);
+                        ctx.clip();
+                        drawImageCover(ctx, camVid, pipX, pipY, pipW, pipH);
+                        ctx.restore();
+
+                        // Update the draggable overlay position in Studio UI
+                        updatePiPOverlay();
+                    } else {
+                        document.getElementById('pipDraggable').classList.add('hidden');
+                    }
+                } else {
+                    document.getElementById('pipDraggable').classList.add('hidden');
                 }
 
-                // PIP removed entirely per user request
+                if (!isMainDrawn && isCamOn && camVid.readyState >= 2) {
+                    drawImageCover(ctx, camVid, 0, 0, canvas.width, canvas.height);
+                    document.getElementById('pipDraggable').classList.add('hidden');
+                }
             }
 
             function drawImageCover(ctx, img, x, y, w, h) {
@@ -958,6 +1010,31 @@ $pageTitle = "Studio: " . $webinar['title'];
             if (track) track.enabled = isMicOn;
             document.getElementById('btnMic').className = isMicOn ? 'btn-ctrl active-green' : 'btn-ctrl active-red';
             LOG(`🎤 Mikrofon: ${isMicOn ? 'Aktiv' : 'Deaktiv'}`);
+        }
+
+        async function toggleNativePiP() {
+            const camVid = document.getElementById('camSource');
+            if (!camVid || !isCamOn) {
+                alert("Kamera aktiv deyil.");
+                return;
+            }
+
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                    document.getElementById('btnPiP').classList.remove('active-green');
+                } else {
+                    if (camVid.readyState >= 2) {
+                        await camVid.requestPictureInPicture();
+                        document.getElementById('btnPiP').classList.add('active-green');
+                    } else {
+                        alert("Kamera görüntüsü hazırlanır, bir neçə saniyə sonra yenidən yoxlayın.");
+                    }
+                }
+            } catch (error) {
+                console.error("PiP Error:", error);
+                alert("Brauzeriniz bu funksiyanı dəstəkləmir və ya kamera aktiv deyil.");
+            }
         }
 
         async function toggleScreen() {
@@ -1717,9 +1794,63 @@ $pageTitle = "Studio: " . $webinar['title'];
             return msg;
         });
 
+        // --- PIP DRAGGABLE UI LOGIC ---
+        function updatePiPOverlay() {
+            const overlay = document.getElementById('pipDraggable');
+            const container = document.getElementById('mainStageContainer');
+            if (!overlay || !container || !isCamOn) return;
+
+            overlay.classList.remove('hidden');
+
+            const rect = container.getBoundingClientRect();
+            const scaleX = rect.width / 1920;
+            const scaleY = rect.height / 1080;
+
+            overlay.style.width = (pipW * scaleX) + 'px';
+            overlay.style.height = (pipH * scaleY) + 'px';
+            
+            // Adjust X for mirrored preview (Studio uses CSS mirror)
+            // If pipX is 40 internally (Left), in mirrored CSS it looks like it's on the Right.
+            // But we want the mouse interaction to feel natural.
+            overlay.style.left = (pipX * scaleX) + 'px';
+            overlay.style.top = (pipY * scaleY) + 'px';
+        }
+
+        const pipOverlay = document.getElementById('pipDraggable');
+        pipOverlay.addEventListener('mousedown', (e) => {
+            isDraggingPiP = true;
+            pipDragStartX = e.clientX;
+            pipDragStartY = e.clientY;
+            pipInitX = pipX;
+            pipInitY = pipY;
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingPiP) return;
+
+            const container = document.getElementById('mainStageContainer');
+            const rect = container.getBoundingClientRect();
+            const scaleX = 1920 / rect.width;
+            const scaleY = 1080 / rect.height;
+
+            let dx = (e.clientX - pipDragStartX) * scaleX;
+            let dy = (e.clientY - pipDragStartY) * scaleY;
+
+            // Update internal coordinates
+            pipX = Math.max(20, Math.min(1920 - pipW - 20, pipInitX + dx));
+            pipY = Math.max(20, Math.min(1080 - pipH - 20, pipInitY + dy));
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingPiP = false;
+        });
+
         window.onload = () => {
-            // Don't call init here, wait for click
+            init();
             lucide.createIcons();
+            // Start polling for students 
+            setInterval(renderStudentList, 5000);
         };
 
         const oldBeforeUnload = window.onbeforeunload;
