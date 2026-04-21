@@ -334,25 +334,25 @@ require_once 'includes/header.php';
 
 <!-- Create Modal (Mühazirəçi və Admin üçün) -->
 <?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
-<div id="createModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300">
-    <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[3.5rem] border border-white/10 p-12 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
+<div id="createModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300 overflow-y-auto">
+    <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[2.5rem] md:rounded-[3.5rem] border border-white/10 p-8 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden my-auto">
         <!-- Close Button -->
         <button onclick="document.getElementById('createModal').style.display='none'" 
-                class="absolute top-10 right-10 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all active:scale-90">
-            <i data-lucide="x" class="w-6 h-6"></i>
+                class="absolute top-6 right-6 md:top-10 md:right-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all active:scale-90">
+            <i data-lucide="x" class="w-5 h-5 md:w-6 md:h-6"></i>
         </button>
 
-        <div class="mb-12">
-            <h3 class="text-3xl font-black italic tracking-tighter mb-2">Yeni Vebinar <span class="text-emerald-500">Planla</span></h3>
-            <p class="text-white/40 text-sm font-medium">İştirakçılar üçün yeni bir tədris seansını burada yarada bilərsiniz.</p>
+        <div class="mb-8 md:mb-12">
+            <h3 class="text-2xl md:text-3xl font-black italic tracking-tighter mb-2">Yeni Vebinar <span class="text-emerald-500">Planla</span></h3>
+            <p class="text-white/40 text-xs md:text-sm font-medium">İştirakçılar üçün yeni bir tədris seansını burada yarada bilərsiniz.</p>
         </div>
         
         <form action="api/create_webinar.php" method="POST" class="space-y-8">
             <?php if ($user['role'] === 'admin' && !empty($filterItems)): ?>
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Kafedra Seçin</label>
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Kafedra Seçin</label>
                 <select name="department_id" required 
-                        class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold text-white appearance-none">
+                        class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold text-white appearance-none">
                     <?php 
                     $currFac = "";
                     foreach ($filterItems as $item): 
@@ -369,30 +369,30 @@ require_once 'includes/header.php';
             <?php endif; ?>
 
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Vebinar Mövzusu</label>
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Vebinar Mövzusu</label>
                 <input type="text" name="title" required 
-                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold placeholder:text-white/10"
+                       class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold placeholder:text-white/10"
                        placeholder="Məs: Kiber Təhlükəsizlik Və Bulud Texnologiyaları">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-3">
-                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Başlama Tarixi</label>
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Başlama Tarixi</label>
                     <input type="datetime-local" name="scheduled_at" required 
-                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold text-white/40">
+                           class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold text-white/40 min-h-[3.5rem] md:min-h-0">
                 </div>
                 <div class="space-y-3">
-                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Müddət (Dəq)</label>
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Müddət (Dəq)</label>
                     <input type="number" name="duration" value="90" 
-                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold"
+                           class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-bold"
                            placeholder="90">
                 </div>
             </div>
 
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Dərs Haqda Qısa Qeyd</label>
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Dərs Haqda Qısa Qeyd</label>
                 <textarea name="description" rows="3"
-                          class="w-full bg-white/5 border border-white/10 rounded-3xl px-8 py-5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium placeholder:text-white/10"
+                          class="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-emerald-500/50 transition-all font-medium placeholder:text-white/10"
                           placeholder="İştirakçıların öncədən bilməsi vacib olan məlumatlar..."></textarea>
             </div>
 
@@ -414,47 +414,47 @@ require_once 'includes/header.php';
 
 <!-- Edit Modal (Mühazirəçi və Admin üçün) -->
 <?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
-<div id="editModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300">
-    <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[3.5rem] border border-white/10 p-12 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
+<div id="editModal" class="fixed inset-0 z-[60] bg-[#060f23]/90 backdrop-blur-md hidden items-center justify-center p-4 animate-in fade-in duration-300 overflow-y-auto">
+    <div class="bg-[#0a1f44] w-full max-w-2xl rounded-[2.5rem] md:rounded-[3.5rem] border border-white/10 p-8 md:p-16 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden my-auto">
         <!-- Close Button -->
         <button onclick="closeEditModal()" 
-                class="absolute top-10 right-10 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all active:scale-90">
-            <i data-lucide="x" class="w-6 h-6"></i>
+                class="absolute top-6 right-6 md:top-10 md:right-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all active:scale-90">
+            <i data-lucide="x" class="w-5 h-5 md:w-6 md:h-6"></i>
         </button>
 
-        <div class="mb-12">
-            <h3 class="text-3xl font-black italic tracking-tighter mb-2">Vebinarı <span class="text-blue-400">Redaktə Et</span></h3>
-            <p class="text-white/40 text-sm font-medium">Gözləyən statusda olan vebinarın məlumatlarını burada dəyişə bilərsiniz.</p>
+        <div class="mb-8 md:mb-12">
+            <h3 class="text-2xl md:text-3xl font-black italic tracking-tighter mb-2">Vebinarı <span class="text-blue-400">Redaktə Et</span></h3>
+            <p class="text-white/40 text-xs md:text-sm font-medium">Gözləyən statusda olan vebinarın məlumatlarını burada dəyişə bilərsiniz.</p>
         </div>
         
         <form id="editForm" onsubmit="submitEditForm(event)" class="space-y-8">
             <input type="hidden" id="edit_id" name="id">
             
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Vebinar Mövzusu</label>
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Vebinar Mövzusu</label>
                 <input type="text" id="edit_title" name="title" required 
-                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-blue-400/50 transition-all font-bold placeholder:text-white/10"
+                       class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-blue-400/50 transition-all font-bold placeholder:text-white/10"
                        placeholder="Məs: Kiber Təhlükəsizlik Və Bulud Texnologiyaları">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-3">
-                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Başlama Tarixi</label>
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Başlama Tarixi</label>
                     <input type="datetime-local" id="edit_scheduled_at" name="scheduled_at" required 
-                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-blue-400/50 transition-all font-bold text-white/40">
+                           class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-blue-400/50 transition-all font-bold text-white/40 min-h-[3.5rem] md:min-h-0">
                 </div>
                 <div class="space-y-3">
-                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Müddət (Dəq)</label>
+                    <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Müddət (Dəq)</label>
                     <input type="number" id="edit_duration" name="duration" value="90" 
-                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-8 py-5 text-sm focus:outline-none focus:border-blue-400/50 transition-all font-bold"
+                           class="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-blue-400/50 transition-all font-bold"
                            placeholder="90">
                 </div>
             </div>
 
             <div class="space-y-3">
-                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-6">Dərs Haqda Qısa Qeyd</label>
+                <label class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 md:ml-6">Dərs Haqda Qısa Qeyd</label>
                 <textarea id="edit_description" name="description" rows="3"
-                          class="w-full bg-white/5 border border-white/10 rounded-3xl px-8 py-5 text-sm focus:outline-none focus:border-blue-400/50 transition-all font-medium placeholder:text-white/10"
+                          class="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl px-6 py-4 md:px-8 md:py-5 text-xs md:text-sm focus:outline-none focus:border-blue-400/50 transition-all font-medium placeholder:text-white/10"
                           placeholder="İştirakçıların öncədən bilməsi vacib olan məlumatlar..."></textarea>
             </div>
 
