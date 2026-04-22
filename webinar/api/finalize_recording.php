@@ -60,12 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  */
 function patchWebmDuration($filePath, $durationMs)
 {
-    $handle = fopen($filePath, 'r+b');
-    if (!$handle)
-        return;
+    // WebM Duration float is often expected in seconds by browsers, 
+    // despite the Matroska spec mentioning TimecodeScale units.
+    $durationSeconds = (float)($durationMs / 1000.0);
 
-    // Read the first 64KB for header analysis
-    $header = fread($handle, 65536);
+    $handle = fopen($filePath, 'r+b');
+    if (!$handle) return;
+
+    // Read the first 128KB for header analysis (slightly more than before for safety)
+    $bufferSize = 131072;
+    $header = fread($handle, $bufferSize);
 
     // Segment Info ID: 15 49 A9 66
     $infoId = "\x15\x49\xA9\x66";
@@ -76,22 +80,32 @@ function patchWebmDuration($filePath, $durationMs)
         return;
     }
 
-    // Get Info size (VINT)
+    // Determine Info size (EBML VINT)
     $sizeByte = ord($header[$pos + 4]);
     $sizeLen = 0;
-    if ($sizeByte & 0x80)
-        $sizeLen = 1;
-    else if ($sizeByte & 0x40)
-        $sizeLen = 2;
-    // ... we assume 1 byte for simplicity in typical MediaRecorder output (under 127 bytes)
+    if ($sizeByte & 0x80) $sizeLen = 1;
+    else if ($sizeByte & 0x40) $sizeLen = 2;
+    else if ($sizeByte & 0x20) $sizeLen = 3;
+    else if ($sizeByte & 0x10) $sizeLen = 4;
 
-    if ($sizeLen !== 1) {
+    if ($sizeLen === 0) {
         fclose($handle);
         return;
     }
 
-    $infoBodyStart = $pos + 5;
-    $infoSize = $sizeByte & 0x7F;
+    $infoBodyStart = $pos + 4 + $sizeLen;
+    
+    // Simple VINT decode for sizes up to 4 bytes
+    $infoSize = $sizeByte & (0xFF >> $sizeLen);
+    for ($i = 1; $i < $sizeLen; $i++) {
+        $infoSize = ($infoSize << 8) | ord($header[$pos + 4 + $i]);
+    }
+
+    // Verify if we have the whole Info block in our buffer
+    if ($infoBodyStart + $infoSize > $bufferSize) {
+        fclose($handle);
+        return; // Header too large for this simple patcher
+    }
 
     // Check if Duration already exists inside Info: 44 89
     if (strpos(substr($header, $infoBodyStart, $infoSize), "\x44\x89") !== false) {
@@ -99,33 +113,37 @@ function patchWebmDuration($filePath, $durationMs)
         return; // Already patched or present
     }
 
-    // Construct Duration element: 44 89 (ID) + 88 (Size: 8 bytes float) + [8 bytes float]
-    // WebM durations are usually in timecode units (usually 1ms if TimecodeScale is 1,000,000)
-    $durationBuf = "\x44\x89\x88" . pack('E', $durationMs); // 'E' is 64-bit float little-endian, but WebM needs big-endian
+    // Construct Duration element: 44 89 (ID) + 88 (Size: 8 bytes float) + [8 bytes float BE]
+    // Using 'G' for 64-bit float Big-Endian (available in PHP 7.2+)
+    $durationBuf = "\x44\x89\x88" . pack('G', $durationSeconds);
 
-    // Convert to Big-Endian (WebM standard)
-    $durationBuf = "\x44\x89\x88" . strrev(pack('d', $durationMs)); // 'd' is architecture-dependent, strrev for big-endian fix
-
-    // Update Info Size
+    // Update Info Size in the result
     $newInfoSize = $infoSize + strlen($durationBuf);
-    $newSizeByte = chr(0x80 | $newInfoSize);
+    
+    // Construct new VINT for Size (using same length as original for simplicity)
+    $newSizeVint = "";
+    $tempSize = $newInfoSize;
+    for ($i = $sizeLen - 1; $i >= 0; $i--) {
+        $byte = $tempSize & 0xFF;
+        if ($i === 0) $byte |= (0x80 >> ($sizeLen - 1));
+        $newSizeVint = chr($byte) . $newSizeVint;
+        $tempSize >>= 8;
+    }
 
-    // Reconstruct the file
-    // [Header up to InfoID] + [InfoID] + [NewSize] + [OldInfoBody] + [DurationBuf] + [RestOfFile]
-
-    $part1 = substr($header, 0, $pos + 4);
-    $part2 = substr($header, $infoBodyStart, $infoSize);
-    $restOfHeader = substr($header, $infoBodyStart + $infoSize);
-
-    // Use a temp file to rewrite safely
+    // Reconstruct the file safely
     $tempPath = $filePath . '.tmp';
     $tempHandle = fopen($tempPath, 'wb');
 
-    fwrite($tempHandle, $part1);
-    fwrite($tempHandle, $newSizeByte);
-    fwrite($tempHandle, $part2);
+    // Part prior to Size
+    fwrite($tempHandle, substr($header, 0, $pos + 4));
+    // New Size VINT
+    fwrite($tempHandle, $newSizeVint);
+    // Info Body
+    fwrite($tempHandle, substr($header, $infoBodyStart, $infoSize));
+    // New Duration Element
     fwrite($tempHandle, $durationBuf);
-    fwrite($tempHandle, $restOfHeader);
+    // Everything else in buffer
+    fwrite($tempHandle, substr($header, $infoBodyStart + $infoSize));
 
     // Pipe the remainder of the file
     fseek($handle, strlen($header));

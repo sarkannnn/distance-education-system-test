@@ -3,6 +3,7 @@ require_once '../config/auth.php';
 require_once '../config/database.php';
 
 header('Content-Type: application/json');
+set_time_limit(0); // Allow long uploads if server is slow
 
 if (!WebinarAuth::isLoggedIn() || $_SESSION['webinar_role'] !== 'teacher') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -70,17 +71,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Əgər fayl artıq mövcuddursa və bu yeni sessiyanın ilk parçasıdırsa, 
-    // WebM/EBML başlığını silib pleyerin donmasının qarşısını alırıq.
-    if ($isFirstChunk && file_exists($filePath) && filesize($filePath) > 100) {
-        // WebM Cluster ID: 1F 43 B6 75
-        $clusterPos = strpos($chunkData, "\x1F\x43\xB6\x75");
-        if ($clusterPos !== false) {
-            $chunkData = substr($chunkData, $clusterPos);
-        }
-    }
+    // Don't strip headers - concatenating full WebM sessions is safer for playback 
+    // even if it creates multiple segments (Chained WebM). Striping creates broken clusters.
 
-    if (file_put_contents($filePath, $chunkData, FILE_APPEND | LOCK_EX)) {
+    $mode = $isFirstChunk ? LOCK_EX : (FILE_APPEND | LOCK_EX);
+    if (file_put_contents($filePath, $chunkData, $mode)) {
         // Update DB if not already set
         try {
             $db = WebinarDatabase::getInstance();

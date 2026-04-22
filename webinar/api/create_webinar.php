@@ -25,16 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $checkTeacher = $db->fetch("SELECT id FROM webinar_users WHERE id = ?", [$teacherId]);
         if (!$checkTeacher) {
             logDebug("CreateWebinar Critical: Teacher ID $teacherId not found in webinar_users for user " . ($user['username'] ?? 'unknown'));
-            // Try to force sync if it's an admin
-            if ($user['role'] === 'admin') {
-                logDebug("CreateWebinar: Attempting emergency sync for Admin $teacherId");
+            // Try to force sync for any portal user (Admin or Instructor)
+            if ($user['role'] === 'admin' || $user['role'] === 'teacher') {
+                logDebug("CreateWebinar: Attempting emergency sync for {$user['role']} $teacherId");
                 $db->insert('webinar_users', [
                     'id' => $teacherId,
-                    'username' => 'admin_' . $teacherId,
+                    'username' => strtolower($user['role']) . '_' . $teacherId,
                     'password_hash' => '$2y$10$O0NSKsQUtpcJSG0OsVYPQ.j0Z3J9rIK3iGdglkFGdJypS5Z6ixJdK',
-                    'full_name' => $user['full_name'] ?? 'Super User',
-                    'role' => 'admin',
-                    'faculty_id' => null,
+                    'full_name' => $user['full_name'] ?? 'İstifadəçi',
+                    'role' => $user['role'],
+                    'faculty_id' => $user['faculty_id'] ?? null,
                     'is_active' => 1
                 ]);
                 logDebug("CreateWebinar: Emergency sync successful.");

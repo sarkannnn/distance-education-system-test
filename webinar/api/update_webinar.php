@@ -32,9 +32,16 @@ if (!$id || !$title || !$scheduled_at) {
 
 try {
     // Admin can edit any webinar, teachers only their own
-    if ($user['role'] === 'admin' && !isset($user['department_id'])) {
-        $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ?", [$id]);
+    if ($user['role'] === 'admin') {
+        if (empty($user['department_id'])) {
+            // Master Admin
+            $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ?", [$id]);
+        } else {
+            // Department Admin
+            $webinar = $db->fetch("SELECT * FROM webinars WHERE id = ? AND department_id = ?", [$id, $user['department_id']]);
+        }
     } else {
+        // Teacher
         $webinar = $db->fetch(
             "SELECT * FROM webinars WHERE id = ? AND teacher_id = ? AND department_id = ?",
             [$id, $user['id'], $user['department_id']]

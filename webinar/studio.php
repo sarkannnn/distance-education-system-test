@@ -575,10 +575,10 @@ $pageTitle = "Studio: " . $webinar['title'];
 
         function getBestMimeType() {
             const types = [
-                'video/mp4;codecs=avc1,mp4a.40.2',
                 'video/webm;codecs=vp9,opus',
                 'video/webm;codecs=vp8,opus',
-                'video/webm'
+                'video/webm',
+                'video/mp4;codecs=avc1,mp4a.40.2'
             ];
             for (let t of types) {
                 if (MediaRecorder.isTypeSupported(t)) return t;
@@ -595,7 +595,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: bestType,
-                    videoBitsPerSecond: 3000000 // 3.0 Mbps for better quality (especially for screen sharing)
+                    videoBitsPerSecond: 3000000 // 3.0 Mbps: Optimal balance for 1080p stability
                 });
 
                 mediaRecorder.ondataavailable = (event) => {
@@ -605,7 +605,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                 };
 
                 recordingStartTime = Date.now();
-                mediaRecorder.start(10000); // Trigger dataavailable every 10 seconds
+                mediaRecorder.start(30000); // 30 seconds interval to reduce stuttering
                 LOG(`🔴 Video qeydiyyat başladı (${bestType.split(';')[0]})`, "#ef4444");
             } catch (e) {
                 console.warn("MediaRecorder Error:", e);
@@ -616,7 +616,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                         if (event.data.size > 0) flushChunk(event.data);
                     };
                     recordingStartTime = Date.now();
-                    mediaRecorder.start(10000);
+                    mediaRecorder.start(30000);
                     LOG("🔴 Video qeydiyyat başladı (fallback).", "#ef4444");
                 } catch (err) {
                     LOG("❌ Qeydiyyat mümkün olmadı.", "red");
@@ -660,7 +660,7 @@ $pageTitle = "Studio: " . $webinar['title'];
             });
         }
 
-        async function flushChunk(blob) {
+        async function flushChunk(blob, retryCount = 0) {
             const formData = new FormData();
             formData.append('webinar_id', wID);
             formData.append('video_blob', blob);
@@ -669,14 +669,30 @@ $pageTitle = "Studio: " . $webinar['title'];
 
             if (isFirstChunkRecorded) isFirstChunkRecorded = false;
 
-            lastFlushPromise = fetch('api/upload_recording.php', {
-                method: 'POST',
-                body: formData
-            }).then(r => r.json()).then(data => {
-                if (data.success) {
-                    LOG(`💾 Parça saxlanıldı: ${Math.round(data.size / 1024 / 1024 * 10) / 10} MB`, "#94a3b8");
+            // Chain promises to ensure strict sequential upload (prevents chunk reordering and corruption)
+            lastFlushPromise = lastFlushPromise.then(async () => {
+                try {
+                    const resp = await fetch('api/upload_recording.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                        LOG(`💾 Parça saxlanıldı: ${Math.round(data.size / 1024 / 1024 * 10) / 10} MB`, "#94a3b8");
+                    } else {
+                        throw new Error(data.message || 'Server error');
+                    }
+                    return data;
+                } catch (err) {
+                    if (retryCount < 3) {
+                        LOG(`⚠️ Yükləmə xətası, yenidən cəhd edilir (${retryCount + 1}/3)...`, "#fbbf24");
+                        // Wait 2 seconds before retry
+                        await new Promise(r => setTimeout(r, 2000));
+                        return flushChunk(blob, retryCount + 1);
+                    }
+                    LOG("❌ İnternet bağlantısı kəsildi, parça itirildi.", "red");
+                    throw err;
                 }
-                return data;
             }).catch(err => {
                 console.error("Flush error:", err);
             });
@@ -688,10 +704,10 @@ $pageTitle = "Studio: " . $webinar['title'];
             initWebinarTimer();
             try {
                 LOG("Media cihazları yoxlanılır...", "#3b82f6");
-                // Get Camera & Michel
+                // Get Camera & Mic (Prefer 1080p to match canvas)
                 camStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 1280, height: 720 },
-                    audio: { echoCancellation: true }
+                    video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
                 });
 
                 document.getElementById('camSource').srcObject = camStream;
@@ -1040,7 +1056,13 @@ $pageTitle = "Studio: " . $webinar['title'];
         async function toggleScreen() {
             if (!isScreenOn) {
                 try {
-                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+                        video: { 
+                            width: { ideal: 1920 }, 
+                            height: { ideal: 1080 },
+                            frameRate: { ideal: 30 }
+                        } 
+                    });
                     document.getElementById('screenSource').srcObject = screenStream;
                     isScreenOn = true;
                     document.getElementById('btnScreen').classList.add('active-green');
@@ -1538,9 +1560,9 @@ $pageTitle = "Studio: " . $webinar['title'];
                 const btn = event.currentTarget;
                 const oldText = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerHTML = '<i class="animate-spin mr-2">...</i> EMAL EDİLİR...';
+                btn.innerHTML = '<i class="animate-spin mr-2">...</i> YEKUNLAŞDIRILIR...';
 
-                LOG("⌛ Yayım dayandırılır və son görüntülər saxlanılır...", "#f59e0b");
+                LOG("⌛ Yayım dayandırılır və arxiv hazırlanır. Zəhmət olmasa gözləyin...", "#f59e0b");
 
                 // Allow user to leave without warning now that we are finalizing
                 window.onbeforeunload = null;

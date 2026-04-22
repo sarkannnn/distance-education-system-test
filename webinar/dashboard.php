@@ -666,6 +666,19 @@ window.addEventListener('DOMContentLoaded', () => {
         const createModal = document.getElementById('createModal');
         if (createModal) createModal.style.display = 'flex';
     }
+    
+    // Show error or success messages from URL
+    if (urlParams.has('error')) {
+        showToast('Xəta: ' + decodeURIComponent(urlParams.get('error')), 'error');
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.has('success')) {
+        let msg = 'Əməliyyat uğurla tamamlandı.';
+        if (urlParams.get('success') === 'webinar_created') msg = 'Vebinar uğurla yaradıldı!';
+        showToast(msg, 'success');
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 });
 </script>
 

@@ -55,7 +55,10 @@ require_once 'includes/header.php';
 
     <div class="bg-black rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl relative aspect-video group">
         <video controls class="w-full h-full object-contain">
-            <source src="<?php echo $videoPath; ?>" type="video/webm">
+            <?php 
+                $mimeType = (strpos($videoPath, '.mp4') !== false) ? 'video/mp4' : 'video/webm';
+            ?>
+            <source src="<?php echo $videoPath; ?>" type="<?php echo $mimeType; ?>">
             Sizin brauzeriniz video playeri dəstəkləmir.
         </video>
     </div>
