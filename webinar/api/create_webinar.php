@@ -21,15 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $teacherId = $user['id'];
 
-        // Check if teacher already has an active or scheduled webinar
-        $activeWebinar = $db->fetch(
-            "SELECT id FROM webinars WHERE teacher_id = ? AND status IN ('live', 'scheduled')",
-            [$teacherId]
-        );
-
-        if ($activeWebinar) {
-            throw new Exception("Sizin artıq aktiv və ya planlaşdırılmış bir dərsiniz var. Eyni anda yalnız 1 dərs yarada bilərsiniz.");
-        }
+        // Check removed: Teachers can now schedule multiple webinars.
         
         // Ensure teacher exists in webinar_users to satisfy foreign key
         $checkTeacher = $db->fetch("SELECT id FROM webinar_users WHERE id = ?", [$teacherId]);

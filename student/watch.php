@@ -104,11 +104,36 @@ if (!$videoUrl) {
 
 // SECURITY: CHECK IF STUDENT IS ENROLLED IN THIS COURSE
 if ($currentUser['role'] === 'student') {
-    $courseId = $lesson['course_id'];
-    $isEnrolled = $db->fetch(
-        "SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?",
-        [$currentUser['id'], $courseId]
+    $courseId = (int)$lesson['course_id'];
+    $tmisSubjectId = isset($lesson['tmis_subject_id']) ? (int)$lesson['tmis_subject_id'] : 0;
+    
+    $isEnrolled = false;
+
+    // 1. Check local enrollments
+    // We need to check both by student_id (TMIS ID) and local user ID because the system might use either
+    $localUser = $db->fetch("SELECT id FROM users WHERE student_id = ?", [$currentUser['id']]);
+    $localId = $localUser ? $localUser['id'] : 0;
+
+    $checkLocal = $db->fetch(
+        "SELECT id FROM enrollments WHERE (user_id = ? OR user_id = ?) AND course_id = ?",
+        [$currentUser['id'], $localId, $courseId]
     );
+
+    if ($checkLocal) {
+        $isEnrolled = true;
+    } else {
+        // 2. Fallback: Check TMIS subjects list (Source of truth)
+        $studentSubjects = tmis_get('/student/subjects');
+        if ($studentSubjects && is_array($studentSubjects)) {
+            foreach ($studentSubjects as $subj) {
+                $subjId = (int)($subj['id'] ?? 0);
+                if ($subjId > 0 && ($subjId === $courseId || $subjId === $tmisSubjectId)) {
+                    $isEnrolled = true;
+                    break;
+                }
+            }
+        }
+    }
     
     if (!$isEnrolled) {
         die("

@@ -31,6 +31,13 @@ try {
         exit;
     }
 
+    // Prevent starting a new live class if the teacher already has one active
+    $activeWebinar = $db->fetch("SELECT id FROM webinars WHERE teacher_id = ? AND status = 'live'", [$webinar['teacher_id']]);
+    if ($activeWebinar && $activeWebinar['id'] != $id) {
+        echo json_encode(['success' => false, 'message' => 'Bu kafedranın (müəllimin) artıq davam edən (canlı) dərsi var. Eyni anda iki dərs başladıla bilməz. Əvvəlcə aktiv dərsi bitirin.']);
+        exit;
+    }
+
     $db->update('webinars', 
         ['status' => 'live', 'started_at' => date('Y-m-d H:i:s')], 
         'id = ?', 

@@ -11,7 +11,7 @@ session_start();
 if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     // Try teacher session
     session_write_close();
-    session_name('DISTANT_TEACHER_SESSION');
+    session_name('DISTANT_STUDENT_SESSION');
     session_start();
     if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         http_response_code(401);

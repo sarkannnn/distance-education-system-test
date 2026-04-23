@@ -192,46 +192,6 @@ if ($tmisToday && is_array($tmisToday)) {
     }
 }
 
-// 4. Vebinarları əlavə et (Dashboard üçün)
-try {
-    $studentFacultyName = $_SESSION['student_faculty'] ?? '';
-    $studentDeptName = $_SESSION['student_department'] ?? '';
-    
-    if (!empty($studentFacultyName)) {
-        $cleanFaculty = trim($studentFacultyName);
-        $cleanDept = trim($studentDeptName);
-
-        $faculty = $db->fetch("SELECT id FROM webinar_faculties WHERE name LIKE ?", ["%$cleanFaculty%"]);
-        $dept = $db->fetch("SELECT id FROM webinar_departments WHERE name LIKE ?", ["%$cleanDept%"]);
-        
-        $facultyId = $faculty['id'] ?? 0;
-        $deptId = $dept['id'] ?? 0;
-        
-        if ($facultyId > 0 || $deptId > 0) {
-            $webinars = $db->fetchAll(
-                "SELECT w.id, w.title, wu.full_name as instructor_name, w.scheduled_at
-                 FROM webinars w
-                 JOIN webinar_users wu ON w.teacher_id = wu.id
-                 WHERE w.status = 'live'
-                 AND (w.faculty_id = ? OR w.department_id = ?)",
-                [$facultyId, $deptId]
-            );
-            
-            foreach ($webinars as $w) {
-                $todaySchedule[] = [
-                    'id' => $w['id'],
-                    'live_class_id' => $w['id'],
-                    'time' => date('H:i', strtotime($w['scheduled_at'])),
-                    'course' => $w['title'],
-                    'instructor' => $w['instructor_name'],
-                    'type' => 'webinar',
-                    'status' => 'in-progress'
-                ];
-            }
-        }
-    }
-} catch (Exception $e) {}
-
 // =========================================================================
 //  3. SON ARXİV MATERİALLARI
 //     API: GET /api/student/recent-archives
@@ -404,9 +364,9 @@ require_once 'includes/header.php';
                             </div>
                         <?php else: ?>
                             <?php foreach ($todaySchedule as $lesson):
-                                $isLive = ($lesson['status'] === 'in-progress' || $lesson['type'] === 'live' || $lesson['type'] === 'webinar') && !empty($lesson['live_class_id']);
+                                $isLive = ($lesson['status'] === 'in-progress');
+                                $joinUrl = 'live-view.php?id=' . ($lesson['live_class_id'] ?? $lesson['id']);
                                 $tag = $isLive ? 'a' : 'div';
-                                $joinUrl = ($lesson['type'] === 'webinar') ? '../webinar/view.php?id=' . $lesson['live_class_id'] : 'live-view.php?id=' . $lesson['live_class_id'];
                                 $href = $isLive ? 'href="' . $joinUrl . '"' : '';
                                 ?>
                                 <<?php echo $tag; ?> <?php echo $href; ?> class="schedule-item

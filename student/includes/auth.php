@@ -4,7 +4,7 @@
  * Distant Təhsil - Tələbə Autentifikasiya Sistemi
  */
 
-session_name('DISTANT_T_SESSION_V4');
+session_name('DISTANT_STUDENT_SESSION');
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',

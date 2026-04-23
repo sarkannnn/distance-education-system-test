@@ -32,35 +32,56 @@ if (!$lesson) {
 
 // CHECK IF STUDENT IS ENROLLED IN THIS COURSE
 if ($currentUser['role'] === 'student') {
-    // 1. Check local DB
-    $isEnrolled = $db->fetch(
-        "SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?",
-        [$currentUser['id'], $lesson['course_id']]
-    );
+    $courseId = (int)$lesson['course_id'];
+    $tmisSubjectId = isset($lesson['tmis_subject_id']) ? (int)$lesson['tmis_subject_id'] : 0;
     
-    // 2. Check Session (TMIS fallback)
-    $inSession = false;
-    if (isset($_SESSION['my_course_ids']) && is_array($_SESSION['my_course_ids'])) {
-        if (in_array((int)$lesson['course_id'], $_SESSION['my_course_ids'])) {
-            $inSession = true;
-        }
-    }
+    $isEnrolled = false;
 
-    // 3. Check Stream (If it's a broadcast to multiple courses)
-    $isStreamTarget = false;
-    if (!empty($lesson['stream_course_ids'])) {
-        $targets = explode(',', $lesson['stream_course_ids']);
-        if (isset($_SESSION['my_course_ids']) && is_array($_SESSION['my_course_ids'])) {
-            foreach ($targets as $t) {
-                if (in_array((int)trim($t), $_SESSION['my_course_ids'])) {
-                    $isStreamTarget = true;
+    // 1. Check local enrollments
+    // student_id is TMIS ID; local ID might be used in enrollments
+    $localUser = $db->fetch("SELECT id FROM users WHERE student_id = ?", [$currentUser['id']]);
+    $localId = $localUser ? $localUser['id'] : 0;
+
+    $checkLocal = $db->fetch(
+        "SELECT id FROM enrollments WHERE (user_id = ? OR user_id = ?) AND course_id = ?",
+        [$currentUser['id'], $localId, $courseId]
+    );
+
+    if ($checkLocal) {
+        $isEnrolled = true;
+    } else {
+        // 2. Fallback: Check TMIS subjects list
+        $studentSubjects = tmis_get('/student/subjects');
+        if ($studentSubjects && is_array($studentSubjects)) {
+            foreach ($studentSubjects as $subj) {
+                $subjId = (int)($subj['id'] ?? 0);
+                if ($subjId > 0 && ($subjId === $courseId || $subjId === $tmisSubjectId)) {
+                    $isEnrolled = true;
                     break;
                 }
             }
         }
     }
+
+    // 3. Check Stream (If it's a broadcast to multiple courses)
+    if (!$isEnrolled && !empty($lesson['stream_course_ids'])) {
+        $targets = explode(',', $lesson['stream_course_ids']);
+        // Check if any of the target courses match the student's subjects
+        $studentSubjectIds = [];
+        $studentSubjects = tmis_get('/student/subjects');
+        if ($studentSubjects && is_array($studentSubjects)) {
+            foreach ($studentSubjects as $s) $studentSubjectIds[] = (int)($s['id'] ?? 0);
+        }
+        
+        foreach ($targets as $t) {
+            if (in_array((int)trim($t), $studentSubjectIds)) {
+                $isEnrolled = true;
+                break;
+            }
+        }
+    }
     
-    if (!$isEnrolled && !$inSession && !$isStreamTarget) {
+    if (!$isEnrolled) {
         die("
             <div style='background:#0f172a; color:white; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;'>
                 <div style='background:#1e293b; padding:40px; border-radius:20px; text-align:center; border:1px solid rgba(255,255,255,0.1);'>

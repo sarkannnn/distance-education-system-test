@@ -80,45 +80,6 @@ try {
     } else {
         $dbLive = [];
     }
-// 3. Vebinarları yoxla (Fakültə/Kafedra üzrə)
-$webinarLive = [];
-try {
-    $studentFacultyName = $_SESSION['student_faculty'] ?? '';
-    $studentDeptName = $_SESSION['student_department'] ?? '';
-    
-    if (!empty($studentFacultyName)) {
-        $cleanFaculty = trim($studentFacultyName);
-        $cleanDept = trim($studentDeptName);
-        
-        // Fakültə və ya Kafedra adına görə ID-ləri tap (daha elastik axtarış)
-        $faculty = $db->fetch("SELECT id FROM webinar_faculties WHERE name LIKE ?", ["%$cleanFaculty%"]);
-        $dept = $db->fetch("SELECT id FROM webinar_departments WHERE name LIKE ?", ["%$cleanDept%"]);
-        
-        $facultyId = $faculty['id'] ?? 0;
-        $deptId = $dept['id'] ?? 0;
-        
-        if ($facultyId > 0 || $deptId > 0) {
-            $webinars = $db->fetchAll(
-                "SELECT w.id, w.title, 'Vebinar' as subject_name, wu.full_name as instructor_name, 
-                        w.scheduled_at as start_time, w.status, 100 as max_participants,
-                        'webinar' as record_type
-                 FROM webinars w
-                 JOIN webinar_users wu ON w.teacher_id = wu.id
-                 WHERE w.status IN ('live', 'starting-soon')
-                 AND (w.faculty_id = ? OR w.department_id = ?)",
-                [$facultyId, $deptId]
-            );
-            
-            foreach ($webinars as $w) {
-                $webinarLive[] = $w;
-            }
-        }
-    }
-} catch (Exception $e) {
-    error_log("Error fetching webinars: " . $e->getMessage());
-}
-
-$dbLive = array_merge($dbLive, $webinarLive);
 
     // TMIS nəticələri ilə birləşdir, dublikatları yoxla
     $existingIds = array_column($liveClasses, 'id');
@@ -154,6 +115,10 @@ $dbLive = array_merge($dbLive, $webinarLive);
 
     // Yenidən siyahıya çevir
     $liveClasses = array_values($courseMap);
+} catch (Exception $e) {
+    $liveClasses = [];
+}
+
 // =========================================================================
 //  2. GƏLƏCƏK DƏRSLƏR
 //     API: GET /api/student/schedule/upcoming
@@ -428,7 +393,7 @@ require_once 'includes/header.php';
                         <h2 style="font-size: 20px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px;">
                             Hazırda canlı dərs yoxdur</h2>
                         <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">
-                            Bu gün üçün nəzərdə tutulmuş canlı dərslər hələ başlamayıb və ya artıq yekunlaşıb.
+                            Bu gün üçün nəzördə tutulmuş canlı dərslər hələ başlamayıb və ya artıq yekunlaşıb.
                         </p>
                     </div>
                 <?php else: ?>
@@ -498,8 +463,7 @@ require_once 'includes/header.php';
                                 <!-- Right Section - Join Actions -->
                                 <div class="live-actions">
                                     <?php if ($liveClass['status'] === 'live'): ?>
-                                        <?php $joinUrl = ($liveClass['record_type'] === 'webinar') ? "../webinar/view.php?id=" . $liveClass['id'] : "live-view.php?id=" . $liveClass['id']; ?>
-                                        <a href="<?php echo $joinUrl; ?>"
+                                        <a href="live-view.php?id=<?php echo $liveClass['id']; ?>"
                                             class="btn btn-danger btn-lg btn-block">
                                             <i data-lucide="video"></i>
                                             Canlı Dərsə Qoşul
@@ -509,8 +473,7 @@ require_once 'includes/header.php';
                                             Hazırlaş (Tezliklə başlayır)
                                         </button>
                                     <?php else: ?>
-                                        <?php $joinUrl = ($liveClass['record_type'] === 'webinar') ? "../webinar/view.php?id=" . $liveClass['id'] : "live-view.php?id=" . $liveClass['id']; ?>
-                                        <a href="<?php echo $joinUrl; ?>"
+                                        <a href="live-view.php?id=<?php echo $liveClass['id']; ?>"
                                             class="btn btn-warning btn-lg btn-block">
                                             <i data-lucide="video"></i>
                                             Dərsə Qoşul

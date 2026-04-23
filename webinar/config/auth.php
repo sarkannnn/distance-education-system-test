@@ -6,7 +6,12 @@ ini_set('session.gc_maxlifetime', 28800);
 ini_set('session.cookie_lifetime', 28800);
 session_set_cookie_params(28800);
 
-session_name('DISTANT_T_SESSION_V4');
+// Detect session name (Student vs Teacher/Admin)
+$sessionName = 'DISTANT_T_SESSION_V4';
+if (isset($_COOKIE['DISTANT_STUDENT_SESSION']) && !isset($_COOKIE['DISTANT_T_SESSION_V4'])) {
+    $sessionName = 'DISTANT_STUDENT_SESSION';
+}
+session_name($sessionName);
 session_start();
 
 function logDebug($msg) {
@@ -19,13 +24,16 @@ class WebinarAuth
 {
     public static function isLoggedIn()
     {
-        if (isset($_SESSION['webinar_user_id'])) return true;
-        
-        // Portal users (Admin, Instructor, Student) should have access
-        if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'instructor', 'student'])) {
+        if (isset($_SESSION['webinar_user_id'])) {
             return true;
         }
-        
+
+        // Bridge check: If super user (admin) is logged into the main portal
+        // The main portal uses 'DISTANT_T_SESSION_V4' (handled by session_name in auth.php)
+        if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+            return true;
+        }
+
         return false;
     }
 
@@ -39,77 +47,36 @@ class WebinarAuth
 
         $db = WebinarDatabase::getInstance();
 
-        // Priority 1: User from main portal (Admin, Instructor, Student)
-        if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'instructor', 'student'])) {
-            $mainUserId = $_SESSION['user_id'] ?? 1;
+        // Priority 1: Bridge Main Portal Admin to Webinar Session
+        if (!isset($_SESSION['webinar_user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+            $fullName = $_SESSION['user_name'] ?? 'Super User';
             
-            // If student, return student object
-            if ($_SESSION['user_role'] === 'student') {
-                $studentFacultyName = $_SESSION['student_faculty'] ?? '';
-                $studentDeptName = $_SESSION['student_department'] ?? '';
-                
-                // Fetch IDs for student faculty/dept
-                $faculty = $db->fetch("SELECT id FROM webinar_faculties WHERE name = ?", [$studentFacultyName]);
-                $dept = $db->fetch("SELECT id FROM webinar_departments WHERE name = ?", [$studentDeptName]);
-                
-                return [
-                    'id' => $mainUserId,
-                    'username' => $_SESSION['tmis_username'] ?? 'student_' . $mainUserId,
-                    'full_name' => $_SESSION['user_name'] ?? 'Tələbə',
-                    'role' => 'student',
-                    'faculty_id' => $faculty['id'] ?? null,
-                    'department_id' => $dept['id'] ?? null,
-                    'faculty_name' => $studentFacultyName,
-                    'department_name' => $studentDeptName
-                ];
+            // Try to find an existing admin account in webinar_users
+            $user = $db->fetch("SELECT u.*, f.name as faculty_name 
+                               FROM webinar_users u 
+                               LEFT JOIN webinar_faculties f ON u.faculty_id = f.id 
+                               WHERE u.role = 'admin' AND (u.username = 'admin' OR u.full_name = ?)", [$fullName]);
+            
+            if (!$user) {
+                // Fallback to the first admin account (usually ID 1)
+                $user = $db->fetch("SELECT u.*, f.name as faculty_name 
+                                   FROM webinar_users u 
+                                   LEFT JOIN webinar_faculties f ON u.faculty_id = f.id 
+                                   WHERE u.role = 'admin' ORDER BY u.id ASC LIMIT 1");
             }
 
-            // Check if this user exists in webinar_users (for Admin/Instructor)
-            $webinarUser = $db->fetch("SELECT * FROM webinar_users WHERE id = ?", [$mainUserId]);
-            
-            if (!$webinarUser) {
-                logDebug("WebinarAuth: User {$mainUserId} ({$_SESSION['user_role']}) not found in webinar_users. Syncing...");
-                
-                // Get more info from session for sync
-                $role = ($_SESSION['user_role'] === 'admin') ? 'admin' : 'teacher';
-                $fullName = $_SESSION['user_name'] ?? ($_SESSION['user_role'] === 'admin' ? 'Super User' : 'Müəllim');
-                
-                try {
-                    $db->insert('webinar_users', [
-                        'id' => $mainUserId,
-                        'username' => strtolower($role) . '_' . $mainUserId,
-                        'password_hash' => '$2y$10$O0NSKsQUtpcJSG0OsVYPQ.j0Z3J9rIK3iGdglkFGdJypS5Z6ixJdK',
-                        'full_name' => $fullName,
-                        'role' => $role,
-                        'faculty_id' => null, 
-                        'is_active' => 1
-                    ]);
-                    logDebug("WebinarAuth: User {$mainUserId} synced successfully.");
-                } catch (Exception $e) {
-                    logDebug("WebinarAuth: Failed to sync User to webinar_users: " . $e->getMessage());
-                }
-            }
-
-            if ($_SESSION['user_role'] === 'admin') {
-                return [
-                    'id' => $mainUserId,
-                    'username' => 'admin',
-                    'full_name' => $_SESSION['user_name'] ?? 'Super User',
-                    'role' => 'admin',
-                    'faculty_id' => null,
-                    'faculty_slug' => 'all',
-                    'faculty_name' => 'Bütün Kafedralar'
-                ];
+            if ($user) {
+                logDebug("Bridging Main Portal Admin to Webinar Admin: " . $user['username']);
+                $_SESSION['webinar_user_id'] = $user['id'];
+                $_SESSION['webinar_username'] = $user['username'];
+                // Prioritize the name from the main portal session if available
+                $_SESSION['webinar_full_name'] = $_SESSION['user_name'] ?? $user['full_name'];
+                $_SESSION['webinar_role'] = $user['role'];
+                $_SESSION['webinar_faculty_id'] = $user['faculty_id'];
+                $_SESSION['webinar_faculty_name'] = $user['faculty_name'] ?? '';
+                $_SESSION['webinar_department_id'] = $user['department_id'] ?? null;
             } else {
-                // Return teacher data (faculty/department handled by session later or defaults)
-                return [
-                    'id' => $mainUserId,
-                    'username' => 'teacher',
-                    'full_name' => $_SESSION['user_name'] ?? 'Müəllim',
-                    'role' => 'teacher',
-                    'faculty_id' => $_SESSION['teacher_faculty_id'] ?? null,
-                    'department_id' => $_SESSION['teacher_department_id'] ?? null
-                ];
+                logDebug("Bridge failed: No admin account found in webinar_users.");
             }
         }
 
@@ -121,8 +88,8 @@ class WebinarAuth
                 'full_name' => $_SESSION['webinar_full_name'],
                 'role' => $_SESSION['webinar_role'],
                 'faculty_id' => $_SESSION['webinar_faculty_id'],
-                'faculty_slug' => $_SESSION['webinar_faculty_slug'],
-                'faculty_name' => $_SESSION['webinar_faculty_name'],
+                'faculty_slug' => $_SESSION['webinar_faculty_slug'] ?? null,
+                'faculty_name' => $_SESSION['webinar_faculty_name'] ?? null,
                 'department_id' => $_SESSION['webinar_department_id'] ?? null,
                 'department_name' => $_SESSION['webinar_department_name'] ?? null
             ];
@@ -134,6 +101,13 @@ class WebinarAuth
     public static function requireLogin()
     {
         if (!self::isLoggedIn()) {
+            header('Location: login.php');
+            exit;
+        }
+
+        // Ensure current user session is populated (triggering bridge if needed)
+        $user = self::getCurrentUser();
+        if (!$user) {
             header('Location: login.php');
             exit;
         }

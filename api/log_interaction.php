@@ -18,9 +18,9 @@ $input = json_decode(file_get_contents('php://input'), true);
 $portalHint = $input['portal'] ?? 'guest';
 
 // Handle Session Detection
-$sessionNames = ['DISTANT_T_SESSION_V4', 'DISTANT_STUDENT_SESSION'];
+$sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_STUDENT_SESSION'];
 if ($portalHint === 'student') {
-    $sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_T_SESSION_V4'];
+    $sessionNames = ['DISTANT_STUDENT_SESSION', 'DISTANT_STUDENT_SESSION'];
 }
 
 $sessionFound = false;
