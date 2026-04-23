@@ -76,10 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $mode = $isFirstChunk ? LOCK_EX : (FILE_APPEND | LOCK_EX);
     if (file_put_contents($filePath, $chunkData, $mode)) {
-        // Update DB if not already set
+        // Ensure recording_path is always set in DB
         try {
             $db = WebinarDatabase::getInstance();
-            $db->update('webinars', ['recording_path' => $fileName], 'id = ? AND (recording_path IS NULL OR recording_path = "")', [$webinarId]);
+            $existing = $db->fetch("SELECT recording_path FROM webinars WHERE id = ?", [$webinarId]);
+            if (!$existing || empty($existing['recording_path'])) {
+                $db->update('webinars', ['recording_path' => $fileName], 'id = ?', [$webinarId]);
+            }
         } catch (Exception $e) {
             // Silently ignore DB errors if file was saved
         }

@@ -3,6 +3,7 @@ require_once '../config/auth.php';
 require_once '../config/database.php';
 
 header('Content-Type: application/json');
+set_time_limit(300); // Allow up to 5 minutes for ffmpeg processing
 
 if (!WebinarAuth::isLoggedIn() || $_SESSION['webinar_role'] !== 'teacher') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -35,12 +36,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // --- WebM EBML Patching Logic ---
-    // This adds the 'Duration' element to the WebM header so browsers can seek.
-    if (strpos($mimeType, 'webm') !== false) {
-        if (filesize($filePath) > 1024) { // Only patch if file has data
+    $method = 'none';
+
+    // --- Strategy 1: FFmpeg Remux (BEST — adds Cues, fixes Duration, enables seeking) ---
+    if (strpos($mimeType, 'webm') !== false && filesize($filePath) > 1024) {
+        $ffmpegPath = findFFmpeg();
+        
+        if ($ffmpegPath) {
+            $tempOut = $filePath . '.remuxed.webm';
+            // -c copy = no re-encoding (fast), just repackaging with proper metadata
+            $cmd = escapeshellarg($ffmpegPath) . ' -y -i ' . escapeshellarg(realpath($filePath)) 
+                 . ' -c copy -fflags +genpts ' . escapeshellarg($tempOut) . ' 2>&1';
+            
+            exec($cmd, $output, $returnCode);
+            
+            if ($returnCode === 0 && file_exists($tempOut) && filesize($tempOut) > 1024) {
+                // Replace original with remuxed version
+                unlink($filePath);
+                rename($tempOut, $filePath);
+                $method = 'ffmpeg';
+            } else {
+                // FFmpeg failed — cleanup and fall through to EBML patch
+                if (file_exists($tempOut)) unlink($tempOut);
+                error_log("FFmpeg remux failed for webinar $webinarId: " . implode("\n", $output));
+                
+                // Fallback to EBML patch
+                try {
+                    patchWebmDuration($filePath, $durationMs);
+                    $method = 'ebml_patch';
+                } catch (Exception $e) {
+                    error_log("EBML Patch also failed for webinar $webinarId: " . $e->getMessage());
+                }
+            }
+        } else {
+            // No FFmpeg — use EBML patch
             try {
                 patchWebmDuration($filePath, $durationMs);
+                $method = 'ebml_patch';
             } catch (Exception $e) {
                 error_log("WebM Patching Error for Webinar $webinarId: " . $e->getMessage());
             }
@@ -49,26 +81,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     echo json_encode([
         'success' => true,
-        'message' => 'Recording finalized and optimized',
-        'duration' => $durationMs
+        'message' => 'Recording finalized',
+        'method' => $method,
+        'duration' => $durationMs,
+        'file_size' => filesize($filePath)
     ]);
 }
 
 /**
- * Patches a WebM file to include duration metadata.
- * Rewrites the file with a corrected EBML Segment Info block.
+ * Find ffmpeg binary in common locations
+ */
+function findFFmpeg()
+{
+    // Check if ffmpeg is in PATH
+    $whereCmd = (PHP_OS_FAMILY === 'Windows') ? 'where ffmpeg 2>NUL' : 'which ffmpeg 2>/dev/null';
+    $path = trim(shell_exec($whereCmd) ?? '');
+    if ($path && file_exists(explode("\n", $path)[0])) {
+        return explode("\n", $path)[0];
+    }
+
+    // Common locations
+    $locations = [
+        'C:\\ffmpeg\\bin\\ffmpeg.exe',
+        'C:\\laragon\\bin\\ffmpeg\\ffmpeg.exe',
+        '/usr/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
+    ];
+
+    foreach ($locations as $loc) {
+        if (file_exists($loc)) return $loc;
+    }
+
+    return null;
+}
+
+/**
+ * Fallback: Patches a WebM file to include duration metadata.
+ * WebM Duration is stored in MILLISECONDS (not seconds) as per Matroska spec
+ * when TimecodeScale is the default 1,000,000 nanoseconds.
  */
 function patchWebmDuration($filePath, $durationMs)
 {
-    // WebM Duration float is often expected in seconds by browsers, 
-    // despite the Matroska spec mentioning TimecodeScale units.
-    $durationSeconds = (float)($durationMs / 1000.0);
+    // WebM/Matroska Duration field = duration in TimecodeScale units
+    // Default TimecodeScale = 1,000,000 ns = 1ms
+    // So Duration should be in MILLISECONDS (float64)
+    $durationValue = (float) $durationMs;
 
     $handle = fopen($filePath, 'r+b');
     if (!$handle) return;
 
-    // Read the first 128KB for header analysis (slightly more than before for safety)
-    $bufferSize = 131072;
+    $bufferSize = min(filesize($filePath), 262144);
     $header = fread($handle, $bufferSize);
 
     // Segment Info ID: 15 49 A9 66
@@ -83,44 +145,48 @@ function patchWebmDuration($filePath, $durationMs)
     // Determine Info size (EBML VINT)
     $sizeByte = ord($header[$pos + 4]);
     $sizeLen = 0;
-    if ($sizeByte & 0x80) $sizeLen = 1;
-    else if ($sizeByte & 0x40) $sizeLen = 2;
-    else if ($sizeByte & 0x20) $sizeLen = 3;
-    else if ($sizeByte & 0x10) $sizeLen = 4;
+    for ($bit = 7; $bit >= 0; $bit--) {
+        if ($sizeByte & (1 << $bit)) {
+            $sizeLen = 8 - $bit;
+            break;
+        }
+    }
 
-    if ($sizeLen === 0) {
+    if ($sizeLen === 0 || $sizeLen > 4) {
         fclose($handle);
         return;
     }
 
     $infoBodyStart = $pos + 4 + $sizeLen;
-    
-    // Simple VINT decode for sizes up to 4 bytes
+
     $infoSize = $sizeByte & (0xFF >> $sizeLen);
     for ($i = 1; $i < $sizeLen; $i++) {
         $infoSize = ($infoSize << 8) | ord($header[$pos + 4 + $i]);
     }
 
-    // Verify if we have the whole Info block in our buffer
     if ($infoBodyStart + $infoSize > $bufferSize) {
         fclose($handle);
-        return; // Header too large for this simple patcher
+        return;
     }
 
-    // Check if Duration already exists inside Info: 44 89
+    // Check if Duration already exists: 44 89
     if (strpos(substr($header, $infoBodyStart, $infoSize), "\x44\x89") !== false) {
         fclose($handle);
-        return; // Already patched or present
+        return;
     }
 
-    // Construct Duration element: 44 89 (ID) + 88 (Size: 8 bytes float) + [8 bytes float BE]
-    // Using 'G' for 64-bit float Big-Endian (available in PHP 7.2+)
-    $durationBuf = "\x44\x89\x88" . pack('G', $durationSeconds);
-
-    // Update Info Size in the result
+    // Duration element: 44 89 (ID) + 88 (Size=8) + float64 BE
+    $durationBuf = "\x44\x89\x88" . pack('G', $durationValue);
     $newInfoSize = $infoSize + strlen($durationBuf);
-    
-    // Construct new VINT for Size (using same length as original for simplicity)
+
+    // VINT overflow check
+    $maxForLen = (1 << (7 * $sizeLen)) - 2;
+    if ($newInfoSize > $maxForLen) {
+        fclose($handle);
+        error_log("WebM Patch: VINT overflow for $filePath");
+        return;
+    }
+
     $newSizeVint = "";
     $tempSize = $newInfoSize;
     for ($i = $sizeLen - 1; $i >= 0; $i--) {
@@ -130,31 +196,33 @@ function patchWebmDuration($filePath, $durationMs)
         $tempSize >>= 8;
     }
 
-    // Reconstruct the file safely
     $tempPath = $filePath . '.tmp';
     $tempHandle = fopen($tempPath, 'wb');
-
-    // Part prior to Size
-    fwrite($tempHandle, substr($header, 0, $pos + 4));
-    // New Size VINT
-    fwrite($tempHandle, $newSizeVint);
-    // Info Body
-    fwrite($tempHandle, substr($header, $infoBodyStart, $infoSize));
-    // New Duration Element
-    fwrite($tempHandle, $durationBuf);
-    // Everything else in buffer
-    fwrite($tempHandle, substr($header, $infoBodyStart + $infoSize));
-
-    // Pipe the remainder of the file
-    fseek($handle, strlen($header));
-    while (!feof($handle)) {
-        fwrite($tempHandle, fread($handle, 65536));
+    if (!$tempHandle) {
+        fclose($handle);
+        return;
     }
 
-    fclose($handle);
-    fclose($tempHandle);
+    try {
+        fwrite($tempHandle, substr($header, 0, $pos + 4));
+        fwrite($tempHandle, $newSizeVint);
+        fwrite($tempHandle, substr($header, $infoBodyStart, $infoSize));
+        fwrite($tempHandle, $durationBuf);
+        fwrite($tempHandle, substr($header, $infoBodyStart + $infoSize));
 
-    // Overwrite original
-    rename($tempPath, $filePath);
+        fseek($handle, strlen($header));
+        while (!feof($handle)) {
+            fwrite($tempHandle, fread($handle, 65536));
+        }
+
+        fclose($handle);
+        fclose($tempHandle);
+        rename($tempPath, $filePath);
+    } catch (Exception $e) {
+        fclose($handle);
+        fclose($tempHandle);
+        if (file_exists($tempPath)) unlink($tempPath);
+        throw $e;
+    }
 }
 ?>

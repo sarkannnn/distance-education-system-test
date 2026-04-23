@@ -1,4 +1,4 @@
-/* Webinar Studio Premium CSS - Responsive Edition */
+/* Webinar Studio Premium CSS - Full Mobile Responsive Edition */
 :root {
     --bg-dark: #060f23;
     --card-bg: rgba(10, 31, 68, 0.7);
@@ -199,13 +199,21 @@ body {
     transform: scale(1.1);
 }
 
-/* 📱 Mobile & Tablet Responsive Queries (Strict Aggressive Fix) */
+/* ============================================================
+   📱 TABLET RESPONSIVE (max-width: 1024px)
+   Both studio.php (teacher) and view.php (student)
+   ============================================================ */
 @media (max-width: 1024px) {
+
+    :root {
+        --header-h: 56px;
+    }
 
     body,
     html {
         overflow: hidden !important;
         height: 100vh !important;
+        height: 100dvh !important;
         position: fixed;
         width: 100%;
     }
@@ -215,16 +223,16 @@ body {
         display: flex !important;
         flex-direction: column !important;
         height: calc(100vh - 56px) !important;
+        height: calc(100dvh - 56px) !important;
         background: #020617 !important;
         width: 100% !important;
         overflow: hidden !important;
     }
 
-    /* Hide Desktop Sidebars and Overlays */
+    /* === SIDEBAR: Hide by default, slide-up drawer on toggle === */
     aside,
     #studioAside {
         display: none !important;
-        /* Hide by default on mobile */
     }
 
     #studioAside.mobile-open {
@@ -234,14 +242,17 @@ body {
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
-        height: 85vh !important;
+        height: 80vh !important;
+        height: 80dvh !important;
         z-index: 2000 !important;
-        border-radius: 32px 32px 0 0;
+        border-radius: 24px 24px 0 0 !important;
         background: #0a1f44 !important;
         animation: mobileSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        flex-direction: column !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
-    /* Video Section: Dark Empty Void with Centered Video */
+    /* === VIDEO SECTION: Full area === */
     .video-section {
         flex: 1 !important;
         display: flex !important;
@@ -262,6 +273,7 @@ body {
         border-radius: 0 !important;
         box-shadow: none !important;
         background: transparent !important;
+        border: none !important;
     }
 
     .main-video-container video,
@@ -270,33 +282,190 @@ body {
         max-height: 100% !important;
     }
 
-    /* Mobile Controls Adaptation */
+    /* === CONTROL BAR: Responsive bottom bar === */
     .control-bar {
-        bottom: max(20px, env(safe-area-inset-bottom, 20px)) !important;
+        bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
         width: auto !important;
-        max-width: calc(100% - 24px) !important;
-        justify-content: space-evenly !important;
-        padding: 10px 20px !important;
+        max-width: calc(100% - 16px) !important;
+        justify-content: center !important;
+        padding: 8px 12px !important;
         transform: translateX(-50%) !important;
-        background: rgba(10, 31, 68, 0.92) !important;
+        background: rgba(10, 31, 68, 0.95) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
         border-radius: 100px !important;
         gap: 4px !important;
         z-index: 200 !important;
-        box-shadow: 0 4px 30px rgba(0,0,0,0.6) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6) !important;
     }
 
     .btn-ctrl {
-        width: 52px !important;
-        height: 52px !important;
-        min-width: 52px !important;
-        min-height: 52px !important;
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        flex-shrink: 0 !important;
     }
 
     .btn-ctrl i {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    .btn-ctrl:hover {
+        transform: none !important;
+    }
+
+    /* Control label text */
+    .control-bar .flex.flex-col span {
+        font-size: 7px !important;
+        letter-spacing: 0.05em !important;
+    }
+
+    /* Hide dividers on mobile */
+    .control-bar .w-px {
+        display: none !important;
+    }
+
+    /* === HEADER: Compact mobile header === */
+    header {
+        height: 56px !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+    }
+
+    /* Hide desktop header info */
+    header .hidden.lg\:flex,
+    header>div:first-child>div:not(:first-child) {
+        display: none !important;
+    }
+
+    /* Keep header logo small */
+    header>div:first-child .w-10 {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+    }
+
+    /* === PRODUCTION START OVERLAY: Responsive === */
+    #startProductionOverlay {
+        padding: 20px !important;
+    }
+
+    #startProductionOverlay h2 {
+        font-size: 1.5rem !important;
+    }
+
+    #startProductionOverlay p {
+        font-size: 0.875rem !important;
+    }
+
+    #startProductionOverlay button {
+        width: 100% !important;
+        max-width: 300px !important;
+    }
+
+    /* === LIVE BADGE: Compact on mobile === */
+    .live-badge {
+        transform: scale(0.85);
+        transform-origin: left top;
+        left: 8px !important;
+        top: 8px !important;
+        padding: 4px 8px !important;
+        font-size: 9px !important;
+    }
+
+    /* === WHITEBOARD TOOLBAR: Bottom horizontal on mobile === */
+    #wbToolbarWrapper {
+        left: 50% !important;
+        top: auto !important;
+        bottom: 80px !important;
+        transform: translateX(-50%) scale(0.75) !important;
+        flex-direction: column !important;
+    }
+
+    #wbToolbarContent {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        max-width: 90vw !important;
+        max-height: 50vh !important;
+        overflow-y: auto !important;
+        padding: 8px !important;
+        gap: 4px !important;
+        border-radius: 1.5rem !important;
+    }
+
+    /* WB navigation module horizontal */
+    #wbToolbarContent>div:first-child {
+        flex-direction: row !important;
+    }
+
+    /* WB tools grid */
+    #wbToolbarContent .grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 4px !important;
+    }
+
+    #wbToolbarContent .grid .col-span-2 {
+        grid-column: span 4 !important;
+    }
+
+    /* WB tool buttons smaller */
+    .wb-tool-btn,
+    #wbToolbarContent button {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+    }
+
+    /* WB color buttons */
+    .wb-color-btn {
         width: 22px !important;
         height: 22px !important;
+    }
+
+    /* === BOTTOM INFO BADGE: Reposition on mobile === */
+    .video-section .absolute.bottom-10.left-10 {
+        bottom: 70px !important;
+        left: 8px !important;
+    }
+
+    .video-section .absolute.bottom-10.left-10 .glass-panel {
+        padding: 4px 10px !important;
+        font-size: 8px !important;
+        border-radius: 12px !important;
+    }
+
+    /* === IMAGE PLACEMENT OVERLAY: Touch-friendly === */
+    #imagePlacementOverlay button {
+        padding: 8px 16px !important;
+        font-size: 11px !important;
+    }
+
+    /* === STUDENT CONTROLS: Always visible when active === */
+    #studentControls {
+        bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+    }
+
+    /* === MOBILE LOCAL STAGE PiP: Bigger on tablet === */
+    #mobileLocalStage {
+        width: 25vw !important;
+        max-width: 150px !important;
+        top: 12px !important;
+        right: 12px !important;
+    }
+
+    /* === ANNOUNCEMENT MODAL: Responsive === */
+    #announcementModal>div {
+        max-width: calc(100% - 24px) !important;
+        padding: 24px !important;
+        border-radius: 1.5rem !important;
+    }
+
+    /* === UNMUTE OVERLAY: Responsive === */
+    #unmuteOverlay>div {
+        padding: 16px 24px !important;
+        font-size: 14px !important;
     }
 
     @keyframes mobileSlideUp {
@@ -310,28 +479,320 @@ body {
     }
 }
 
+/* ============================================================
+   📱 PHONE RESPONSIVE (max-width: 640px)
+   ============================================================ */
 @media (max-width: 640px) {
     header {
-        height: 56px !important;
-        background: #111a2e !important;
-        padding: 0 12px !important;
+        height: 48px !important;
+        background: #0a1633 !important;
+        padding: 0 8px !important;
+        gap: 4px !important;
     }
 
+    .studio-grid {
+        height: calc(100vh - 48px) !important;
+        height: calc(100dvh - 48px) !important;
+    }
+
+    /* Header title: single line, truncated */
+    header h1 {
+        font-size: 11px !important;
+        max-width: 120px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    /* Header subtitle hidden */
+    header p {
+        display: none !important;
+    }
+
+    /* Header logo smaller */
+    header>div:first-child .w-10,
+    header>div:first-child .w-8 {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+    }
+
+    header>div:first-child .w-10 i,
+    header>div:first-child .w-8 i {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /* "Bitir" button: compact on phone */
+    header button[onclick="endWebinar()"] {
+        padding: 6px 12px !important;
+        font-size: 9px !important;
+        border-radius: 10px !important;
+    }
+
+    /* Mobile panel toggle: smaller */
+    header .flex.bg-white\/5 {
+        gap: 0 !important;
+    }
+
+    header .flex.bg-white\/5 button {
+        font-size: 9px !important;
+        padding: 4px 8px !important;
+    }
+
+    /* Join Stage button: icon only on very small screens */
+    #btnJoinStage span {
+        display: none !important;
+    }
+
+    #btnJoinStage {
+        padding: 6px 10px !important;
+    }
+
+    /* Connection status: dot only */
+    #connectionStatus span {
+        display: none !important;
+    }
+
+    #connectionStatus {
+        width: 28px !important;
+        height: 28px !important;
+        padding: 0 !important;
+    }
+
+    /* LIVE badge: even smaller */
     .live-badge {
-        transform: scale(0.85);
-        transform-origin: left top;
-        left: 10px !important;
-        top: 15px !important;
+        transform: scale(0.75) !important;
+        left: 4px !important;
+        top: 4px !important;
     }
 
-    header div.hidden.lg\:flex {
+    /* Control bar: tighter on phone */
+    .control-bar {
+        padding: 6px 8px !important;
+        gap: 2px !important;
+        bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
+    }
+
+    .btn-ctrl {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
+    }
+
+    .btn-ctrl i {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    /* Control labels: hide on very small */
+    .control-bar .flex.flex-col span:not(:first-child) {
+        display: none !important;
+    }
+
+    /* Sidebar drawer: taller on phone */
+    #studioAside.mobile-open {
+        height: 90vh !important;
+        height: 90dvh !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* Chat input: compact */
+    #studioAside .p-6 {
+        padding: 12px !important;
+    }
+
+    #studioAside input[type="text"] {
+        padding: 10px 48px 10px 14px !important;
+        font-size: 13px !important;
+        border-radius: 14px !important;
+    }
+
+    /* Chat messages: compact */
+    #chatMessages {
+        padding: 8px !important;
+    }
+
+    #chatMessages>div {
+        padding: 10px !important;
+        border-radius: 14px !important;
+    }
+
+    /* Production overlay: phone optimized */
+    #startProductionOverlay {
+        padding: 16px !important;
+    }
+
+    #startProductionOverlay .w-24 {
+        width: 64px !important;
+        height: 64px !important;
+    }
+
+    #startProductionOverlay .w-24 i {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    #startProductionOverlay h2 {
+        font-size: 1.25rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    #startProductionOverlay p {
+        font-size: 0.8rem !important;
+        margin-bottom: 24px !important;
+    }
+
+    /* Whiteboard toolbar: very compact on phone */
+    #wbToolbarWrapper {
+        bottom: 60px !important;
+        transform: translateX(-50%) scale(0.65) !important;
+    }
+
+    /* Mobile local stage PiP */
+    #mobileLocalStage {
+        width: 28vw !important;
+        max-width: 100px !important;
+        top: 8px !important;
+        right: 8px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Department badge: hide on small phones */
+    .video-section .absolute.bottom-10.left-10 {
+        display: none !important;
+    }
+
+    /* Announcement modal */
+    #announcementModal>div {
+        padding: 16px !important;
+        border-radius: 1.2rem !important;
+    }
+
+    #announcementModal h3 {
+        font-size: 1rem !important;
+    }
+
+    #announcementModal .w-20 {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    /* PiP Draggable: responsive on mobile */
+    #pipDraggable {
+        border-radius: 12px !important;
+        border-width: 1px !important;
+    }
+}
+
+/* ============================================================
+   📱 VERY SMALL PHONES (max-width: 380px)
+   ============================================================ */
+@media (max-width: 380px) {
+    .btn-ctrl {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+    }
+
+    .btn-ctrl i {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .control-bar {
+        padding: 5px 6px !important;
+        gap: 1px !important;
+    }
+
+    header h1 {
+        max-width: 80px !important;
+        font-size: 10px !important;
+    }
+
+    /* Bitir button even more compact */
+    header button[onclick="endWebinar()"] {
+        padding: 4px 8px !important;
+        font-size: 8px !important;
+    }
+}
+
+/* ============================================================
+   🖥️ DESKTOP ONLY RULES
+   ============================================================ */
+@media (min-width: 1025px) {
+    #mobileLocalStage {
         display: none !important;
     }
 }
 
-/* Hide Mobile PiP on Desktop */
-@media (min-width: 1025px) {
+/* ============================================================
+   🔄 LANDSCAPE PHONE (short height)
+   ============================================================ */
+@media (max-height: 500px) and (max-width: 1024px) {
+    header {
+        height: 40px !important;
+    }
+
+    .studio-grid {
+        height: calc(100vh - 40px) !important;
+        height: calc(100dvh - 40px) !important;
+    }
+
+    .control-bar {
+        bottom: 4px !important;
+        padding: 4px 8px !important;
+    }
+
+    .btn-ctrl {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+    }
+
+    .live-badge {
+        transform: scale(0.7) !important;
+    }
+
     #mobileLocalStage {
-        display: none !important;
+        width: 15vw !important;
+        max-width: 80px !important;
+    }
+
+    #studioAside.mobile-open {
+        height: 95vh !important;
+    }
+}
+
+/* ============================================================
+   🎬 PLAY PAGE RESPONSIVE (play.php)
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Play page video container */
+    .max-w-5xl {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .max-w-5xl>div:nth-child(2) {
+        border-radius: 16px !important;
+    }
+
+    .max-w-5xl video {
+        border-radius: 0 !important;
+    }
+
+    /* Play page info card */
+    .max-w-5xl>div:last-child {
+        border-radius: 16px !important;
+        padding: 16px !important;
+    }
+
+    .max-w-5xl h2 {
+        font-size: 1.25rem !important;
     }
 }

@@ -89,40 +89,39 @@ $pageTitle = "Studio: " . $webinar['title'];
     </div>
 
     <header
-        class="h-14 lg:h-16 border-b border-white/5 bg-[#0a1f44]/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 z-50">
-        <!-- Desktop Header Title -->
-        <div class="hidden lg:flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <i data-lucide="video" class="w-6 h-6 text-emerald-400"></i>
+        class="h-14 lg:h-16 border-b border-white/5 bg-[#0a1f44]/80 backdrop-blur-md flex items-center justify-between px-2 sm:px-4 lg:px-6 z-50 gap-1 sm:gap-2">
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/20 flex shrink-0 items-center justify-center">
+                <i data-lucide="video" class="w-4 h-4 sm:w-6 sm:h-6 text-emerald-400"></i>
             </div>
-            <div>
-                <h1 class="text-sm font-bold leading-none"><?php echo e($webinar['title']); ?></h1>
-                <p class="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">
+            <div class="hidden sm:block min-w-0">
+                <h1 class="text-xs sm:text-sm font-bold leading-none truncate max-w-[140px] lg:max-w-none"><?php echo e($webinar['title']); ?></h1>
+                <p class="text-[9px] sm:text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5 truncate">
                     <?php echo e($webinar['dept_name']); ?></p>
             </div>
         </div>
 
-        <!-- Mobile Header (Legacy Style) -->
-        <div class="flex lg:hidden items-center">
-            <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
-        </div>
-
-        <div class="flex lg:hidden items-center justify-center">
-            <div class="flex bg-white/5 border border-white/10 rounded-full p-1 gap-1">
+        <!-- Mobile: Panel Toggle -->
+        <div class="flex lg:hidden items-center justify-center shrink-0">
+            <div class="flex bg-white/5 border border-white/10 rounded-full p-0.5 gap-0.5">
                 <button onclick="toggleMobilePanel('left')"
-                    class="px-3 py-1.5 rounded-full text-[10px] font-bold text-white/60 hover:text-white transition-all flex items-center gap-1.5">
-                    <i data-lucide="users" class="w-3 h-3"></i> İştirakçılar
+                    class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold text-white/60 hover:text-white transition-all flex items-center gap-1">
+                    <i data-lucide="users" class="w-3 h-3"></i>
+                    <span class="hidden min-[420px]:inline">Qoşulanlar</span>
                 </button>
                 <button onclick="toggleMobilePanel('right')"
-                    class="px-3 py-1.5 rounded-full bg-white/10 text-[10px] font-bold text-white transition-all flex items-center gap-1.5">
-                    <i data-lucide="message-square" class="w-3 h-3"></i> Çat
+                    class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-white/10 text-[9px] sm:text-[10px] font-bold text-white transition-all flex items-center gap-1">
+                    <i data-lucide="message-square" class="w-3 h-3"></i>
+                    <span class="hidden min-[420px]:inline">Çat</span>
                 </button>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <!-- End Button -->
+        <div class="flex items-center shrink-0">
             <button onclick="endWebinar()"
-                class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                class="px-3 py-1.5 sm:px-5 sm:py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap active:scale-95 shadow-lg shadow-rose-500/20">
                 Bitir
             </button>
         </div>
@@ -135,8 +134,9 @@ $pageTitle = "Studio: " . $webinar['title'];
                 <canvas id="outputCanvas" class="w-full h-full object-cover bg-black mirrored-canvas"></canvas>
                 
                 <!-- Draggable PiP Overlay (Studio UI Only) -->
-                <div id="pipDraggable" class="absolute cursor-move border-2 border-dashed border-emerald-500/50 bg-emerald-500/10 hidden z-50 transition-[box-shadow,border-color] hover:border-emerald-500 hover:shadow-2xl active:scale-[1.02]">
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div id="pipDraggable" class="absolute cursor-move border-2 border-dashed border-emerald-500/50 bg-emerald-500/10 hidden z-50 transition-[box-shadow,border-color] hover:border-emerald-500 hover:shadow-2xl active:scale-[1.02] rounded-2xl overflow-hidden">
+                    <video id="pipPreview" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover scale-x-[-1]"></video>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                         <i data-lucide="move" class="w-6 h-6 text-emerald-400 opacity-40"></i>
                     </div>
                     <div class="absolute -top-6 left-0 bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-widest rounded-t-lg">KAMERA PƏNCƏRƏSİ</div>
@@ -571,7 +571,8 @@ $pageTitle = "Studio: " . $webinar['title'];
         let recordedChunks = [];
         let recordingStartTime = 0;
         let recordingMimeType = 'video/webm;codecs=vp8,opus';
-        let isFirstChunkRecorded = true; // Tracks if this is the start of a recorder session
+        let isFirstChunkRecorded = true;
+        let isInitDone = false; // Guard: prevent double init()
 
         function getBestMimeType() {
             const types = [
@@ -588,14 +589,18 @@ $pageTitle = "Studio: " . $webinar['title'];
 
         function startRecording() {
             if (!stream) return;
-            isFirstChunkRecorded = true; // New recorder session
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                LOG('⚠️ Recorder artıq aktiv, təkrar başladılmadı.', '#f59e0b');
+                return;
+            }
+            isFirstChunkRecorded = true;
             try {
                 const bestType = getBestMimeType();
                 recordingMimeType = bestType;
 
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: bestType,
-                    videoBitsPerSecond: 3000000 // 3.0 Mbps: Optimal balance for 1080p stability
+                    videoBitsPerSecond: 3000000
                 });
 
                 mediaRecorder.ondataavailable = (event) => {
@@ -605,18 +610,17 @@ $pageTitle = "Studio: " . $webinar['title'];
                 };
 
                 recordingStartTime = Date.now();
-                mediaRecorder.start(30000); // 30 seconds interval to reduce stuttering
+                mediaRecorder.start(10000); // 10 saniyə — daha az data itirilir
                 LOG(`🔴 Video qeydiyyat başladı (${bestType.split(';')[0]})`, "#ef4444");
             } catch (e) {
                 console.warn("MediaRecorder Error:", e);
-                // Fallback
                 try {
                     mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.ondataavailable = (event) => {
                         if (event.data.size > 0) flushChunk(event.data);
                     };
                     recordingStartTime = Date.now();
-                    mediaRecorder.start(30000);
+                    mediaRecorder.start(10000);
                     LOG("🔴 Video qeydiyyat başladı (fallback).", "#ef4444");
                 } catch (err) {
                     LOG("❌ Qeydiyyat mümkün olmadı.", "red");
@@ -632,85 +636,116 @@ $pageTitle = "Studio: " . $webinar['title'];
             const durationMs = Date.now() - recordingStartTime;
             LOG("🏁 Yayım yekunlaşdırılır, video emal edilir...", "#60a5fa");
 
-            return new Promise((resolve) => {
-                mediaRecorder.onstop = async () => {
-                    // Wait for the very last flush triggered by stop()
-                    await lastFlushPromise;
+            // Timeout protection — 30 saniyədən çox gözləmirik
+            const timeoutPromise = new Promise((resolve) => {
+                setTimeout(() => {
+                    LOG("⚠️ Yekunlaşdırma vaxtı keçdi, davam edilir...", "#f59e0b");
+                    resolve();
+                }, 30000);
+            });
 
+            const recordingPromise = new Promise((resolve) => {
+                try {
+                    mediaRecorder.onstop = async () => {
+                        try {
+                            // Son chunk-ın yüklənməsini gözlə (max 15 saniyə)
+                            await Promise.race([
+                                lastFlushPromise,
+                                new Promise(r => setTimeout(r, 15000))
+                            ]);
+
+                            const formData = new FormData();
+                            formData.append('webinar_id', wID);
+                            formData.append('duration_ms', durationMs);
+                            formData.append('mime_type', recordingMimeType);
+
+                            const resp = await fetch('api/finalize_recording.php', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const data = await resp.json();
+                            if (data.success) {
+                                LOG("✅ Video uğurla arxivləşdirildi.", "#10b981");
+                            } else {
+                                LOG("⚠️ Arxivləşmə xəbərdarlığı: " + (data.message || ''), "#f59e0b");
+                            }
+                        } catch (err) {
+                            console.error("Finalize error:", err);
+                            LOG("⚠️ Arxivləşmə xətası, amma dərs bitirilir.", "#f59e0b");
+                        }
+                        resolve();
+                    };
+                    mediaRecorder.stop();
+                } catch (stopErr) {
+                    console.error("MediaRecorder stop error:", stopErr);
+                    resolve();
+                }
+            });
+
+            // Hansı birinci bitərsə — ya recording tamamlanır, ya timeout
+            await Promise.race([recordingPromise, timeoutPromise]);
+        }
+
+        function flushChunk(blob) {
+            const isFirst = isFirstChunkRecorded;
+            if (isFirstChunkRecorded) isFirstChunkRecorded = false;
+
+            // Chain promises — hər chunk əvvəlki bitəndən sonra yüklənir (ardıcıllıq qorunur)
+            lastFlushPromise = lastFlushPromise.then(async () => {
+                let lastErr = null;
+                for (let attempt = 0; attempt < 3; attempt++) {
                     try {
                         const formData = new FormData();
                         formData.append('webinar_id', wID);
-                        formData.append('duration_ms', durationMs);
+                        formData.append('video_blob', blob);
                         formData.append('mime_type', recordingMimeType);
+                        formData.append('is_first_chunk', isFirst ? '1' : '0');
 
-                        const resp = await fetch('api/finalize_recording.php', {
+                        const resp = await fetch('api/upload_recording.php', {
                             method: 'POST',
                             body: formData
                         });
                         const data = await resp.json();
                         if (data.success) {
-                            LOG("✅ Video uğurla arxivləşdirildi.", "#10b981");
+                            LOG(`💾 Parça saxlanıldı: ${Math.round(data.size / 1024 / 1024 * 10) / 10} MB`, "#94a3b8");
+                            return data;
                         }
-                    } catch (err) {
-                        console.error("Finalize error:", err);
-                    }
-                    resolve();
-                };
-                mediaRecorder.stop();
-            });
-        }
-
-        async function flushChunk(blob, retryCount = 0) {
-            const formData = new FormData();
-            formData.append('webinar_id', wID);
-            formData.append('video_blob', blob);
-            formData.append('mime_type', recordingMimeType);
-            formData.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
-
-            if (isFirstChunkRecorded) isFirstChunkRecorded = false;
-
-            // Chain promises to ensure strict sequential upload (prevents chunk reordering and corruption)
-            lastFlushPromise = lastFlushPromise.then(async () => {
-                try {
-                    const resp = await fetch('api/upload_recording.php', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await resp.json();
-                    if (data.success) {
-                        LOG(`💾 Parça saxlanıldı: ${Math.round(data.size / 1024 / 1024 * 10) / 10} MB`, "#94a3b8");
-                    } else {
                         throw new Error(data.message || 'Server error');
+                    } catch (err) {
+                        lastErr = err;
+                        if (attempt < 2) {
+                            LOG(`⚠️ Yükləmə xətası, cəhd ${attempt + 2}/3...`, "#fbbf24");
+                            await new Promise(r => setTimeout(r, 2000));
+                        }
                     }
-                    return data;
-                } catch (err) {
-                    if (retryCount < 3) {
-                        LOG(`⚠️ Yükləmə xətası, yenidən cəhd edilir (${retryCount + 1}/3)...`, "#fbbf24");
-                        // Wait 2 seconds before retry
-                        await new Promise(r => setTimeout(r, 2000));
-                        return flushChunk(blob, retryCount + 1);
-                    }
-                    LOG("❌ İnternet bağlantısı kəsildi, parça itirildi.", "red");
-                    throw err;
                 }
+                LOG("❌ Parça yüklənə bilmədi. İnternet yoxlayın.", "red");
+                console.error("Flush failed after 3 attempts:", lastErr);
             }).catch(err => {
-                console.error("Flush error:", err);
+                console.error("Flush chain error:", err);
             });
 
             return lastFlushPromise;
         }
 
         async function init() {
+            // Guard: init() yalnız bir dəfə çağırılmalıdır
+            if (isInitDone) {
+                LOG('⚠️ init() artıq icra edilib, təkrar çağırış bloklandı.', '#f59e0b');
+                return;
+            }
+            isInitDone = true;
+
             initWebinarTimer();
             try {
                 LOG("Media cihazları yoxlanılır...", "#3b82f6");
-                // Get Camera & Mic (Prefer 1080p to match canvas)
                 camStream = await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
                     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
                 });
 
                 document.getElementById('camSource').srcObject = camStream;
+                document.getElementById('pipPreview').srcObject = camStream;
                 updateSideStage();
                 startCompositing();
 
@@ -1590,9 +1625,7 @@ $pageTitle = "Studio: " . $webinar['title'];
         }
 
         // --- Prevent Accidental Refresh ---
-        window.onbeforeunload = function () {
-            return "Canlı yayım davam edir. Səhifəni yeniləsəniz yayım kəsiləcək. Davam etmək istəyirsiniz?";
-        };
+        // Not: beforeunload aşağıda addEventListener ilə idarə olunur
 
         // --- Student Stage Control ---
         // --- Student Stage Control ---
@@ -1798,19 +1831,25 @@ $pageTitle = "Studio: " . $webinar['title'];
         }
 
         // --- PROTECTION LOGIC ---
-        // Block F5, F12, Ctrl+R, Ctrl+F5
+        // Block F5, Ctrl+R, Ctrl+F5 (F12 devtools üçün açıq saxlanır)
         window.addEventListener('keydown', (e) => {
-            // 116 = F5, 123 = F12, 82 = R
-            if (e.keyCode === 116 || e.keyCode === 123 || (e.ctrlKey && e.keyCode === 82)) {
+            if (e.keyCode === 116 || (e.ctrlKey && e.keyCode === 82)) {
                 e.preventDefault();
                 LOG("⚠️ Diqqət: Yayım zamanı bu əməliyyat bloklanıb!", "#f59e0b");
                 return false;
             }
         });
 
-        // Warn before leaving
+        // Warn before leaving + Emergency save attempt
         window.addEventListener('beforeunload', (e) => {
-            const msg = "Vebinar davam edir. Çıxsanız yayım kəsiləcək və hər kəs sistemdən atılacaq!";
+            // Təcili: son chunk-ı göndərməyə çalış (sendBeacon ilə)
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                try { mediaRecorder.stop(); } catch(ex) {}
+            }
+            if (peer) {
+                try { peer.destroy(); } catch(ex) {}
+            }
+            const msg = "Vebinar davam edir. Çıxsanız yayım kəsiləcək!";
             e.preventDefault();
             e.returnValue = msg;
             return msg;
@@ -1868,18 +1907,12 @@ $pageTitle = "Studio: " . $webinar['title'];
             isDraggingPiP = false;
         });
 
-        window.onload = () => {
-            init();
+        // init() yalnız startProductionNow() ilə çağırılır
+        // window.onload — yalnız UI hazırlığı üçün
+        window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            // Start polling for students 
             setInterval(renderStudentList, 5000);
-        };
-
-        const oldBeforeUnload = window.onbeforeunload;
-        window.onbeforeunload = () => {
-            if (peer) peer.destroy();
-            if (oldBeforeUnload) oldBeforeUnload();
-        };
+        });
     </script>
 </body>
 
