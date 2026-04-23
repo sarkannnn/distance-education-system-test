@@ -28,8 +28,8 @@ if ($user['role'] === 'admin' && !isset($user['department_id'])) {
          FROM webinars w 
          LEFT JOIN webinar_departments d ON w.department_id = d.id 
          JOIN webinar_users u ON w.teacher_id = u.id
-         WHERE w.id = ? AND w.department_id = ?",
-        [$id, $user['department_id']]
+         WHERE w.id = ? AND (w.faculty_id = ? OR w.department_id = ?)",
+        [$id, $user['faculty_id'] ?? 0, $user['department_id'] ?? 0]
     );
 }
 
@@ -38,7 +38,8 @@ if (!$webinar) {
 }
 
 if ($webinar['status'] !== 'live') {
-    header('Location: dashboard.php?error=not_live');
+    $redirect = ($user['role'] === 'student') ? '../student/live-classes.php' : 'dashboard.php';
+    header('Location: ' . $redirect . '?error=not_live');
     exit;
 }
 

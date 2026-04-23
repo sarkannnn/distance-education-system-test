@@ -18,17 +18,16 @@ if ($user['role'] === 'admin' && empty($user['department_id'])) {
     );
 } else {
     if ($user['role'] === 'student') {
-        // Students only see webinars from teachers of courses they are enrolled in
+        // Students see all webinars in their faculty or department
+        $facultyId = $user['faculty_id'] ?? 0;
+        $deptId = $user['department_id'] ?? 0;
+        
         $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
              FROM webinars w 
              JOIN webinar_users u ON w.teacher_id = u.id 
              LEFT JOIN webinar_faculties f ON w.faculty_id = f.id 
-             WHERE w.teacher_id IN (
-                 SELECT instructor_id FROM courses c 
-                 JOIN enrollments e ON c.id = e.course_id 
-                 WHERE e.user_id = ?
-             )";
-        $params = [$user['id']];
+             WHERE (w.faculty_id = ? OR w.department_id = ?)";
+        $params = [$facultyId, $deptId];
     } else {
         // Teachers and Department Admins see all webinars in their department
         $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 

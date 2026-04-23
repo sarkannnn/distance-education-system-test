@@ -80,10 +80,45 @@ try {
     } else {
         $dbLive = [];
     }
+// 3. Vebinarları yoxla (Fakültə/Kafedra üzrə)
+$webinarLive = [];
+try {
+    $studentFacultyName = $_SESSION['student_faculty'] ?? '';
+    $studentDeptName = $_SESSION['student_department'] ?? '';
+    
+    if (!empty($studentFacultyName)) {
+        $cleanFaculty = trim($studentFacultyName);
+        $cleanDept = trim($studentDeptName);
+        
+        // Fakültə və ya Kafedra adına görə ID-ləri tap (daha elastik axtarış)
+        $faculty = $db->fetch("SELECT id FROM webinar_faculties WHERE name LIKE ?", ["%$cleanFaculty%"]);
+        $dept = $db->fetch("SELECT id FROM webinar_departments WHERE name LIKE ?", ["%$cleanDept%"]);
+        
+        $facultyId = $faculty['id'] ?? 0;
+        $deptId = $dept['id'] ?? 0;
+        
+        if ($facultyId > 0 || $deptId > 0) {
+            $webinars = $db->fetchAll(
+                "SELECT w.id, w.title, 'Vebinar' as subject_name, wu.full_name as instructor_name, 
+                        w.scheduled_at as start_time, w.status, 100 as max_participants,
+                        'webinar' as record_type
+                 FROM webinars w
+                 JOIN webinar_users wu ON w.teacher_id = wu.id
+                 WHERE w.status IN ('live', 'starting-soon')
+                 AND (w.faculty_id = ? OR w.department_id = ?)",
+                [$facultyId, $deptId]
+            );
+            
+            foreach ($webinars as $w) {
+                $webinarLive[] = $w;
+            }
+        }
+    }
 } catch (Exception $e) {
-    error_log("Error fetching live classes: " . $e->getMessage());
-    $dbLive = [];
+    error_log("Error fetching webinars: " . $e->getMessage());
 }
+
+$dbLive = array_merge($dbLive, $webinarLive);
 
     // TMIS nəticələri ilə birləşdir, dublikatları yoxla
     $existingIds = array_column($liveClasses, 'id');
@@ -107,10 +142,11 @@ try {
                     'instructor' => trim($row['instructor_name'] ?? 'Müəllim'),
                     'startTime' => date('H:i', strtotime($row['start_time'])),
                     'raw_start' => $row['start_time'], // Müqayisə üçün
-                    'duration' => ($row['duration_minutes'] ?: 90) . ' dəqiqə',
+                    'duration' => (isset($row['duration_minutes']) ? $row['duration_minutes'] : 90) . ' dəqiqə',
                     'participants' => 0,
                     'maxParticipants' => $row['max_participants'] ?? 100,
-                    'status' => $row['status']
+                    'status' => $row['status'],
+                    'record_type' => $row['record_type'] ?? 'live_class'
                 ];
             }
         }
@@ -462,7 +498,8 @@ require_once 'includes/header.php';
                                 <!-- Right Section - Join Actions -->
                                 <div class="live-actions">
                                     <?php if ($liveClass['status'] === 'live'): ?>
-                                        <a href="live-view.php?id=<?php echo $liveClass['id']; ?>"
+                                        <?php $joinUrl = ($liveClass['record_type'] === 'webinar') ? "../webinar/view.php?id=" . $liveClass['id'] : "live-view.php?id=" . $liveClass['id']; ?>
+                                        <a href="<?php echo $joinUrl; ?>"
                                             class="btn btn-danger btn-lg btn-block">
                                             <i data-lucide="video"></i>
                                             Canlı Dərsə Qoşul
@@ -472,7 +509,8 @@ require_once 'includes/header.php';
                                             Hazırlaş (Tezliklə başlayır)
                                         </button>
                                     <?php else: ?>
-                                        <a href="live-view.php?id=<?php echo $liveClass['id']; ?>"
+                                        <?php $joinUrl = ($liveClass['record_type'] === 'webinar') ? "../webinar/view.php?id=" . $liveClass['id'] : "live-view.php?id=" . $liveClass['id']; ?>
+                                        <a href="<?php echo $joinUrl; ?>"
                                             class="btn btn-warning btn-lg btn-block">
                                             <i data-lucide="video"></i>
                                             Dərsə Qoşul

@@ -21,8 +21,8 @@ class WebinarAuth
     {
         if (isset($_SESSION['webinar_user_id'])) return true;
         
-        // Admin from main portal should have access
-        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+        // Portal users (Admin, Instructor, Student) should have access
+        if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'instructor', 'student'])) {
             return true;
         }
         
@@ -39,11 +39,32 @@ class WebinarAuth
 
         $db = WebinarDatabase::getInstance();
 
-        // Priority 1: User from main portal (Admin or Instructor)
-        if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'instructor'])) {
+        // Priority 1: User from main portal (Admin, Instructor, Student)
+        if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'instructor', 'student'])) {
             $mainUserId = $_SESSION['user_id'] ?? 1;
             
-            // Check if this user exists in webinar_users
+            // If student, return student object
+            if ($_SESSION['user_role'] === 'student') {
+                $studentFacultyName = $_SESSION['student_faculty'] ?? '';
+                $studentDeptName = $_SESSION['student_department'] ?? '';
+                
+                // Fetch IDs for student faculty/dept
+                $faculty = $db->fetch("SELECT id FROM webinar_faculties WHERE name = ?", [$studentFacultyName]);
+                $dept = $db->fetch("SELECT id FROM webinar_departments WHERE name = ?", [$studentDeptName]);
+                
+                return [
+                    'id' => $mainUserId,
+                    'username' => $_SESSION['tmis_username'] ?? 'student_' . $mainUserId,
+                    'full_name' => $_SESSION['user_name'] ?? 'Tələbə',
+                    'role' => 'student',
+                    'faculty_id' => $faculty['id'] ?? null,
+                    'department_id' => $dept['id'] ?? null,
+                    'faculty_name' => $studentFacultyName,
+                    'department_name' => $studentDeptName
+                ];
+            }
+
+            // Check if this user exists in webinar_users (for Admin/Instructor)
             $webinarUser = $db->fetch("SELECT * FROM webinar_users WHERE id = ?", [$mainUserId]);
             
             if (!$webinarUser) {
