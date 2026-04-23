@@ -17,16 +17,27 @@ if ($user['role'] === 'admin' && empty($user['department_id'])) {
          ORDER BY w.scheduled_at DESC"
     );
 } else {
-// Normal user or Admin logged in as Department
-$sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
-     FROM webinars w 
-     LEFT JOIN webinar_users u ON w.teacher_id = u.id 
-     LEFT JOIN webinar_faculties f ON w.faculty_id = f.id
-     WHERE w.department_id = ?";
-    $params = [$user['department_id']];
-
-    // Teachers see all webinars in their department regardless of who created them
-    // This allows Super Users to schedule webinars for specific departments.
+    if ($user['role'] === 'student') {
+        // Students only see webinars from teachers of courses they are enrolled in
+        $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
+             FROM webinars w 
+             JOIN webinar_users u ON w.teacher_id = u.id 
+             LEFT JOIN webinar_faculties f ON w.faculty_id = f.id 
+             WHERE w.teacher_id IN (
+                 SELECT instructor_id FROM courses c 
+                 JOIN enrollments e ON c.id = e.course_id 
+                 WHERE e.user_id = ?
+             )";
+        $params = [$user['id']];
+    } else {
+        // Teachers and Department Admins see all webinars in their department
+        $sql = "SELECT w.*, u.full_name as teacher_name, f.name as fac_name 
+             FROM webinars w 
+             LEFT JOIN webinar_users u ON w.teacher_id = u.id 
+             LEFT JOIN webinar_faculties f ON w.faculty_id = f.id 
+             WHERE w.department_id = ?";
+        $params = [$user['department_id']];
+    }
 
     $sql .= " ORDER BY w.scheduled_at DESC";
     $webinars = $db->fetchAll($sql, $params);

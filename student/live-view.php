@@ -30,25 +30,46 @@ if (!$lesson) {
     die("Dərs tapılmadı.");
 }
 
-// AUTO-ENROLL STUDENT IF NOT ALREADY ENROLLED IN THE COURSE
+// CHECK IF STUDENT IS ENROLLED IN THIS COURSE
 if ($currentUser['role'] === 'student') {
-    try {
-        $alreadyEnrolled = $db->fetch(
-            "SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?",
-            [$currentUser['id'], $lesson['course_id']]
-        );
-        
-        if (!$alreadyEnrolled) {
-            // Auto-enroll the student
-            $db->query(
-                "INSERT INTO enrollments (user_id, course_id, status) VALUES (?, ?, 'active')",
-                [$currentUser['id'], $lesson['course_id']]
-            );
-            error_log("✅ Auto-enrolled user {$currentUser['id']} in course {$lesson['course_id']} for live class {$lessonId}");
+    // 1. Check local DB
+    $isEnrolled = $db->fetch(
+        "SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?",
+        [$currentUser['id'], $lesson['course_id']]
+    );
+    
+    // 2. Check Session (TMIS fallback)
+    $inSession = false;
+    if (isset($_SESSION['my_course_ids']) && is_array($_SESSION['my_course_ids'])) {
+        if (in_array((int)$lesson['course_id'], $_SESSION['my_course_ids'])) {
+            $inSession = true;
         }
-    } catch (Exception $e) {
-        error_log("⚠️ Auto-enrollment in live-view failed: " . $e->getMessage());
-        // Don't block access, just log the error
+    }
+
+    // 3. Check Stream (If it's a broadcast to multiple courses)
+    $isStreamTarget = false;
+    if (!empty($lesson['stream_course_ids'])) {
+        $targets = explode(',', $lesson['stream_course_ids']);
+        if (isset($_SESSION['my_course_ids']) && is_array($_SESSION['my_course_ids'])) {
+            foreach ($targets as $t) {
+                if (in_array((int)trim($t), $_SESSION['my_course_ids'])) {
+                    $isStreamTarget = true;
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (!$isEnrolled && !$inSession && !$isStreamTarget) {
+        die("
+            <div style='background:#0f172a; color:white; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;'>
+                <div style='background:#1e293b; padding:40px; border-radius:20px; text-align:center; border:1px solid rgba(255,255,255,0.1);'>
+                    <h2 style='color:#ef4444; margin-bottom:10px;'>Giriş Qadağandır</h2>
+                    <p style='color:#94a3b8;'>Siz bu fənn üzrə qeydiyyatda deyilsiniz.<br>Yalnız müəllimin tələbələri dərslərə qoşula bilər.</p>
+                    <a href='index.php' style='display:inline-block; margin-top:20px; background:#3b82f6; color:white; padding:10px 25px; border-radius:10px; text-decoration:none;'>Panelə Qayıt</a>
+                </div>
+            </div>
+        ");
     }
 }
 

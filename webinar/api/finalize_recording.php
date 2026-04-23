@@ -21,14 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $db = WebinarDatabase::getInstance();
-    $webinar = $db->fetch("SELECT recording_path FROM webinars WHERE id = ? AND faculty_id = ?", [$webinarId, $_SESSION['webinar_faculty_id']]);
+    
+    // Check 'webinars' table first
+    $webinar = $db->fetch("SELECT id, recording_path, 'webinar' as type FROM webinars WHERE id = ? AND faculty_id = ?", [$webinarId, $_SESSION['webinar_faculty_id']]);
+    
+    // Fallback: Check 'live_classes' table
+    if (!$webinar) {
+        $webinar = $db->fetch("SELECT id, recording_path, 'live_class' as type FROM live_classes WHERE id = ? AND (instructor_id = ? OR faculty_id = ?)", [
+            $webinarId, 
+            $_SESSION['webinar_user_id'] ?? 0,
+            $_SESSION['webinar_faculty_id'] ?? 0
+        ]);
+    }
 
     if (!$webinar || empty($webinar['recording_path'])) {
-        echo json_encode(['success' => false, 'message' => 'Recording not found']);
+        echo json_encode(['success' => false, 'message' => 'Recording not found or access denied']);
         exit;
     }
 
-    $uploadDir = '../../uploads/webinar_recordings/';
+    $isLiveClass = ($webinar['type'] === 'live_class');
+    $uploadDir = $isLiveClass ? '../../uploads/videos/' : '../../uploads/webinar_recordings/';
     $filePath = $uploadDir . $webinar['recording_path'];
 
     if (!file_exists($filePath)) {

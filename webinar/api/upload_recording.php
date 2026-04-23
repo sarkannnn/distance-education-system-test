@@ -19,14 +19,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $db = WebinarDatabase::getInstance();
-    // Verify faculty isolation
-    $webinar = $db->fetch("SELECT id FROM webinars WHERE id = ? AND faculty_id = ?", [$webinarId, $_SESSION['webinar_faculty_id']]);
+    
+    // Check 'webinars' table first
+    $webinar = $db->fetch("SELECT id, 'webinar' as type FROM webinars WHERE id = ? AND faculty_id = ?", [$webinarId, $_SESSION['webinar_faculty_id']]);
+    
+    // Fallback: Check 'live_classes' table
     if (!$webinar) {
-        echo json_encode(['success' => false, 'message' => 'Access denied: webinar not found in your faculty']);
+        $webinar = $db->fetch("SELECT id, 'live_class' as type FROM live_classes WHERE id = ? AND (instructor_id = ? OR faculty_id = ?)", [
+            $webinarId, 
+            $_SESSION['webinar_user_id'] ?? 0,
+            $_SESSION['webinar_faculty_id'] ?? 0
+        ]);
+    }
+
+    if (!$webinar) {
+        echo json_encode(['success' => false, 'message' => 'Access denied: webinar/class not found or unauthorized']);
         exit;
     }
 
-    $uploadDir = '../../uploads/webinar_recordings/';
+    $isLiveClass = ($webinar['type'] === 'live_class');
+    $uploadDir = $isLiveClass ? '../../uploads/videos/' : '../../uploads/webinar_recordings/';
     if (!is_dir($uploadDir)) {
         if (!mkdir($uploadDir, 0755, true)) {
             echo json_encode(['success' => false, 'message' => 'Failed to create upload directory']);
@@ -79,9 +91,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Ensure recording_path is always set in DB
         try {
             $db = WebinarDatabase::getInstance();
-            $existing = $db->fetch("SELECT recording_path FROM webinars WHERE id = ?", [$webinarId]);
+            $table = $isLiveClass ? 'live_classes' : 'webinars';
+            $existing = $db->fetch("SELECT recording_path FROM $table WHERE id = ?", [$webinarId]);
             if (!$existing || empty($existing['recording_path'])) {
-                $db->update('webinars', ['recording_path' => $fileName], 'id = ?', [$webinarId]);
+                $db->update($table, ['recording_path' => $fileName], 'id = ?', [$webinarId]);
             }
         } catch (Exception $e) {
             // Silently ignore DB errors if file was saved

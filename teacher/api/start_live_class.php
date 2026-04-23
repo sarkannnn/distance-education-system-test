@@ -113,6 +113,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $iName = ($insMeta && !empty($insMeta['name'])) ? $insMeta['name'] : ($_SESSION['user_name'] ?? 'Müəllim');
         $iTitle = ($insMeta && !empty($insMeta['title'])) ? $insMeta['title'] : ($_SESSION['user_academic_title'] ?? 'Müəllim');
 
+        // Check if teacher already has an active live class
+        $activeClass = $db->fetch(
+            "SELECT id FROM live_classes WHERE instructor_id = ? AND status IN ('live', 'starting-soon', 'ending-soon')",
+            [$finalInstructorId]
+        );
+
+        if ($activeClass) {
+            echo json_encode(['success' => false, 'message' => 'Sizin artıq davam edən bir canlı dərsiniz var. Eyni anda yalnız 1 dərs aça bilərsiniz.']);
+            exit;
+        }
+
         // 1. Canlı dərslər cədvəlinə əlavə et (Status: LIVE)
         $live_class_id = $db->insert('live_classes', [
             'course_id' => $course_id,

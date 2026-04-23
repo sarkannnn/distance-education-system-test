@@ -14,20 +14,31 @@ if (!$id) {
 
 if ($user['role'] === 'admin' && !isset($user['department_id'])) {
     $webinar = $db->fetch(
-        "SELECT w.*, d.name as dept_name 
+        "SELECT w.*, d.name as dept_name, 'webinar' as session_type
          FROM webinars w 
          LEFT JOIN webinar_departments d ON w.department_id = d.id 
          WHERE w.id = ?",
         [$id]
     );
+    if (!$webinar) {
+        $webinar = $db->fetch("SELECT *, 'live_class' as session_type FROM live_classes WHERE id = ?", [$id]);
+    }
 } else {
     $webinar = $db->fetch(
-        "SELECT w.*, d.name as dept_name 
+        "SELECT w.*, d.name as dept_name, 'webinar' as session_type
          FROM webinars w 
          LEFT JOIN webinar_departments d ON w.department_id = d.id 
          WHERE w.id = ? AND w.department_id = ?",
         [$id, $user['department_id']]
     );
+    if (!$webinar) {
+        // For live classes, check by faculty or instructor
+        $webinar = $db->fetch(
+            "SELECT *, 'live_class' as session_type FROM live_classes 
+             WHERE id = ? AND (faculty_id = ? OR instructor_id = ?)",
+            [$id, $user['department_id'], $_SESSION['webinar_user_id'] ?? 0]
+        );
+    }
 }
 
 if (!$webinar) {
@@ -96,9 +107,11 @@ $pageTitle = "Studio: " . $webinar['title'];
                 <i data-lucide="video" class="w-4 h-4 sm:w-6 sm:h-6 text-emerald-400"></i>
             </div>
             <div class="hidden sm:block min-w-0">
-                <h1 class="text-xs sm:text-sm font-bold leading-none truncate max-w-[140px] lg:max-w-none"><?php echo e($webinar['title']); ?></h1>
+                <h1 class="text-xs sm:text-sm font-bold leading-none truncate max-w-[140px] lg:max-w-none">
+                    <?php echo e($webinar['title']); ?></h1>
                 <p class="text-[9px] sm:text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5 truncate">
-                    <?php echo e($webinar['dept_name']); ?></p>
+                    <?php echo e($webinar['dept_name']); ?>
+                </p>
             </div>
         </div>
 
@@ -132,14 +145,18 @@ $pageTitle = "Studio: " . $webinar['title'];
         <div class="video-section">
             <div class="main-video-container relative" id="mainStageContainer">
                 <canvas id="outputCanvas" class="w-full h-full object-cover bg-black mirrored-canvas"></canvas>
-                
+
                 <!-- Draggable PiP Overlay (Studio UI Only) -->
-                <div id="pipDraggable" class="absolute cursor-move border-2 border-dashed border-emerald-500/50 bg-emerald-500/10 hidden z-50 transition-[box-shadow,border-color] hover:border-emerald-500 hover:shadow-2xl active:scale-[1.02] rounded-2xl overflow-hidden">
-                    <video id="pipPreview" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover scale-x-[-1]"></video>
+                <div id="pipDraggable"
+                    class="absolute cursor-move border-2 border-dashed border-emerald-500/50 bg-emerald-500/10 hidden z-50 transition-[box-shadow,border-color] hover:border-emerald-500 hover:shadow-2xl active:scale-[1.02] rounded-2xl overflow-hidden">
+                    <video id="pipPreview" autoplay playsinline muted
+                        class="absolute inset-0 w-full h-full object-cover scale-x-[-1]"></video>
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                         <i data-lucide="move" class="w-6 h-6 text-emerald-400 opacity-40"></i>
                     </div>
-                    <div class="absolute -top-6 left-0 bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-widest rounded-t-lg">KAMERA PƏNCƏRƏSİ</div>
+                    <div
+                        class="absolute -top-6 left-0 bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-widest rounded-t-lg">
+                        KAMERA PƏNCƏRƏSİ</div>
                 </div>
                 <video id="localMainVid" autoplay playsinline class="hidden w-full h-full object-contain"></video>
 
@@ -887,16 +904,20 @@ $pageTitle = "Studio: " . $webinar['title'];
                         ctx.strokeStyle = '#94a3b8';
                         ctx.lineWidth = 1;
                         ctx.beginPath();
-                        const step = 30 * (canvas.width / wbCanvas.width);
-                        for (let x = step; x < canvas.width; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); }
-                        for (let y = step; y < canvas.height; y += step) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
+                        const wbW = wbCanvas.width || 1920;
+                        const wbH = wbCanvas.height || 1080;
+                        const stepX = 30 * (canvas.width / wbW);
+                        const stepY = 25 * (canvas.height / wbH);
+                        for (let x = stepX; x < canvas.width; x += stepX) { ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); }
+                        for (let y = stepY; y < canvas.height; y += stepY) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
                         ctx.stroke();
                     } else if (wbBgType === 'lines') {
                         ctx.strokeStyle = '#94a3b8';
                         ctx.lineWidth = 1;
                         ctx.beginPath();
-                        const step = 25 * (canvas.height / wbCanvas.height);
-                        for (let y = step; y < canvas.height; y += step) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
+                        const wbH = wbCanvas.height || 1080;
+                        const stepY = 25 * (canvas.height / wbH);
+                        for (let y = stepY; y < canvas.height; y += stepY) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
                         ctx.stroke();
                     }
 
@@ -954,14 +975,14 @@ $pageTitle = "Studio: " . $webinar['title'];
                     if (isCamOn && camVid.readyState >= 2) {
                         // Drawing logic for PiP
                         const margin = 4;
-                        
+
                         // Draw Shadow/Frame
                         ctx.save();
                         ctx.shadowBlur = 25;
                         ctx.shadowColor = 'rgba(0,0,0,0.6)';
                         ctx.fillStyle = '#1e293b'; // Slate 800
                         ctx.beginPath();
-                        ctx.roundRect(pipX - margin, pipY - margin, pipW + (margin*2), pipH + (margin*2), 16);
+                        ctx.roundRect(pipX - margin, pipY - margin, pipW + (margin * 2), pipH + (margin * 2), 16);
                         ctx.fill();
                         ctx.restore();
 
@@ -1091,12 +1112,12 @@ $pageTitle = "Studio: " . $webinar['title'];
         async function toggleScreen() {
             if (!isScreenOn) {
                 try {
-                    screenStream = await navigator.mediaDevices.getDisplayMedia({ 
-                        video: { 
-                            width: { ideal: 1920 }, 
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            width: { ideal: 1920 },
                             height: { ideal: 1080 },
                             frameRate: { ideal: 30 }
-                        } 
+                        }
                     });
                     document.getElementById('screenSource').srcObject = screenStream;
                     isScreenOn = true;
@@ -1132,7 +1153,7 @@ $pageTitle = "Studio: " . $webinar['title'];
                     if (c.open && c.peer !== exclude) {
                         c.send(data);
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error("Broadcast failed for peer:", c.peer, e);
                 }
             });
@@ -1223,14 +1244,18 @@ $pageTitle = "Studio: " . $webinar['title'];
 
             if (isWBActive) {
                 overlay.classList.remove('hidden');
+                overlay.style.display = 'block';
                 btn.classList.add('active-green');
                 initWBCanvas();
-                // Force a resize check after showing
+                // Force multiple resizes to ensure canvas fills correctly
                 setTimeout(() => { if (window.wbResize) window.wbResize(); }, 50);
+                setTimeout(() => { if (window.wbResize) window.wbResize(); }, 200);
+                setTimeout(() => { if (window.wbResize) window.wbResize(); }, 500);
                 LOG("🎨 Professional Lövhə aktivdir", "#10b981");
                 broadcast({ type: 'whiteboard_state', active: true });
             } else {
                 overlay.classList.add('hidden');
+                overlay.style.display = 'none';
                 btn.classList.remove('active-green');
                 laserActive = false;
                 document.getElementById('laserCursor').style.display = 'none';
@@ -1844,10 +1869,10 @@ $pageTitle = "Studio: " . $webinar['title'];
         window.addEventListener('beforeunload', (e) => {
             // Təcili: son chunk-ı göndərməyə çalış (sendBeacon ilə)
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                try { mediaRecorder.stop(); } catch(ex) {}
+                try { mediaRecorder.stop(); } catch (ex) { }
             }
             if (peer) {
-                try { peer.destroy(); } catch(ex) {}
+                try { peer.destroy(); } catch (ex) { }
             }
             const msg = "Vebinar davam edir. Çıxsanız yayım kəsiləcək!";
             e.preventDefault();
@@ -1869,7 +1894,7 @@ $pageTitle = "Studio: " . $webinar['title'];
 
             overlay.style.width = (pipW * scaleX) + 'px';
             overlay.style.height = (pipH * scaleY) + 'px';
-            
+
             // Adjust X for mirrored preview (Studio uses CSS mirror)
             // If pipX is 40 internally (Left), in mirrored CSS it looks like it's on the Right.
             // But we want the mouse interaction to feel natural.

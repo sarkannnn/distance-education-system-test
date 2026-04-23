@@ -102,6 +102,32 @@ if (!$videoUrl) {
     exit;
 }
 
+// SECURITY: CHECK IF STUDENT IS ENROLLED IN THIS COURSE
+if ($currentUser['role'] === 'student') {
+    $courseId = $lesson['course_id'];
+    $isEnrolled = $db->fetch(
+        "SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?",
+        [$currentUser['id'], $courseId]
+    );
+    
+    if (!$isEnrolled) {
+        die("
+            <div style='background:#f8fafc; color:#1e293b; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;'>
+                <div style='background:white; padding:40px; border-radius:24px; text-align:center; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1); max-width:400px;'>
+                    <div style='width:64px; height:64px; background:#fee2e2; color:#ef4444; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;'>
+                        <i data-lucide='lock' style='width:32px; height:32px;'></i>
+                    </div>
+                    <h2 style='color:#0f172a; margin-bottom:12px; font-weight:800;'>Giriş Qadağandır</h2>
+                    <p style='color:#64748b; line-height:1.6;'>Siz bu fənn üzrə qeydiyyatda deyilsiniz. Arxiv videolarına yalnız kursun tələbələri baxa bilər.</p>
+                    <a href='archive.php' style='display:inline-block; margin-top:24px; background:#3b82f6; color:white; padding:12px 30px; border-radius:12px; text-decoration:none; font-weight:700;'>Arxivə Qayıt</a>
+                </div>
+            </div>
+            <script src='https://unpkg.com/lucide@latest'></script>
+            <script>lucide.createIcons();</script>
+        ");
+    }
+}
+
 require_once 'includes/header.php';
 ?>
 

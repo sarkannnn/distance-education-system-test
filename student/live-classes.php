@@ -66,14 +66,20 @@ $studentSubjectIds = array_unique(array_filter($studentSubjectIds));
 // Lokal live_classes cədvəlindən birbaşa oxu
 // Students can see all public live classes and will be auto-enrolled when they join
 try {
-    // Show all visible active live classes
-    // Auto-enrollment in live-view.php handles course enrollment
-    $dbLive = $db->fetchAll(
-        "SELECT lc.* FROM live_classes lc 
-         WHERE lc.status IN ('live', 'starting-soon', 'ending-soon')
-         AND lc.is_visible = TRUE
-         ORDER BY lc.start_time ASC"
-    );
+    // Show only active live classes that the student is enrolled in
+    if (!empty($studentSubjectIds)) {
+        $placeholders = implode(',', array_fill(0, count($studentSubjectIds), '?'));
+        $dbLive = $db->fetchAll(
+            "SELECT lc.* FROM live_classes lc 
+             WHERE lc.status IN ('live', 'starting-soon', 'ending-soon')
+             AND lc.is_visible = TRUE
+             AND lc.course_id IN ($placeholders)
+             ORDER BY lc.start_time ASC",
+            $studentSubjectIds
+        );
+    } else {
+        $dbLive = [];
+    }
 } catch (Exception $e) {
     error_log("Error fetching live classes: " . $e->getMessage());
     $dbLive = [];
