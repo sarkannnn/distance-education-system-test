@@ -8,9 +8,9 @@ session_name('DISTANT_STUDENT_SESSION');
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',
-    'secure'   => true,
+    'secure'   => false, // Allow HTTP for localhost testing
     'httponly' => true,
-    'samesite' => 'Strict',
+    'samesite' => 'Lax', // Changed to Lax to avoid cross-path issues
 ]);
 ini_set('session.use_strict_mode', 1);
 ini_set('session.use_only_cookies', 1);
@@ -205,9 +205,9 @@ class Auth
             session_set_cookie_params([
                 'lifetime' => 0,
                 'path'     => '/',
-                'secure'   => true,
+                'secure'   => false,
                 'httponly' => true,
-                'samesite' => 'Strict',
+                'samesite' => 'Lax',
             ]);
             ini_set('session.use_strict_mode', 1);
             ini_set('session.use_only_cookies', 1);

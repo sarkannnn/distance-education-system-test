@@ -234,7 +234,7 @@
 
             const result = await response.json();
             if (result.success) {
-                window.location.href = `live-studio?id=${result.live_class_id}&subject_id=${courseId}`;
+                window.location.href = `live-studio_livekit.php?id=${result.live_class_id}&subject_id=${courseId}`;
             } else {
                 alert('Xəta: ' + result.message);
                 submitBtn.disabled = false;

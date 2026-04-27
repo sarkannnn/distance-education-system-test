@@ -365,7 +365,7 @@
             });
             const result = await response.json();
             if (result.success) {
-                window.location.href = `live-studio?id=${result.live_class_id}&subject_id=${result.subject_id}`;
+                window.location.href = `live-studio_livekit.php?id=${result.live_class_id}&subject_id=${result.subject_id}`;
             } else {
                 alert('Xəta: ' + result.message);
                 btn.disabled = false;

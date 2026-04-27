@@ -463,7 +463,7 @@ require_once 'includes/header.php';
                                 <!-- Right Section - Join Actions -->
                                 <div class="live-actions">
                                     <?php if ($liveClass['status'] === 'live'): ?>
-                                        <a href="live-view.php?id=<?php echo $liveClass['id']; ?>"
+                                        <a href="live-view_livekit.php?id=<?php echo $liveClass['id']; ?>"
                                             class="btn btn-danger btn-lg btn-block">
                                             <i data-lucide="video"></i>
                                             Canlı Dərsə Qoşul
@@ -473,7 +473,7 @@ require_once 'includes/header.php';
                                             Hazırlaş (Tezliklə başlayır)
                                         </button>
                                     <?php else: ?>
-                                        <a href="live-view.php?id=<?php echo $liveClass['id']; ?>"
+                                        <a href="live-view_livekit.php?id=<?php echo $liveClass['id']; ?>"
                                             class="btn btn-warning btn-lg btn-block">
                                             <i data-lucide="video"></i>
                                             Dərsə Qoşul

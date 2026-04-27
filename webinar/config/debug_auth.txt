@@ -925,3 +925,5 @@
 [2026-04-23 13:56:34] getCurrentUser Called. Session: {"webinar_user_id":413,"webinar_username":"stomatologiya_muhazireci","webinar_full_name":"Stomatologiya - M\u00fchazir\u0259\u00e7i","webinar_role":"teacher","webinar_faculty_id":3,"webinar_faculty_name":"Tibb","webinar_faculty_slug":"memarliq-muhendislik","webinar_department_id":13,"webinar_department_name":"Stomatologiya"}
 [2026-04-23 13:56:36] getCurrentUser Called. Session: []
 [2026-04-23 13:56:36] isLoggedIn returned false.
+[2026-04-24 08:12:44] getCurrentUser Called. Session: {"sso_attempts":1,"sso_last_attempt":1777018364,"csrf_token":"a94ea6e5e98a13fc965dd59fc8d061e7cd616dd3a56ecea375594ddd9f48b193"}
+[2026-04-24 08:12:44] isLoggedIn returned false.
