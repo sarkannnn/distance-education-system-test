@@ -32,9 +32,15 @@ class LiveKitEgressService
             // Timeouts (in seconds)
             $this->connectTimeout = (int)(getenv('LIVEKIT_CONNECT_TIMEOUT') ?: 10);
             $this->requestTimeout = (int)(getenv('LIVEKIT_REQUEST_TIMEOUT') ?: 30);
-        ) {
-            error_log("WARNING: LiveKit credentials not properly configured. Check .env file.");
-            error_log("Expected: LIVEKIT_API_KEY and LIVEKIT_API_SECRET environment variables");
+            
+            // Validate credentials
+            if (
+                empty($this->apiKey) || $this->apiKey === 'your_api_key_here' ||
+                empty($this->apiSecret) || $this->apiSecret === 'your_api_secret_here'
+            ) {
+                error_log("WARNING: LiveKit credentials not properly configured. Check .env file.");
+                error_log("Expected: LIVEKIT_API_KEY and LIVEKIT_API_SECRET environment variables");
+            }
         }
     }
 
