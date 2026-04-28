@@ -10,6 +10,12 @@ require_once 'includes/auth.php';
 require_once 'includes/helpers.php';
 $auth = new Auth();
 requireInstructor();
+
+// Prevent browser/proxy caching of this dynamic page
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+
 $db = Database::getInstance();
 $lessonId = $_GET['id'] ?? null;
 $subjectId = $_GET['subject_id'] ?? null;
@@ -2766,6 +2772,11 @@ require_once 'includes/header.php';
                     await room.connect(data.serverUrl, data.token);
                     LOG("🚀 LiveKit Serverinə qoşuldu!", "#10b981");
 
+                    // Start server-side recording after a small delay to ensure room is ready
+                    setTimeout(() => {
+                        startEgressRecording();
+                    }, 3000);
+
                     // Initial media publish if already started
                     if (stream) {
                         await publishMedia();
@@ -3063,32 +3074,31 @@ require_once 'includes/header.php';
             }
         }
 
-        try {
-            // CALL EGRESS START API
-            const fd = new FormData();
-            fd.append('lesson_id', lID);
-            fd.append('room_name', lID); // Room name is lesson ID in our system
+        // Start the rendering loop
+        if (canvasLoopId) clearInterval(canvasLoopId);
+        canvasLoopId = setInterval(drawToCanvas, 33);
+    }
 
-            fetch('../api/start_egress.php', { method: 'POST', body: fd, credentials: 'include' })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.success) {
-                        LOG(`✅ Server-side Arxiv (Egress) aktivdir. 🔴`, "#10b981");
-                    } else {
-                        LOG(`⚠️ Egress Xətası: ${d.error || 'Naməlum'}`, "#ef4444");
-                        console.error("Egress error:", d);
-                    }
-                });
+    function startEgressRecording() {
+        LOG("🎬 Arxivləşdirmə başladılır...", "#3b82f6");
+        const fd = new FormData();
+        fd.append('lesson_id', lID);
+        fd.append('room_name', lID);
 
-            recordingStartTime = Date.now();
-
-            // Start the rendering loop (needed for visual feedback if any, but Egress uses live-record_view.php)
-            if (canvasLoopId) clearInterval(canvasLoopId);
-            canvasLoopId = setInterval(drawToCanvas, 33); 
-
-        } catch (e) {
-            LOG("Egress Başlatma Xətası", "#ef4444");
-        }
+        fetch('../api/start_egress.php', { method: 'POST', body: fd, credentials: 'include' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    LOG(`✅ Server-side Arxiv (Egress) aktivdir. 🔴`, "#10b981");
+                    recordingStartTime = Date.now();
+                } else {
+                    LOG(`⚠️ Egress Xətası: ${d.error || 'Naməlum'}`, "#ef4444");
+                    console.error("Egress error:", d);
+                }
+            })
+            .catch(err => {
+                LOG("❌ Egress bağlantı xətası.", "#ef4444");
+            });
     }
 
     function drawToCanvas() {
@@ -3752,57 +3762,56 @@ require_once 'includes/header.php';
         }, 1000);
     }
 
-    function stopAndUpload(isAuto = false) {
-        if (!isAuto && !confirm("Dərsi bitirmək və arxivləmək istəyirsiniz?")) return;
+    window.stopAndUpload = function(isAuto = false) {
+        try {
+            if (!isAuto && !confirm("Dərsi bitirmək və arxivləmək istəyirsiniz?")) return;
 
-        LOG("🏁 Dərs bitirilir...", "#f59e0b");
-        broadcastData({
-            type: 'lesson_ended'
-        });
+            LOG("🏁 Dərs bitirilir...", "#f59e0b");
+            
+            // Send end signal but don't wait for it if it hangs
+            broadcastData({ type: 'lesson_ended' }).catch(e => console.warn("Broadcast end error:", e));
 
-        LOG("⏳ Arxiv tamamlanır, xahiş olunur gözləyin...", "#3b82f6");
+            LOG("⏳ Arxiv tamamlanır, xahiş olunur gözləyin...", "#3b82f6");
 
-        // STOP EGRESS API
-        const fd = new FormData();
-        fd.append('lesson_id', lID);
+            const fd = new FormData();
+            fd.append('live_class_id', lID);
 
-        fetch('../api/stop_egress.php', { method: 'POST', body: fd, credentials: 'include' })
-            .then(r => r.json())
+            // 1. END CLASS IN DATABASE (STATUS: LIVE -> ENDED)
+            fetch('api/end_live_class.php', { 
+                method: 'POST', 
+                body: fd, 
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'include' 
+            })
+            .then(r => r.json().catch(() => ({ success: true }))) // Continue even if JSON parse fails
+            .then(() => {
+                LOG("✅ Dərs bazada bitirildi.", "#10b981");
+                
+                // 2. STOP SERVER-SIDE RECORDING (EGRESS)
+                return fetch('../api/stop_egress.php', { method: 'POST', body: fd, credentials: 'include' });
+            })
+            .then(r => r.json().catch(() => ({ success: false, message: "Egress cavabı oxunmadı" })))
             .then(d => {
-                LOG("📥 Server-side qeydiyyat dayandırıldı.", "#10b981");
-                LOG("✅ Dərs uğurla tamamlandı!", "#10b981");
+                if (d && d.success) {
+                    LOG("📥 Server-side qeydiyyat dayandırıldı.", "#10b981");
+                } else {
+                    LOG("⚠️ Arxiv dayandırılarkən xəbərdarlıq: " + (d?.message || d?.error || "Naməlum"), "#fde047");
+                }
+                LOG("🏁 Dərs uğurla tamamlandı!", "#10b981");
                 setTimeout(() => {
-                    location.href = "index.php?status=finished";
-                }, 2000);
+                    window.location.assign("live-lessons.php?ended=1");
+                }, 1500);
             })
             .catch(err => {
-                LOG("❌ Arxiv dayandırıla bilmədi.", "#ef4444");
-                setTimeout(() => { location.href = "index.php"; }, 2000);
+                LOG("❌ Prosesdə xəta yarandı, lakin çıxış edilir...", "#ef4444");
+                console.error("End Process Error:", err);
+                setTimeout(() => { window.location.assign("live-lessons.php"); }, 1500);
             });
-    }
-                                sessionStorage.removeItem('active_recording_session_' + lID);
-                                alert(d.message || "Dərs uğurla bitirildi!");
-                                window.location.href = 'live-lessons.php';
-                            } else {
-                                LOG("❌ Server xətası: " + d.message, "#ef4444");
-                                alert("Xəta: " + d.message);
-                                window.location.href = 'live-lessons.php';
-                            }
-                        } catch (e) {
-                            console.error("Non-JSON response:", text);
-                            LOG("❌ Cavab oxunarkən xəta yarandı.", "#ef4444");
-                            alert("Server Xətası: Məlumat yadda saxlanıla bilmədi.");
-                            window.location.href = 'live-lessons.php';
-                        }
-                    })
-                    .catch(err => {
-                        LOG("❌ Şəbəkə xətası: " + err.message, "#ef4444");
-                        alert("Şəbəkə Xətası: Video yüklənə bilmədi.");
-                        window.location.href = 'live-lessons.php';
-                    });
-            });
-        }, 2000);
-    }
+        } catch (fatalErr) {
+            console.error("Fatal End Lesson Error:", fatalErr);
+            window.location.assign("index.php");
+        }
+    };
 
     function kickStudent(pId, name, uId) {
         // Fallback: If uId is missing, try to get it from the card attribute

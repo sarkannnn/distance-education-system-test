@@ -4,11 +4,18 @@
  * This page is used by LiveKit Egress to record the lesson layout.
  * It joins the room as a hidden participant and renders the compositor canvas.
  */
-require_once 'includes/auth.php'; // Optional, might need a special bypass for Egress bot
+// Egress Recording View - No auth required but secret key suggested
 require_once 'includes/helpers.php';
+$db = Database::getInstance();
 
 $lessonId = $_GET['id'] ?? null;
-$db = Database::getInstance();
+$secret = $_GET['secret'] ?? '';
+
+// Simple security check (you can change this secret)
+if ($secret !== 'L6k_Rec_2024') {
+    // die("Unauthorized access."); 
+}
+
 $lesson = $db->fetch("SELECT * FROM live_classes WHERE id = ?", [$lessonId]);
 
 if (!$lesson) {

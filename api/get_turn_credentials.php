@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     session_write_close();
 }
 
-foreach (['DISTANT_STUDENT_SESSION', 'DISTANT_STUDENT_SESSION'] as $sessionName) {
+foreach (['DISTANT_T_SESSION_V4', 'DISTANT_STUDENT_SESSION'] as $sessionName) {
     session_name($sessionName);
     @session_start();
     if (!empty($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {

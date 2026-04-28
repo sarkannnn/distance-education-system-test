@@ -29,7 +29,7 @@ class LiveKitEgressService {
         // Use a fixed public host if defined (recommended for Egress)
         $publicHost = getenv('PUBLIC_BASE_URL') ?: "$protocol://$host/distant-tehsil-test";
         
-        $templateUrl = "$publicHost/teacher/live-record_view.php?id=$lessonId";
+        $templateUrl = "$publicHost/teacher/live-record_view.php?id=$lessonId&secret=L6k_Rec_2024";
 
         // 1. Generate Admin Token with Egress permissions
         $token = LiveKitHelper::generateToken(

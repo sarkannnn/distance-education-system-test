@@ -260,7 +260,10 @@ if ($activeLesson) {
     $now = time();
     if ($endTime > $now) {
         $diff = $endTime - $now;
-        $remainingTime = sprintf('%02d:%02d:%02d', ($diff / 3600), ($diff / 60 % 60), $diff % 60);
+        $h = floor($diff / 3600);
+        $m = floor(($diff % 3600) / 60);
+        $s = $diff % 60;
+        $remainingTime = sprintf('%02d:%02d:%02d', $h, $m, $s);
     }
 }
 
@@ -787,7 +790,9 @@ require_once 'includes/header.php';
 
 <?php if ($activeLesson): ?>
     <script>
-        // Countdown Timer logic     let timeLeft = "<?php echo $remainingTime; ?>".split(':').reduce((acc, time) => (60 * acc) + +time);     const countdownEl = document.getElementById('countdown');
+        // Countdown Timer logic
+        let timeLeft = "<?php echo $remainingTime; ?>".split(':').reduce((acc, time) => (60 * acc) + +time);
+        const countdownEl = document.getElementById('countdown');
         if (timeLeft > 0) {
             const interval = setInterval(() => {
                 timeLeft--;
