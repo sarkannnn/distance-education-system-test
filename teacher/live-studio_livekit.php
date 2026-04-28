@@ -634,13 +634,13 @@ require_once 'includes/header.php';
 
         <?php if ($portraitCameraOnPhone): ?>
 
-            /* Portrait (vertical) camera on phones */
-            #mainVideoWrapper {
-                aspect-ratio: 9/16 !important;
-                width: auto !important;
-                height: min(62vh, 400px) !important;
-                max-width: 100% !important;
-            }
+        /* Portrait (vertical) camera on phones */
+        #mainVideoWrapper {
+            aspect-ratio: 9/16 !important;
+            width: auto !important;
+            height: min(62vh, 400px) !important;
+            max-width: 100% !important;
+        }
 
         <?php endif; ?>
 
@@ -1495,7 +1495,7 @@ require_once 'includes/header.php';
         d.scrollTop = d.scrollHeight;
     };
 
-    window.onerror = function (msg, url, line) {
+    window.onerror = function(msg, url, line) {
         LOG(`🚨 JS ERROR: ${msg} (Line: ${line})`, "#ef4444");
         console.error(msg, url, line);
         return false;
@@ -1658,7 +1658,9 @@ require_once 'includes/header.php';
             LOG("🎨 Advanced Whiteboard aktivdir.", "#3b82f6");
         } else {
             // Close instantly on student side without waiting video stream teardown.
-            broadcastData({ type: 'whiteboard_force_stop' });
+            broadcastData({
+                type: 'whiteboard_force_stop'
+            });
             overlay.classList.remove('is-visible');
             btn.classList.remove('active-blue');
             document.getElementById('laserCursor').style.display = 'none';
@@ -2325,10 +2327,10 @@ require_once 'includes/header.php';
         const chunkUrl = window.location.pathname.includes('/teacher/') ? '../api/live/upload_chunk.php' : '/api/live/upload_chunk.php';
 
         return fetch(chunkUrl, {
-            method: 'POST',
-            body: fd,
-            credentials: 'include'
-        })
+                method: 'POST',
+                body: fd,
+                credentials: 'include'
+            })
             .then(async r => {
                 const text = await r.text();
                 try {
@@ -2524,7 +2526,9 @@ require_once 'includes/header.php';
         if (!room || room.state !== 'connected') return;
         const encoder = new TextEncoder();
         const payload = encoder.encode(JSON.stringify(data));
-        const options = { reliable: true };
+        const options = {
+            reliable: true
+        };
         if (targetIdentity && typeof targetIdentity === 'string') {
             options.destinationIdentities = [targetIdentity];
         }
@@ -2550,12 +2554,16 @@ require_once 'includes/header.php';
         };
 
         aprove.onclick = () => {
-            broadcastData({ type: 'mic_approved' }, pId);
+            broadcastData({
+                type: 'mic_approved'
+            }, pId);
             LOG(`${senderName} mikrofonu açıldı.`, "#22c55e");
             cleanup();
         };
         reject.onclick = () => {
-            broadcastData({ type: 'mic_rejected' }, pId);
+            broadcastData({
+                type: 'mic_rejected'
+            }, pId);
             LOG(`${senderName} rədd edildi.`, "#fde047");
             cleanup();
         };
@@ -2579,9 +2587,12 @@ require_once 'includes/header.php';
     // ─── Dynamic ICE/TURN Configuration ───
     // Default fallback (STUN only — works on LAN, fails on mobile)
     let iceServers = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
+        iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            },
+            {
+                urls: 'stun:stun1.l.google.com:19302'
+            }
         ],
         sdpSemantics: 'unified-plan',
         iceCandidatePoolSize: 10
@@ -2592,7 +2603,9 @@ require_once 'includes/header.php';
     async function fetchTurnCredentials() {
         try {
             LOG("🔑 TURN server məlumatları yüklənir...", "#3b82f6");
-            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now(), { credentials: 'include' });
+            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now(), {
+                credentials: 'include'
+            });
             const data = await resp.json();
 
             if (data.success && data.iceServers && data.iceServers.length > 0) {
@@ -2603,10 +2616,10 @@ require_once 'includes/header.php';
                 };
                 turnCredentialsFetched = true;
 
-                const hasTurn = data.iceServers.some(s =>
-                    (typeof s.urls === 'string' && s.urls.startsWith('turn:')) ||
-                    (typeof s.urls === 'string' && s.urls.startsWith('turns:'))
-                );
+                const hasTurn = data.iceServers.some(s => {
+                    const urlList = typeof s.urls === 'string' ? [s.urls] : s.urls;
+                    return urlList.some(url => url.startsWith('turn:') || url.startsWith('turns:'));
+                });
 
                 if (hasTurn) {
                     LOG("✅ TURN server hazırdır (mobil bağlantı dəstəklənir)", "#10b981");
@@ -2632,7 +2645,9 @@ require_once 'includes/header.php';
 
     const peerConfig = {
         debug: 1,
-        get config() { return iceServers; },
+        get config() {
+            return iceServers;
+        },
         host: window.location.hostname,
         port: 9000,
         secure: false,
@@ -2703,12 +2718,12 @@ require_once 'includes/header.php';
                 dummyCtx.fillRect(0, 0, 640, 480);
                 camStream = dummyCanvas.captureStream();
                 try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
                     const osc = audioCtx.createOscillator();
                     const dst = osc.connect(audioCtx.createMediaStreamDestination());
                     osc.start();
                     camStream.addTrack(dst.stream.getAudioTracks()[0]);
-                } catch (e) { }
+                } catch (e) {}
                 document.getElementById('camSource').srcObject = camStream;
             }
 
@@ -2718,11 +2733,15 @@ require_once 'includes/header.php';
                 modal.style.display = 'flex';
 
                 document.getElementById('wbApproveBtn').onclick = () => {
-                    broadcastData({ type: 'whiteboard_approved' }, pId);
+                    broadcastData({
+                        type: 'whiteboard_approved'
+                    }, pId);
                     modal.style.display = 'none';
                 };
                 document.getElementById('wbRejectBtn').onclick = () => {
-                    broadcastData({ type: 'whiteboard_rejected' }, pId);
+                    broadcastData({
+                        type: 'whiteboard_rejected'
+                    }, pId);
                     modal.style.display = 'none';
                 };
             }
@@ -2733,11 +2752,15 @@ require_once 'includes/header.php';
                 modal.style.display = 'flex';
 
                 document.getElementById('screenApproveBtn').onclick = () => {
-                    broadcastData({ type: 'screen_share_approved' }, pId);
+                    broadcastData({
+                        type: 'screen_share_approved'
+                    }, pId);
                     modal.style.display = 'none';
                 };
                 document.getElementById('screenRejectBtn').onclick = () => {
-                    broadcastData({ type: 'screen_share_rejected' }, pId);
+                    broadcastData({
+                        type: 'screen_share_rejected'
+                    }, pId);
                     modal.style.display = 'none';
                 };
             }
@@ -2755,7 +2778,9 @@ require_once 'includes/header.php';
             async function startLiveKit() {
                 try {
                     LOG("📡 LiveKit qoşulması başladılır...");
-                    const res = await fetch(`../api/livekit_token.php?room=${lID}`, { credentials: 'include' });
+                    const res = await fetch(`../api/livekit_token.php?room=${lID}`, {
+                        credentials: 'include'
+                    });
                     const data = await res.json();
                     if (!data.success) throw new Error(data.message);
 
@@ -2974,7 +2999,10 @@ require_once 'includes/header.php';
             });
 
             const lossPercent = packetsSent > 0 ? (packetsLost / packetsSent) * 100 : 0;
-            return { rttMs, lossPercent };
+            return {
+                rttMs,
+                lossPercent
+            };
         } catch (e) {
             return null;
         }
@@ -3019,7 +3047,7 @@ require_once 'includes/header.php';
     function startAdaptiveQualityMonitor() {
         if (adaptiveQualityInterval) clearInterval(adaptiveQualityInterval);
         adaptiveQualityInterval = setInterval(() => {
-            evaluateAdaptiveQuality().catch(() => { });
+            evaluateAdaptiveQuality().catch(() => {});
         }, 8000);
     }
 
@@ -3085,7 +3113,11 @@ require_once 'includes/header.php';
         fd.append('lesson_id', lID);
         fd.append('room_name', lID);
 
-        fetch('../api/start_egress.php', { method: 'POST', body: fd, credentials: 'include' })
+        fetch('../api/start_egress.php', {
+                method: 'POST',
+                body: fd,
+                credentials: 'include'
+            })
             .then(r => r.json())
             .then(d => {
                 if (d.success) {
@@ -3128,12 +3160,12 @@ require_once 'includes/header.php';
             ctx.save();
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            
+
             // Check if video is actually updating
             if (studentScreenVidElement.paused || studentScreenVidElement.ended) {
                 studentScreenVidElement.play().catch(() => {});
             }
-            
+
             ctx.drawImage(studentScreenVidElement, dx, dy, dW, dH);
             ctx.restore();
 
@@ -3164,10 +3196,10 @@ require_once 'includes/header.php';
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 ctx.strokeStyle = '#10b981'; // Green for teacher
                 ctx.lineWidth = 3;
-                
+
                 const cx = canvas.width - camDrawW - 30;
                 const cy = canvas.height - camDrawH - 30;
-                
+
                 if (ctx.roundRect) {
                     ctx.beginPath();
                     ctx.roundRect(cx, cy, camDrawW, camDrawH, 12);
@@ -3182,7 +3214,7 @@ require_once 'includes/header.php';
                 ctx.fillStyle = '#10b981';
                 ctx.font = 'bold 10px Inter, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('MÜƏLLİM', cx + camDrawW/2, cy + camDrawH + 15);
+                ctx.fillText('MÜƏLLİM', cx + camDrawW / 2, cy + camDrawH + 15);
                 ctx.restore();
             }
 
@@ -3568,7 +3600,9 @@ require_once 'includes/header.php';
             const screenSrc = document.getElementById('screenSource');
             if (screenSrc) screenSrc.srcObject = null;
             LOG("Ekran paylaşımı dayandırıldı.", "#f59e0b");
-            broadcastData({ type: 'teacher_screen_share_stopped' });
+            broadcastData({
+                type: 'teacher_screen_share_stopped'
+            });
 
             if (screenStream) {
                 const tracks = screenStream.getTracks();
@@ -3591,9 +3625,15 @@ require_once 'includes/header.php';
             try {
                 screenStream = await navigator.mediaDevices.getDisplayMedia({
                     video: {
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
-                        frameRate: { ideal: 30 }
+                        width: {
+                            ideal: 1920
+                        },
+                        height: {
+                            ideal: 1080
+                        },
+                        frameRate: {
+                            ideal: 30
+                        }
                     }
                 });
                 document.getElementById('screenSource').srcObject = screenStream;
@@ -3606,7 +3646,9 @@ require_once 'includes/header.php';
                 // const localScreenTrack = new LivekitClient.LocalVideoTrack(screenTrack);
                 // await room.localParticipant.publishTrack(localScreenTrack, { source: LivekitClient.Track.Source.ScreenShare });
 
-                broadcastData({ type: 'teacher_screen_share_started' });
+                broadcastData({
+                    type: 'teacher_screen_share_started'
+                });
 
                 screenStream.getVideoTracks()[0].onended = () => {
                     if (isScreenSharing) toggleScreenShare();
@@ -3686,9 +3728,15 @@ require_once 'includes/header.php';
     function stopStudentSpotlight(reason = 'auto') {
         if (spotlightPeerId) {
             // Send both to be safe, as student only stops what is active
-            broadcastData({ type: 'whiteboard_force_stop', reason: reason }, spotlightPeerId);
-            broadcastData({ type: 'screen_share_force_stop', reason: reason }, spotlightPeerId);
-            
+            broadcastData({
+                type: 'whiteboard_force_stop',
+                reason: reason
+            }, spotlightPeerId);
+            broadcastData({
+                type: 'screen_share_force_stop',
+                reason: reason
+            }, spotlightPeerId);
+
             if (reason === 'teacher') {
                 LOG("🛑 Tələbə paylaşımı dayandırıldı.", "#f59e0b");
             }
@@ -3767,9 +3815,11 @@ require_once 'includes/header.php';
             if (!isAuto && !confirm("Dərsi bitirmək və arxivləmək istəyirsiniz?")) return;
 
             LOG("🏁 Dərs bitirilir...", "#f59e0b");
-            
+
             // Send end signal but don't wait for it if it hangs
-            broadcastData({ type: 'lesson_ended' }).catch(e => console.warn("Broadcast end error:", e));
+            broadcastData({
+                type: 'lesson_ended'
+            }).catch(e => console.warn("Broadcast end error:", e));
 
             LOG("⏳ Arxiv tamamlanır, xahiş olunur gözləyin...", "#3b82f6");
 
@@ -3777,36 +3827,49 @@ require_once 'includes/header.php';
             fd.append('live_class_id', lID);
 
             // 1. END CLASS IN DATABASE (STATUS: LIVE -> ENDED)
-            fetch('api/end_live_class.php', { 
-                method: 'POST', 
-                body: fd, 
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'include' 
-            })
-            .then(r => r.json().catch(() => ({ success: true }))) // Continue even if JSON parse fails
-            .then(() => {
-                LOG("✅ Dərs bazada bitirildi.", "#10b981");
-                
-                // 2. STOP SERVER-SIDE RECORDING (EGRESS)
-                return fetch('../api/stop_egress.php', { method: 'POST', body: fd, credentials: 'include' });
-            })
-            .then(r => r.json().catch(() => ({ success: false, message: "Egress cavabı oxunmadı" })))
-            .then(d => {
-                if (d && d.success) {
-                    LOG("📥 Server-side qeydiyyat dayandırıldı.", "#10b981");
-                } else {
-                    LOG("⚠️ Arxiv dayandırılarkən xəbərdarlıq: " + (d?.message || d?.error || "Naməlum"), "#fde047");
-                }
-                LOG("🏁 Dərs uğurla tamamlandı!", "#10b981");
-                setTimeout(() => {
-                    window.location.assign("live-lessons.php?ended=1");
-                }, 1500);
-            })
-            .catch(err => {
-                LOG("❌ Prosesdə xəta yarandı, lakin çıxış edilir...", "#ef4444");
-                console.error("End Process Error:", err);
-                setTimeout(() => { window.location.assign("live-lessons.php"); }, 1500);
-            });
+            fetch('api/end_live_class.php', {
+                    method: 'POST',
+                    body: fd,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                })
+                .then(r => r.json().catch(() => ({
+                    success: true
+                }))) // Continue even if JSON parse fails
+                .then(() => {
+                    LOG("✅ Dərs bazada bitirildi.", "#10b981");
+
+                    // 2. STOP SERVER-SIDE RECORDING (EGRESS)
+                    return fetch('../api/stop_egress.php', {
+                        method: 'POST',
+                        body: fd,
+                        credentials: 'include'
+                    });
+                })
+                .then(r => r.json().catch(() => ({
+                    success: false,
+                    message: "Egress cavabı oxunmadı"
+                })))
+                .then(d => {
+                    if (d && d.success) {
+                        LOG("📥 Server-side qeydiyyat dayandırıldı.", "#10b981");
+                    } else {
+                        LOG("⚠️ Arxiv dayandırılarkən xəbərdarlıq: " + (d?.message || d?.error || "Naməlum"), "#fde047");
+                    }
+                    LOG("🏁 Dərs uğurla tamamlandı!", "#10b981");
+                    setTimeout(() => {
+                        window.location.assign("live-lessons.php?ended=1");
+                    }, 1500);
+                })
+                .catch(err => {
+                    LOG("❌ Prosesdə xəta yarandı, lakin çıxış edilir...", "#ef4444");
+                    console.error("End Process Error:", err);
+                    setTimeout(() => {
+                        window.location.assign("live-lessons.php");
+                    }, 1500);
+                });
         } catch (fatalErr) {
             console.error("Fatal End Lesson Error:", fatalErr);
             window.location.assign("index.php");
@@ -3843,10 +3906,10 @@ require_once 'includes/header.php';
         fd.append('user_id', uId);
 
         fetch('api/kick_student.php', {
-            method: 'POST',
-            body: fd,
-            credentials: 'include'
-        })
+                method: 'POST',
+                body: fd,
+                credentials: 'include'
+            })
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
                 return r.json();
@@ -3892,7 +3955,9 @@ require_once 'includes/header.php';
     function approveStudentRejoin(uId, name) {
         LOG(`✅ ${name} (ID: ${uId}) üçün yenidən giriş icazəsi təsdiqlənir...`, "#f59e0b");
 
-        fetch(`../student/api/unkick_student.php?live_class_id=${lID}&user_id=${uId}&t=${Date.now()}`, { credentials: 'include' })
+        fetch(`../student/api/unkick_student.php?live_class_id=${lID}&user_id=${uId}&t=${Date.now()}`, {
+                credentials: 'include'
+            })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
@@ -3966,7 +4031,9 @@ require_once 'includes/header.php';
 
     function refreshLiveAttendance() {
         LOG("🔄 Canlı iştirak yenilənir...", "#60a5fa");
-        fetch('api/get_live_attendance.php?id=' + lID + '&subject_id=' + courseId, { credentials: 'include' })
+        fetch('api/get_live_attendance.php?id=' + lID + '&subject_id=' + courseId, {
+                credentials: 'include'
+            })
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -4082,19 +4149,19 @@ require_once 'includes/header.php';
         btn.disabled = true;
         btn.innerHTML = 'Göndərilir...';
         fetch('api/send_notification.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                target_type: type,
-                target_id: targetId,
-                title: title,
-                message: message,
-                type: 'info'
-            }),
-            credentials: 'include'
-        })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    target_type: type,
+                    target_id: targetId,
+                    title: title,
+                    message: message,
+                    type: 'info'
+                }),
+                credentials: 'include'
+            })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -4178,7 +4245,7 @@ require_once 'includes/header.php';
     });
 
     // Klaviatura qısayollarını (F5, Ctrl+R) blokla
-    window.addEventListener('keydown', function (e) {
+    window.addEventListener('keydown', function(e) {
         if ((e.which || e.keyCode) == 116 || (e.ctrlKey && (e.which || e.keyCode) == 82)) {
             e.preventDefault();
             LOG("⚠️ Səhifəni yeniləmək qadağandır!", "#ef4444");
