@@ -1,4 +1,5 @@
 <?php
+
 /**
  * LiveKit Egress Management Service
  * Handles starting and stopping server-side recordings.
@@ -6,40 +7,52 @@
 require_once __DIR__ . '/../teacher/config/database.php';
 require_once __DIR__ . '/livekit_helper.php';
 
-class LiveKitEgressService {
+class LiveKitEgressService
+{
     private $apiKey;
     private $apiSecret;
     private $apiHost;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->apiKey = $_ENV['LIVEKIT_API_KEY'] ?? $_SERVER['LIVEKIT_API_KEY'] ?? getenv('LIVEKIT_API_KEY');
         $this->apiSecret = $_ENV['LIVEKIT_API_SECRET'] ?? $_SERVER['LIVEKIT_API_SECRET'] ?? getenv('LIVEKIT_API_SECRET');
-        $this->apiHost = $_ENV['LIVEKIT_HOST'] ?? $_SERVER['LIVEKIT_HOST'] ?? getenv('LIVEKIT_HOST');
-        
+        $this->apiHost = $_ENV['LIVEKIT_HOST'] ?? $_SERVER['LIVEKIT_HOST'] ?? getenv('LIVEKIT_HOST') ?? 'https://distant-l.ndu.edu.az';
+
         // Remove wss:// or ws:// for API calls
         $this->apiHost = str_replace(['wss://', 'ws://'], ['https://', 'http://'], $this->apiHost);
+
+        // Validate credentials
+        if (
+            empty($this->apiKey) || $this->apiKey === 'your_api_key_here' ||
+            empty($this->apiSecret) || $this->apiSecret === 'your_api_secret_here'
+        ) {
+            error_log("WARNING: LiveKit credentials not properly configured. Check .env file.");
+            error_log("Expected: LIVEKIT_API_KEY and LIVEKIT_API_SECRET environment variables");
+        }
     }
 
-    public function startRecording($lessonId, $roomName) {
+    public function startRecording($lessonId, $roomName)
+    {
         $db = Database::getInstance();
-        
+
         // Base URL for the recording view
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
         $host = $_SERVER['HTTP_HOST'];
         // Use a fixed public host if defined (recommended for Egress)
         $publicHost = getenv('PUBLIC_BASE_URL') ?: "$protocol://$host/distant-tehsil-test";
-        
+
         $templateUrl = "$publicHost/teacher/live-record_view.php?id=$lessonId&secret=L6k_Rec_2024";
 
         // 1. Generate Admin Token with Egress permissions
         $token = LiveKitHelper::generateToken(
-            $this->apiKey, 
-            $this->apiSecret, 
-            'admin_recorder', 
-            'Admin', 
-            '', 
-            false, 
-            false, 
+            $this->apiKey,
+            $this->apiSecret,
+            'admin_recorder',
+            'Admin',
+            '',
+            false,
+            false,
             ['roomRecord' => true]
         );
 
@@ -56,7 +69,7 @@ class LiveKitEgressService {
 
         // 3. Call LiveKit Egress API
         $url = rtrim($this->apiHost, '/') . '/twirp/livekit.Egress/StartRoomCompositeEgress';
-        
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -65,26 +78,49 @@ class LiveKitEgressService {
             'Content-Type: application/json',
             'Authorization: Bearer ' . $token
         ]);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
+        // Log the API call for debugging
+        error_log("LiveKit Egress API call: POST $url, HTTP $httpCode");
+        if ($curlError) {
+            error_log("cURL error: $curlError");
+        }
+
         $result = json_decode($response, true);
-        
+
         if ($httpCode === 200 && isset($result['egress_id'])) {
             // Save Egress ID to database to stop it later
             $db->query("UPDATE live_classes SET egress_id = ? WHERE id = ?", [$result['egress_id'], $lessonId]);
             return ['success' => true, 'egress_id' => $result['egress_id']];
         }
 
-        return ['success' => false, 'error' => $response, 'code' => $httpCode];
+        // Return detailed error information
+        $errorMsg = "LiveKit API Error (HTTP $httpCode): ";
+        if ($curlError) {
+            $errorMsg .= "Connection failed - $curlError";
+        } elseif ($httpCode === 503) {
+            $errorMsg .= "Server unavailable. Is LiveKit deployed? Check LIVEKIT_API_KEY and LIVEKIT_API_SECRET in .env";
+        } elseif ($httpCode === 401) {
+            $errorMsg .= "Authentication failed. Invalid LIVEKIT_API_KEY or LIVEKIT_API_SECRET";
+        } else {
+            $errorMsg .= $response;
+        }
+
+        error_log($errorMsg);
+        return ['success' => false, 'error' => $errorMsg, 'code' => $httpCode];
     }
 
-    public function stopRecording($lessonId) {
+    public function stopRecording($lessonId)
+    {
         $db = Database::getInstance();
         $lesson = $db->fetch("SELECT egress_id FROM live_classes WHERE id = ?", [$lessonId]);
-        
+
         if (!$lesson || empty($lesson['egress_id'])) {
             return ['success' => false, 'message' => 'Egress ID tapılmadı.'];
         }
@@ -92,13 +128,13 @@ class LiveKitEgressService {
         $egressId = $lesson['egress_id'];
 
         $token = LiveKitHelper::generateToken(
-            $this->apiKey, 
-            $this->apiSecret, 
-            'admin_recorder', 
-            'Admin', 
-            '', 
-            false, 
-            false, 
+            $this->apiKey,
+            $this->apiSecret,
+            'admin_recorder',
+            'Admin',
+            '',
+            false,
+            false,
             ['roomRecord' => true]
         );
 
