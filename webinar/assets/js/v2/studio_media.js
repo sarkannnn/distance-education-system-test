@@ -12,12 +12,8 @@ class StudioMedia {
         this.stream = null;
         this.camStream = null;
         this.screenStream = null;
+        this.allDataConns = [];
         this.participants = new Map();
-        
-        // LiveKit Components
-        this.lkRoom = null;
-        this.lkToken = null;
-        this.lkServer = null;
 
         this.isCamOn = false;
         this.isMicOn = false;
@@ -35,19 +31,16 @@ class StudioMedia {
     }
 
     async init() {
-        console.log("StudioMedia: Initializing...");
+        console.log("StudioMedia: Initializing PeerJS...");
 
-        if (this.role === 'teacher') {
+        if (this.role === 'student') {
+            console.log("StudioMedia: Student mode detected");
+            this.startPeerJS();
+        } else {
+            console.log("StudioMedia: Teacher mode detected");
+            // Wait for media before starting PeerJS so we have a stream to answer with
             await this.initTeacherMedia();
             this.startCompositing();
-        }
-
-        // Priority 1: Try LiveKit
-        const success = await this.connectLiveKit();
-        
-        // Priority 2: Fallback to PeerJS if LiveKit fails (or is not configured)
-        if (!success) {
-            console.warn("StudioMedia: LiveKit failed, falling back to PeerJS...");
             this.startPeerJS();
         }
     }
@@ -73,85 +66,10 @@ class StudioMedia {
         }
     }
 
-    // --- LiveKit Integration ---
-    async connectLiveKit() {
-        try {
-            console.log("StudioMedia: Fetching LiveKit Token...");
-            const resp = await fetch(`../api/livekit_token.php?room=webinar-${this.wID}`);
-            const data = await resp.json();
-
-            if (!data.success) {
-                console.warn("StudioMedia: LiveKit Token failed", data.message);
-                return false;
-            }
-
-            this.lkToken = data.token;
-            this.lkServer = data.serverUrl || "wss://distant-l.ndu.edu.az";
-            
-            console.log("StudioMedia: Connecting to LiveKit Room...");
-            this.lkRoom = new LivekitClient.Room({
-                adaptiveStream: true,
-                dynacast: true,
-            });
-
-            // Set up event listeners
-            this.lkRoom
-                .on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-                    this.handleLKTrackSubscribed(track, publication, participant);
-                })
-                .on(LivekitClient.RoomEvent.ParticipantConnected, (participant) => {
-                    console.log("StudioMedia: Participant connected", participant.identity);
-                })
-                .on(LivekitClient.RoomEvent.ParticipantDisconnected, (participant) => {
-                    console.log("StudioMedia: Participant disconnected", participant.identity);
-                    this.removeParticipantFromGrid(participant.identity);
-                })
-                .on(LivekitClient.RoomEvent.Disconnected, () => {
-                    this.updateStatus('Oflayn', 'bg-rose-500');
-                });
-
-            await this.lkRoom.connect(this.lkServer, this.lkToken);
-            this.updateStatus('Canlı (SFU)', 'bg-emerald-500');
-            console.log("StudioMedia: Connected to LiveKit", this.lkRoom.name);
-
-            // Publish our stream if we are Host or Guest Host
-            if (this.role === 'teacher' || this.role === 'guest') {
-                this.publishLKTracks();
-            }
-
-            return true;
-        } catch (err) {
-            console.error("StudioMedia: LiveKit connection failed", err);
-            return false;
-        }
-    }
-
-    async publishLKTracks() {
-        if (!this.lkRoom || !this.composingStream) return;
-        
-        console.log("StudioMedia: Publishing Composing Stream to LiveKit...");
-        const videoTrack = this.composingStream.getVideoTracks()[0];
-        const audioTrack = this.composingStream.getAudioTracks()[0];
-
-        if (videoTrack) await this.lkRoom.localParticipant.publishTrack(videoTrack, { name: 'camera' });
-        if (audioTrack) await this.lkRoom.localParticipant.publishTrack(audioTrack, { name: 'audio' });
-    }
-
-    handleLKTrackSubscribed(track, publication, participant) {
-        if (track.kind === LivekitClient.Track.Kind.Video) {
-            console.log("StudioMedia: Received remote video track from", participant.identity);
-            this.addParticipantToGrid(participant.identity, participant.name || participant.identity, track.attach());
-        }
-        if (track.kind === LivekitClient.Track.Kind.Audio) {
-            track.attach();
-        }
-    }
-
-    // --- PeerJS Fallback Logic ---
     startPeerJS() {
         const peerId = (this.role === 'teacher') ? `w-${this.wID}-teacher` : null;
         console.log(`StudioMedia: Starting PeerJS (ID: ${peerId || 'Auto'})...`);
-        
+
         this.peer = new Peer(peerId, {
             debug: 3,
             config: {
@@ -276,7 +194,7 @@ class StudioMedia {
 
             // Call teacher with composed stream
             if (this.stageCall) this.stageCall.close();
-            
+
             if (!this.composingStream) this.startCompositing();
 
             this.stageCall = this.peer.call(this.teacherPeerId, this.composingStream || this.camStream, {
@@ -351,7 +269,7 @@ class StudioMedia {
 
         // Teacher role uses the composed stream (Canvas + Audio)
         let myStream = (this.role === 'teacher' && this.composingStream) ? this.composingStream : this.camStream;
-        
+
         if (!myStream) {
             myStream = this.createSilentStream();
         }
@@ -496,7 +414,7 @@ class StudioMedia {
 
         box.appendChild(video);
         box.appendChild(nameTag);
-        
+
         // Add click listener to feature this participant
         box.style.cursor = 'pointer';
         box.addEventListener('click', () => this.featureParticipant(id));
@@ -536,7 +454,7 @@ class StudioMedia {
         const container = document.getElementById('featuredVideoContainer');
         const video = document.getElementById('featuredVideo');
         const nameEl = document.getElementById('featuredName');
-        
+
         // Find the video element in the grid to get its stream
         const sourceVid = p.element.querySelector('video');
         if (sourceVid && sourceVid.srcObject) {
@@ -789,7 +707,7 @@ class StudioMedia {
             console.warn("StudioMedia: No outputCanvas found for role", this.role);
             return;
         }
-        
+
         const canvas = this.outputCanvas;
         const ctx = this.outputCtx;
         const targetW = 1920;
@@ -813,7 +731,7 @@ class StudioMedia {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 this.drawImageFit(ctx, window.studioWhiteboard.canvas, 0, 0, canvas.width, canvas.height);
                 mainSourceDrawn = true;
-            } 
+            }
             // 2. Or Screen Share
             else if (this.isScreenOn && this.screenStream) {
                 const screenVid = document.getElementById('screenSource');
@@ -859,7 +777,7 @@ class StudioMedia {
         const sourceStream = (this.role === 'teacher') ? this.camStream : this.camStream; // Both use their own camStream for audio
         const audioTracks = sourceStream ? sourceStream.getAudioTracks() : [];
         this.composingStream = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
-        
+
         console.log(`StudioMedia: Compositing started for ${this.role}`);
     }
 
@@ -911,7 +829,7 @@ class StudioMedia {
 
     swapViews() {
         if (this.role !== 'student') return;
-        
+
         const remoteVid = document.getElementById('remoteVid');
         const localVid = document.getElementById('localVidMobile');
         const remoteName = document.querySelector('#teacherBox .participant-name');
