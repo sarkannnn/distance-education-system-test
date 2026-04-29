@@ -20,6 +20,7 @@ if (!function_exists('e')) {
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.min.js"></script>
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="assets/css/v2/studio.css?v=<?php echo time(); ?>">
