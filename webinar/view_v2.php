@@ -39,7 +39,7 @@ $pageTitle = "Canlı İzle V2: " . $webinar['title'];
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.6.2/dist/livekit-client.umd.min.js"></script>
     <link rel="stylesheet" href="assets/css/v2/studio.css?v=<?php echo time(); ?>">
 </head>
 
@@ -339,8 +339,7 @@ $pageTitle = "Canlı İzle V2: " . $webinar['title'];
         const studioConfig = {
             wID: <?php echo (int) $id; ?>,
             uName: "<?php echo htmlspecialchars($user['fullname'] ?? $user['full_name'] ?? 'İştirakçı'); ?>",
-            role: "student",
-            teacherPeerId: "<?php echo $webinar['peer_id']; ?>"
+            role: "student"
         };
 
         console.log("StudioConfig:", studioConfig);

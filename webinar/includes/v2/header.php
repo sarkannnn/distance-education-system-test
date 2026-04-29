@@ -22,7 +22,7 @@ if (!function_exists('e')) {
     <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.6.2/dist/livekit-client.umd.min.js"></script>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="assets/css/v2/studio.css?v=<?php echo time(); ?>">
