@@ -67,7 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'title' => $title,
             'description' => $description,
             'scheduled_at' => $scheduled_at,
-            'status' => 'scheduled'
+            'status' => 'scheduled',
+            'guest_token' => bin2hex(random_bytes(16))
         ]);
 
         header('Location: ../dashboard.php?success=webinar_created');

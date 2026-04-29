@@ -9,7 +9,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 $auth = new Auth();
 if (!$auth->isLoggedIn()) {
-    jsonResponse(['success' => false, 'message' => 'Giriş tələb olunur'], 401);
+    // Return success:false but HTTP 200 to avoid triggering the global redirect interceptor
+    echo json_encode(['success' => false, 'message' => 'Giriş tələb olunur (Session flaky)']);
+    exit;
 }
 
 $currentUser = $auth->getCurrentUser();
