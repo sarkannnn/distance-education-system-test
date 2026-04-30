@@ -13,9 +13,9 @@ Hazırda sistem PeerJS (Mesh) arxitekturası ilə işləyir. İştirakçılar bi
 Vebinarlar adətən böyük auditoriyalar (50-100+ nəfər) üçün nəzərdə tutulur. PeerJS-in texniki limiti buna imkan vermir. LiveKit (SFU) isə bütün yükü serverə götürərək, hər kəsin stabil və kəsintisiz video izləməsini təmin edir.
 
 ### 🛠️ Necə edəcəyik?
-- **Backend:** `api/livekit_token.php` yaradılacaq.
-- **Frontend:** PeerJS SDK-sı çıxarılıp, `livekit-client` SDK-sı əlavə olunacaq.
-- **Transport:** Video axınları artıq brauzerdən-brauzerə yox, `wss://distant-l.ndu.edu.az` serverinə göndəriləcək.
+- [x] **Backend:** `api/livekit_token.php` yaradılıb.
+- [x] **Frontend:** PeerJS SDK-sı çıxarılıp, `livekit-client` SDK-sı əlavə olunub.
+- [x] **Transport:** Video axınları artıq brauzerdən-brauzerə yox, `wss://distant-l.ndu.edu.az` serverinə göndərilir.
 
 ---
 
@@ -28,9 +28,9 @@ Hazırda mühazirəçi yalnız bir tələbəni "Səhnəyə" (Stage) çıxara bil
 Real interaktivlik üçün bütün iştirakçıların (və ya icazə verilənlərin) eyni anda ekranda görünməsi, bir-birini eşitməsi (Zoom rejimi) təhsil keyfiyyətini artırır. Hətta eyni hesabla girən 10 nəfər belə fərqli pəncərələrdə görünməlidir.
 
 ### 🛠️ Necə edəcəyik?
-- **Unique Identity:** Hər bir bağlantı üçün `userId_random` formatında unikal şəxsiyyət ID-si yaradılacaq.
-- **CSS Grid Layout:** `webinar/view.php` daxilində dinamik şəbəkə sistemi qurulacaq. İştirakçı sayı artdıqca pəncərələr avtomatik olaraq 2x2, 3x3 və s. formasına düşəcək.
-- **Selective Subscription:** İnterneti zəif olanlar üçün yalnız danışan şəxsin videosunu görmə rejimi (Active Speaker) əlavə ediləcək.
+- [x] **Unique Identity:** Hər bir bağlantı üçün `userId_random` formatında unikal şəxsiyyət ID-si yaradılıb.
+- [x] **CSS Grid Layout:** `webinar/view.php` daxilində dinamik şəbəkə sistemi qurulub. İştirakçı sayı artdıqca pəncərələr avtomatik olaraq 2x2, 3x3 və s. formasına düşür.
+- [ ] **Selective Speaker:** İnterneti zəif olanlar üçün yalnız danışan şəxsin videosunu görmə rejimi (Active Speaker) əlavə ediləcək. (In Progress)
 
 ---
 
@@ -43,9 +43,9 @@ Hazırda mühazirəçi paneline daxil olmaq üçün mütləq sistemdə "Teacher"
 Universitetə dəvət olunan qonaq professorların sistemi öyrənməsinə və ya qeydiyyatdan keçməsinə vaxt yoxdur. Onlara sadəcə bir link atmaqla "Teams"dəki kimi yayıma qoşulmalarını təmin etmək lazımdır.
 
 ### 🛠️ Necə edəcəyik?
-- **Token Generator:** Admin panelində "Qonaq Linki Yarat" düyməsi olacaq.
-- **Bypass Auth:** `webinar/studio_guest.php` səhifəsi yaradılacaq. Bu səhifə sessiya (session) yox, URL-dəki unikal JWT token ilə işləyəcək.
-- **Simplified UI:** Qonaq üçün yalnız ən vacib düymələr (Kamera, Mikrofon, Ekran Paylaşımı) olan sadə studiya görünüşü təqdim olunacaq.
+- [x] **Token Generator:** Admin panelində "Qonaq Linki Yarat" düyməsi əlavə olunub.
+- [x] **Bypass Auth:** `webinar/studio_guest.php` səhifəsi yaradılıb. Bu səhifə URL-dəki unikal JWT token ilə işləyir.
+- [x] **Simplified UI:** Qonaq üçün yalnız ən vacib düymələr (Kamera, Mikrofon, Ekran Paylaşımı) olan sadə studiya görünüşü təqdim olunur.
 
 ---
 
@@ -58,9 +58,9 @@ Mühazirəçi studiyanı açan kimi dərhal canlı yayıma başlayır. Hazırlı
 Mühazirəçinin yayım öncəsi özünü görməsi, texniki problemləri (məs: mikrofonda səs yoxdursa) əvvəlcədə bilməsi və hər şey hazır olduqda "CANLIYA KEÇ" düyməsinə basması peşəkarlıqdır.
 
 ### 🛠️ Necə edəcəyik?
-- **Pre-join UI:** Studiyaya girişdən öncə "Setup" pərdəsi əlavə olunacaq.
-- **Local Preview:** Kamera videosu yalnız lokal olaraq göstəriləcək, serverə (LiveKit) hələ göndərilməyəcək.
-- **Ready Switch:** Mühazirəçi təsdiq etdikdən sonra `room.publishTrack()` funksiyası çağırılacaq.
+- [x] **Pre-join UI:** Studiyaya girişdən öncə "Setup" pərdəsi (Lobby) əlavə olunub.
+- [x] **Local Preview:** Kamera videosu lokal olaraq göstərilir, serverə (LiveKit) yalnız qoşulduqda göndərilir.
+- [x] **Ready Switch:** Mühazirəçi təsdiq etdikdən sonra yayım başlayır.
 
 ---
 
@@ -73,8 +73,8 @@ Tələbə yayımı izləyərkən brauzer tab-ını dəyişəndə videonu itirir.
 İstifadəçi rahatlığı (UX) üçün vacibdir. Tələbə qeydlər apararkən müəllimi görməyə davam etməli, müəllim isə məxfiliyini (fonunu) qoruya bilməlidir.
 
 ### 🛠️ Necə edəcəyik?
-- **Web API PiP:** Brauzerin nativ `requestPictureInPicture()` funksiyası aktivləşdiriləcək.
-- **Virtual Background:** LiveKit-in prosessor (Video Processor) imkanları ilə mühazirəçi üçün "Background Blur" (Arxa fonu bulandır) seçimi əlavə ediləcək.
+- [x] **Web API PiP:** Brauzerin nativ `requestPictureInPicture()` funksiyası aktivləşdirilib.
+- [ ] **Virtual Background:** LiveKit-in prosessor imkanları ilə mühazirəçi üçün "Background Blur" (Arxa fonu bulandır) seçimi əlavə ediləcək. (Planned)
 
 ---
 
