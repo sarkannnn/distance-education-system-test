@@ -2360,7 +2360,7 @@ require_once 'includes/header.php';
             });
     }
 
-    function startProductionNow() {
+    async function startProductionNow() {
         const overlay = document.getElementById('startProductionOverlay');
 
         // 1. Request Fullscreen
@@ -2375,17 +2375,48 @@ require_once 'includes/header.php';
         overlay.style.opacity = '0';
         setTimeout(() => overlay.style.display = 'none', 500);
 
-        // 3. Initialize Media if not already done or restart
+        // 3. Check LiveKit server health before connecting
+        const serverOk = await checkLiveKitHealth();
+        if (!serverOk) return;
+
+        // 4. Initialize Media if not already done or restart
         init();
 
         LOG("🎬 Yayım və tam ekran rejimi başladıldı.", "#10b981");
 
-        // 4. Monitoring Fullscreen Exit
+        // 5. Monitoring Fullscreen Exit
         document.onfullscreenchange = () => {
             if (!document.fullscreenElement) {
                 LOG("⚠️ Diqqət: Tam ekran rejimi dayandırıldı!", "#ef4444");
             }
         };
+    }
+
+    // ─── LiveKit server health check ─────────────────────────────────────────
+    async function checkLiveKitHealth() {
+        try {
+            const response = await fetch('../api/livekit_health.php');
+            const data = await response.json();
+
+            if (data.status === 'healthy') {
+                LOG(`✅ LiveKit serveri hazırdır (${data.latency_ms}ms)`, "#10b981");
+                return true;
+            }
+
+            throw new Error(data.error || 'Server unhealthy');
+        } catch (err) {
+            LOG(`❌ LiveKit serveri əlçatmazdır: ${err.message}`, "#ef4444");
+            showNotification(
+                'LiveKit serveri hal-hazırda əlçatmazdır. Zəhmət olmasa bir az sonra yenidən cəhd edin.',
+                'error',
+                10000
+            );
+
+            const btn = document.getElementById('startProductionBtn') || document.querySelector('[onclick="startProductionNow()"]');
+            if (btn) btn.disabled = false; // re-enable so teacher can retry
+
+            return false;
+        }
     }
 
     function flushChunksBeacon() {
@@ -3107,30 +3138,115 @@ require_once 'includes/header.php';
         canvasLoopId = setInterval(drawToCanvas, 33);
     }
 
-    function startEgressRecording() {
-        LOG("🎬 Arxivləşdirmə başladılır...", "#3b82f6");
-        const fd = new FormData();
-        fd.append('lesson_id', lID);
-        fd.append('room_name', lID);
+    // ─── Notification helper ─────────────────────────────────────────────────
+    function showNotification(message, type, duration = 5000) {
+        const colors = {
+            success: 'background:#10b981',
+            warning: 'background:#f59e0b',
+            error: 'background:#ef4444'
+        };
+        const n = document.createElement('div');
+        n.style.cssText = `position:fixed;top:16px;right:16px;z-index:9999;padding:12px 20px;border-radius:8px;
+            color:#fff;font-weight:600;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);
+            ${colors[type] || colors.error}`;
+        n.textContent = message;
+        document.body.appendChild(n);
+        setTimeout(() => n.remove(), duration);
+    }
 
-        fetch('../api/start_egress.php', {
-                method: 'POST',
-                body: fd,
-                credentials: 'include'
-            })
-            .then(r => r.json())
-            .then(d => {
-                if (d.success) {
+    // ─── Egress recording with retry & backoff ───────────────────────────────
+    let egressActive = false;
+    let egressCheckInterval = null;
+
+    async function startEgressRecording() {
+        LOG("🎬 Arxivləşdirmə başladılır...", "#3b82f6");
+        const maxRetries = 3;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const fd = new FormData();
+                fd.append('lesson_id', lID);
+                fd.append('room_name', lID);
+
+                const response = await fetch('../api/start_egress.php', {
+                    method: 'POST',
+                    body: fd,
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
                     LOG(`✅ Server-side Arxiv (Egress) aktivdir. 🔴`, "#10b981");
                     recordingStartTime = Date.now();
-                } else {
-                    LOG(`⚠️ Egress Xətası: ${d.error || 'Naməlum'}`, "#ef4444");
-                    console.error("Egress error:", d);
+                    egressActive = true;
+                    startEgressMonitoring();
+                    return;
                 }
-            })
-            .catch(err => {
-                LOG("❌ Egress bağlantı xətası.", "#ef4444");
-            });
+
+                throw new Error(data.error || 'Unknown error');
+
+            } catch (err) {
+                console.error(`Egress attempt ${attempt} failed:`, err);
+
+                if (attempt >= maxRetries) {
+                    LOG(`⚠️ Egress ${maxRetries} cəhddən sonra uğursuz oldu. Brauzer yazması aktivdir.`, "#f59e0b");
+                    showNotification(
+                        '⚠ Server yazması uğursuz oldu. Brauzer yazması ehtiyat kimi aktivdir.',
+                        'warning',
+                        10000
+                    );
+                    egressActive = false;
+
+                    // Log failure to server for admin review
+                    fetch('../api/log_egress_failure.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            lesson_id: parseInt(lID),
+                            error: err.message
+                        })
+                    }).catch(() => {});
+
+                    return;
+                }
+
+                // Exponential backoff before next retry
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+        }
+    }
+
+    // ─── Egress health monitoring ────────────────────────────────────────────
+    function startEgressMonitoring() {
+        if (egressCheckInterval) clearInterval(egressCheckInterval);
+
+        egressCheckInterval = setInterval(async () => {
+            try {
+                const fd = new FormData();
+                fd.append('lesson_id', lID);
+
+                const response = await fetch('../api/check_egress_status.php', {
+                    method: 'POST',
+                    body: fd,
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (!data.active) {
+                    LOG(`⚠️ Server yazması dayandı: ${data.error || 'naməlum'}`, "#f59e0b");
+                    showNotification('⚠ Server yazması dayandı. Brauzer ehtiyat yazması aktivdir.', 'warning');
+                    egressActive = false;
+                    clearInterval(egressCheckInterval);
+                    egressCheckInterval = null;
+                }
+            } catch (err) {
+                console.warn('Egress status check failed:', err);
+            }
+        }, 30000); // Check every 30 seconds
     }
 
     function drawToCanvas() {

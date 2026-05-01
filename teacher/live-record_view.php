@@ -1,19 +1,29 @@
 <?php
+
 /**
  * LiveKit Egress Recording View
  * This page is used by LiveKit Egress to record the lesson layout.
  * It joins the room as a hidden participant and renders the compositor canvas.
  */
-// Egress Recording View - No auth required but secret key suggested
+// Egress Recording View - Secured with HMAC secret
 require_once 'includes/helpers.php';
 $db = Database::getInstance();
 
 $lessonId = $_GET['id'] ?? null;
-$secret = $_GET['secret'] ?? '';
+$providedSecret = $_GET['secret'] ?? '';
 
-// Simple security check (you can change this secret)
-if ($secret !== 'L6k_Rec_2024') {
-    // die("Unauthorized access."); 
+if (!$lessonId || !$providedSecret) {
+    http_response_code(400);
+    die('Bad Request');
+}
+
+$salt = getenv('EGRESS_SECRET_SALT') ?: 'change-this-in-production';
+$expectedSecret = hash_hmac('sha256', "lesson_{$lessonId}", $salt);
+
+if (!hash_equals($expectedSecret, $providedSecret)) {
+    error_log("[Egress] Unauthorized access attempt to lesson {$lessonId} from " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    http_response_code(403);
+    die('Unauthorized');
 }
 
 $lesson = $db->fetch("SELECT * FROM live_classes WHERE id = ?", [$lessonId]);
@@ -27,31 +37,41 @@ if (!$lesson) {
 ?>
 <!DOCTYPE html>
 <html lang="az">
+
 <head>
     <meta charset="UTF-8">
     <title>REC: <?php echo e($lesson['course_id']); ?></title>
     <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body, html {
-            margin: 0; padding: 0;
-            width: 1920px; height: 1080px; /* Fixed high-res for Egress */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            /* Fixed high-res for Egress */
             background: #0f172a;
             overflow: hidden;
             font-family: 'Inter', sans-serif;
         }
+
         #recordingCanvas {
             width: 100%;
             height: 100%;
             display: block;
         }
+
         /* Hidden elements for tracking */
-        #hiddenVideos { display: none; }
+        #hiddenVideos {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
     <canvas id="recordingCanvas" width="1920" height="1080"></canvas>
-    
+
     <div id="hiddenVideos">
         <video id="teacherCam" autoplay playsinline muted></video>
         <video id="teacherScreen" autoplay playsinline muted></video>
@@ -61,29 +81,31 @@ if (!$lesson) {
     <script>
         const lID = "<?php echo $lessonId; ?>";
         const canvas = document.getElementById('recordingCanvas');
-        const ctx = canvas.getContext('2d', { alpha: false });
-        
+        const ctx = canvas.getContext('2d', {
+            alpha: false
+        });
+
         let room;
         let teacherCamVid = document.getElementById('teacherCam');
         let teacherScreenVid = document.getElementById('teacherScreen');
         let spotlightVid = document.getElementById('studentSpotlight');
-        
+
         let isWhiteboardActive = false;
         let isStudentSpotlight = false;
         let spotlightName = "";
-        
+
         // Whiteboard internal canvas (for rendering drawings)
         const wbCanvas = document.createElement('canvas');
         wbCanvas.width = 1920;
         wbCanvas.height = 1080;
         const wbCtx = wbCanvas.getContext('2d');
-        
+
         async function initRecorder() {
             try {
                 // Fetch token for 'EgressRecorder'
                 const res = await fetch(`../api/livekit_token.php?room=${lID}&identity=EgressRecorder&role=recorder`);
                 const data = await res.json();
-                
+
                 room = new LivekitClient.Room();
                 await room.connect(data.serverUrl, data.token);
                 console.log("Connected to room for recording");
@@ -91,7 +113,7 @@ if (!$lesson) {
                 room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
                     if (track.kind === 'video') {
                         const isTeacher = participant.identity.includes('instructor') || participant.metadata?.includes('teacher');
-                        
+
                         if (publication.source === LivekitClient.Track.Source.Camera && isTeacher) {
                             track.attach(teacherCamVid);
                         } else if (publication.source === LivekitClient.Track.Source.ScreenShare && isTeacher) {
@@ -120,7 +142,7 @@ if (!$lesson) {
         function handleSignaling(d, participant) {
             if (d.type === 'whiteboard_started') isWhiteboardActive = true;
             if (d.type === 'whiteboard_stopped' || d.type === 'whiteboard_force_stop') isWhiteboardActive = false;
-            
+
             if (d.type === 'screen_share_started') {
                 isStudentSpotlight = true;
                 spotlightName = d.sender || "Tələbə";
@@ -144,7 +166,7 @@ if (!$lesson) {
             wbCtx.lineWidth = data.size || 3;
             wbCtx.lineCap = 'round';
             wbCtx.lineJoin = 'round';
-            
+
             if (data.tool === 'eraser') {
                 wbCtx.globalCompositeOperation = 'destination-out';
             } else {
@@ -183,7 +205,7 @@ if (!$lesson) {
             if (isStudentSpotlight && spotlightVid.readyState >= 2) {
                 // Draw spotlighted student screen
                 ctx.drawImage(spotlightVid, 0, 0, canvas.width, canvas.height);
-                
+
                 // Draw Teacher PIP in corner
                 if (teacherCamVid.readyState >= 2) {
                     const pipW = 400;
@@ -211,4 +233,5 @@ if (!$lesson) {
         initRecorder();
     </script>
 </body>
+
 </html>
