@@ -260,14 +260,14 @@ require_once 'includes/header.php';
                         
                         <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0 lg:justify-end">
                             <?php if ($w['status'] === 'live'): ?>
-                                <a href="<?php echo ($user['role'] === 'teacher' || $user['role'] === 'admin') ? 'studio.php' : 'view.php'; ?>?id=<?php echo $w['id']; ?>" 
+                                <a href="<?php echo ($user['role'] === 'teacher' || $user['role'] === 'admin') ? 'studio_v2.php' : 'view_v2.php'; ?>?id=<?php echo $w['id']; ?>" 
                                    class="flex-1 lg:flex-none justify-center group/btn px-6 md:px-10 py-4 md:py-5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center gap-2 md:gap-3 shadow-[0_15px_30px_-12px_rgba(16,185,129,0.5)]">
                                     <i data-lucide="play" class="w-4 h-4 md:w-5 md:h-5 fill-current group-hover/btn:scale-110 transition-transform"></i>
                                     DƏRSƏ QOŞUL
                                 </a>
                             <?php elseif ($w['status'] === 'scheduled' && ($user['role'] === 'teacher' || $user['role'] === 'admin')): ?>
                                 <button onclick="startWebinar(<?php echo $w['id']; ?>)"
-                                        class="flex-1 lg:flex-none justify-center px-6 md:px-10 py-4 md:py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic flex items-center justify-center">
+                                        class="flex-1 lg:flex-none justify-center px-6 md:px-10 py-4 md:py-5 bg-emerald-500 hover:bg-emerald-400 text-white border border-transparent rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all active:scale-95 italic flex items-center justify-center">
                                     <span class="md:hidden">BAŞLAT</span><span class="hidden md:inline">VEBİNARI BAŞLAT</span>
                                 </button>
                             <?php elseif ($w['status'] === 'ended'): ?>
@@ -279,6 +279,15 @@ require_once 'includes/header.php';
                             
                             <?php if ($user['role'] === 'teacher' || $user['role'] === 'admin'): ?>
                                 <div class="flex items-center gap-2 shrink-0">
+                                <?php if ($w['status'] === 'scheduled' || $w['status'] === 'live'): ?>
+                                    <!-- Magic Link Button -->
+                                    <button onclick="copyMagicLink('<?php echo $w['guest_token'] ?? ''; ?>', '<?php echo $w['id']; ?>')"
+                                            class="w-14 h-14 bg-white/5 hover:bg-amber-500/20 text-white/20 hover:text-amber-400 border border-white/5 rounded-2xl transition-all flex items-center justify-center group/magic shadow-xl"
+                                            title="Qonaq Linkini Kopyala">
+                                        <i data-lucide="wand-2" class="w-6 h-6 group-hover/magic:scale-110 transition-transform"></i>
+                                    </button>
+                                <?php endif; ?>
+
                                 <?php if ($w['status'] === 'scheduled'): ?>
                                     <!-- Edit Button - only for scheduled/pending -->
                                     <button onclick='openEditModal(<?php echo json_encode([
@@ -478,12 +487,23 @@ function startWebinar(id) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = 'studio.php?id=' + id;
+                    window.location.href = 'studio_v2.php?id=' + id;
                 } else {
                     alert('Xəta: ' + data.message);
                 }
             });
     }
+}
+
+function copyMagicLink(token, id) {
+    if (!token) {
+        alert("Bu vebinar üçün hələ qonaq linki yaradılmayıb (Bazada guest_token sütununu yoxlayın).");
+        return;
+    }
+    const url = window.location.origin + window.location.pathname.replace('dashboard.php', 'studio_guest.php') + '?token=' + token;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Qonaq linki kopyalandı!', 'success');
+    });
 }
 
 // ===== EDIT FUNCTIONALITY =====

@@ -41,7 +41,7 @@ if (!$identity && !empty($_GET['guest_token'])) {
     $guestToken = $_GET['guest_token'];
     $db = Database::getInstance();
     $webinar = $db->fetch("SELECT title FROM webinars WHERE guest_token = ?", [$guestToken]);
-    
+
     if ($webinar) {
         $identity = 'guest_' . bin2hex(random_bytes(4));
         $name = $_GET['guest_name'] ?? 'Qonaq Müəllim';
@@ -79,7 +79,7 @@ if (!$apiKey || !$apiSecret) {
 // Permissions based on role
 // Teacher and Guest Teacher can publish
 // Students can also publish for interactivity (if needed)
-$canPublish = true; 
+$canPublish = true;
 $canSubscribe = true;
 
 try {
