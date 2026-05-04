@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Arxiv və Resurslar - Archive
  * TMİS API inteqrasiyası ilə.
@@ -139,7 +140,7 @@ try {
 
         if (!empty($allCourseIds)) {
             $placeholders = implode(',', array_fill(0, count($allCourseIds), '?'));
-            
+
             // Axın dərsləri dəstəyi: FIND_IN_SET ilə stream_course_ids yoxlanılır
             $findInSetParts = [];
             foreach ($allCourseIds as $cId) {
@@ -176,7 +177,9 @@ try {
                     'hasVideo' => true,
                     'hasPdf' => false,
                     'description' => 'Sistem tərəfindən avtomatik qeydə alınmış canlı dərs yazısı.',
-                    'video_raw' => '../uploads/videos/' . $rec['recording_path'],
+                    'video_raw' => file_exists(__DIR__ . '/../uploads/videos/' . $rec['recording_path'])
+                        ? '../uploads/videos/' . $rec['recording_path']
+                        : '../uploads/live_recordings/' . $rec['recording_path'],
                     'pdf_url' => '',
                     'raw_date' => $rec['start_time']
                 ];
@@ -189,7 +192,6 @@ try {
     usort($archivedLessons, function ($a, $b) {
         return strtotime($b['raw_date'] ?? '2000-01-01') - strtotime($a['raw_date'] ?? '2000-01-01');
     });
-
 } catch (Exception $e) {
     // Fail silently
 }
@@ -226,7 +228,8 @@ try {
             $allCourseTitles[] = $lc['title'];
         }
     }
-} catch (Exception $e) {}
+} catch (Exception $e) {
+}
 
 // Unikal kurslar
 $courses = array_unique($allCourseTitles);
@@ -428,18 +431,18 @@ require_once 'includes/header.php';
     let currentType = 'all';
 
     // Search functionality
-    document.getElementById('archive-search').addEventListener('input', function (e) {
+    document.getElementById('archive-search').addEventListener('input', function(e) {
         filterArchive();
     });
 
     // Course filter
-    document.getElementById('course-filter').addEventListener('change', function (e) {
+    document.getElementById('course-filter').addEventListener('change', function(e) {
         filterArchive();
     });
 
     // Type filter buttons
     document.querySelectorAll('.type-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function() {
             document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentType = this.dataset.type;
@@ -501,7 +504,7 @@ require_once 'includes/header.php';
 
     // View tracking - both local and TMİS
     document.querySelectorAll('.track-view').forEach(btn => {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
             if (!id) return;
 
@@ -516,8 +519,12 @@ require_once 'includes/header.php';
             // Local increment
             fetch('api/increment_views.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id
+                })
             }).catch(err => console.error('View tracking error:', err));
         });
     });

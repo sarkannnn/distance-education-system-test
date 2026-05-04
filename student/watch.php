@@ -43,8 +43,10 @@ try {
         );
 
         if ($lesson && $lesson['recording_path']) {
-            // Use relative path for better reliability across different environments
-            $videoUrl = '../uploads/videos/' . $lesson['recording_path'];
+            // Check finalized path first, fall back to chunk path (crash/no-finalization case)
+            $videoUrl = file_exists(__DIR__ . '/../uploads/videos/' . $lesson['recording_path'])
+                ? '../uploads/videos/' . $lesson['recording_path']
+                : '../uploads/live_recordings/' . $lesson['recording_path'];
             $title = $lesson['title'] ?: ($lesson['subject_name'] ?? 'Canlı Dərs');
             $course = $lesson['subject_name'] ?? 'Fənn';
             $instructor = trim($lesson['instructor_name'] ?? 'Müəllim');
@@ -64,7 +66,7 @@ try {
 
         if ($lesson && $lesson['video_url']) {
             $rawUrl = $lesson['video_url'];
-            
+
             if (str_starts_with($rawUrl, 'http')) {
                 // If it's a full URL, check if it's local first
                 $filename = basename(parse_url($rawUrl, PHP_URL_PATH));
@@ -106,7 +108,7 @@ if (!$videoUrl) {
 if ($currentUser['role'] === 'student') {
     $courseId = (int)$lesson['course_id'];
     $tmisSubjectId = isset($lesson['tmis_subject_id']) ? (int)$lesson['tmis_subject_id'] : 0;
-    
+
     $isEnrolled = false;
 
     // 1. Check local enrollments
@@ -134,7 +136,7 @@ if ($currentUser['role'] === 'student') {
             }
         }
     }
-    
+
     if (!$isEnrolled) {
         die("
             <div style='background:#f8fafc; color:#1e293b; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;'>
