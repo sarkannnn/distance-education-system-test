@@ -365,7 +365,7 @@ require_once 'includes/header.php';
                         <?php else: ?>
                             <?php foreach ($todaySchedule as $lesson):
                                 $isLive = ($lesson['status'] === 'in-progress');
-                                $joinUrl = 'live-view.php?id=' . ($lesson['live_class_id'] ?? $lesson['id']);
+                                $joinUrl = 'live-view_livekit.php?id=' . ($lesson['live_class_id'] ?? $lesson['id']);
                                 $tag = $isLive ? 'a' : 'div';
                                 $href = $isLive ? 'href="' . $joinUrl . '"' : '';
                                 ?>

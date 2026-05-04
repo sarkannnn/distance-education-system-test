@@ -260,7 +260,10 @@ if ($activeLesson) {
     $now = time();
     if ($endTime > $now) {
         $diff = $endTime - $now;
-        $remainingTime = sprintf('%02d:%02d:%02d', ($diff / 3600), ($diff / 60 % 60), $diff % 60);
+        $h = floor($diff / 3600);
+        $m = floor(($diff % 3600) / 60);
+        $s = $diff % 60;
+        $remainingTime = sprintf('%02d:%02d:%02d', $h, $m, $s);
     }
 }
 
@@ -555,7 +558,7 @@ require_once 'includes/header.php';
                                 style="background: rgba(255,255,255,0.2); color: white; width: 45px; height: 45px;">
                                 <i data-lucide="copy"></i>
                             </button>
-                            <a href="live-studio?id=<?php echo $activeLesson['id']; ?>" class="btn btn-primary btn-lg"
+                            <a href="live-studio_livekit?id=<?php echo $activeLesson['id']; ?>" class="btn btn-primary btn-lg"
                                 style="background: white; color: var(--accent); border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                 <i data-lucide="video"></i>
                                 Studiyanı Aç
@@ -787,7 +790,9 @@ require_once 'includes/header.php';
 
 <?php if ($activeLesson): ?>
     <script>
-        // Countdown Timer logic     let timeLeft = "<?php echo $remainingTime; ?>".split(':').reduce((acc, time) => (60 * acc) + +time);     const countdownEl = document.getElementById('countdown');
+        // Countdown Timer logic
+        let timeLeft = "<?php echo $remainingTime; ?>".split(':').reduce((acc, time) => (60 * acc) + +time);
+        const countdownEl = document.getElementById('countdown');
         if (timeLeft > 0) {
             const interval = setInterval(() => {
                 timeLeft--;
@@ -802,7 +807,7 @@ require_once 'includes/header.php';
                 countdownEl.innerText = `${h}:${m}:${s}`;
             }, 1000);
         }
-        // Avtomatik Studiyanı aç (Yalnız dərs yeni başlayanda)     const urlParams = new URLSearchParams(window.location.search);     if (urlParams.get('started') === '1') {         const studioLink = "live-studio?id=<?php echo $activeLesson['id']; ?>";         setTimeout(() => {             window.location.href = studioLink;         }, 1000);     }
+        // Avtomatik Studiyanı aç (Yalnız dərs yeni başlayanda)     const urlParams = new URLSearchParams(window.location.search);     if (urlParams.get('started') === '1') {         const studioLink = "live-studio_livekit.php?id=<?php echo $activeLesson['id']; ?>";         setTimeout(() => {             window.location.href = studioLink;         }, 1000);     }
     </script>
 <?php endif; ?>
 

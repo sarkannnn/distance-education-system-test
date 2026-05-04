@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Teacher Archive - Arxivləşdirilmiş Materiallar (Premium Redesign)
  */
@@ -280,8 +281,11 @@ if ($tmisToken) {
                             // Lokal video faylı mövcuddursa, TMIS URL-i əvəzinə onu istifadə et
                             if (!empty($localLive['recording_path'])) {
                                 $localPath = __DIR__ . '/../uploads/videos/' . $localLive['recording_path'];
+                                $chunkPath = __DIR__ . '/../uploads/live_recordings/' . $localLive['recording_path'];
                                 if (file_exists($localPath)) {
                                     $fileUrl = '../uploads/videos/' . $localLive['recording_path'];
+                                } elseif (file_exists($chunkPath)) {
+                                    $fileUrl = '../uploads/live_recordings/' . $localLive['recording_path'];
                                 }
                             }
                         }
@@ -324,8 +328,11 @@ if ($tmisToken) {
                             // Lokal video faylı mövcuddursa, TMIS URL-i əvəzinə onu istifadə et
                             if (!empty($bestMatch['recording_path'])) {
                                 $localPath = __DIR__ . '/../uploads/videos/' . $bestMatch['recording_path'];
+                                $chunkPath = __DIR__ . '/../uploads/live_recordings/' . $bestMatch['recording_path'];
                                 if (file_exists($localPath)) {
                                     $fileUrl = '../uploads/videos/' . $bestMatch['recording_path'];
+                                } elseif (file_exists($chunkPath)) {
+                                    $fileUrl = '../uploads/live_recordings/' . $bestMatch['recording_path'];
                                 }
                             }
                         }
@@ -446,7 +453,8 @@ if ($tmisToken) {
                             $diff = abs($itemTs - $lfTs);
                             if ($diff < 86400 && $diff < $bestDiff) { // 24 saat aralığında
                                 $localFile = __DIR__ . '/../uploads/videos/' . $lf['recording_path'];
-                                if (file_exists($localFile)) {
+                                $chunkFile2 = __DIR__ . '/../uploads/live_recordings/' . $lf['recording_path'];
+                                if (file_exists($localFile) || file_exists($chunkFile2)) {
                                     $bestLocal = $lf;
                                     $bestDiff = $diff;
                                     $matchedViews = (int) $lf['views'];
@@ -454,7 +462,10 @@ if ($tmisToken) {
                             }
                         }
                         if ($bestLocal) {
-                            $fileUrl = '../uploads/videos/' . $bestLocal['recording_path'];
+                            $localFile = __DIR__ . '/../uploads/videos/' . $bestLocal['recording_path'];
+                            $fileUrl = file_exists($localFile)
+                                ? '../uploads/videos/' . $bestLocal['recording_path']
+                                : '../uploads/live_recordings/' . $bestLocal['recording_path'];
                             $tmisMatchedLocalLiveIds[] = $bestLocal['id'];
                             if (!$matchedLocalLiveId) {
                                 $matchedLocalLiveId = $bestLocal['id'];
@@ -541,7 +552,7 @@ if (!empty($myTeacherIds) || $isAdmin) {
 
         $localTitle = $archive['title'];
         $sInfoManual = $subjectMap[$archive['course_id']] ?? [];
-        
+
         $rawFileUrl = $archive['pdf_url'] ?: $archive['video_url'];
         // Fix relative paths for local environments
         if (!empty($rawFileUrl) && strpos($rawFileUrl, 'http') !== 0 && strpos($rawFileUrl, '../') !== 0) {
@@ -661,12 +672,12 @@ if (!empty($myTeacherIds) || $isAdmin) {
         }
 
         $sInfo = $subjectMap[$rec['course_id']] ?? [];
-        $specName = (!empty($rec['specialty_name']) && $rec['specialty_name'] !== 'Axın (çoxlu ixtisas)') 
-                    ? $rec['specialty_name'] 
-                    : ($sInfo['profession_name'] ?? 'Təyin edilməyib');
+        $specName = (!empty($rec['specialty_name']) && $rec['specialty_name'] !== 'Axın (çoxlu ixtisas)')
+            ? $rec['specialty_name']
+            : ($sInfo['profession_name'] ?? 'Təyin edilməyib');
         $courseLvl = (!empty($rec['course_level']) && !in_array($rec['course_level'], ['-', 'Təyin edilməyib']))
-                    ? (is_numeric($rec['course_level']) ? $rec['course_level'] . '-cü kurs' : $rec['course_level'])
-                    : (isset($sInfo['course']) ? $sInfo['course'] . '-cü kurs' : 'Təyin edilməyib');
+            ? (is_numeric($rec['course_level']) ? $rec['course_level'] . '-cü kurs' : $rec['course_level'])
+            : (isset($sInfo['course']) ? $sInfo['course'] . '-cü kurs' : 'Təyin edilməyib');
 
         $archivedLessons[] = [
             'id' => 'live_' . $rec['id'],
@@ -682,7 +693,9 @@ if (!empty($myTeacherIds) || $isAdmin) {
             'instructor_name' => $rec['instructor_name'],
             'date' => $rec['start_time'],
             'views' => (int) ($rec['views'] ?? 0),
-            'file_url' => '../uploads/videos/' . $rec['recording_path'],
+            'file_url' => file_exists(__DIR__ . '/../uploads/videos/' . $rec['recording_path'])
+                ? '../uploads/videos/' . $rec['recording_path']
+                : '../uploads/live_recordings/' . $rec['recording_path'],
             'duration' => $formattedDuration,
             'is_live' => true,
             'type' => 'video',
@@ -742,7 +755,7 @@ require_once 'includes/header.php';
                             style="border-radius: 12px; border: none; background: #fff1f2; color: #e11d48; padding: 15px 20px; font-weight: 600; display: flex; align-items: center; gap: 10px;">
                             <i data-lucide="alert-circle" style="width: 20px;"></i>
                             TMİS Xətası: <?php echo $_SESSION['tmis_error'];
-                            unset($_SESSION['tmis_error']); ?>
+                                            unset($_SESSION['tmis_error']); ?>
                         </div>
                     <?php endif; ?>
 
@@ -755,11 +768,11 @@ require_once 'includes/header.php';
                     <?php endif; ?>
                 </div>
                 <?php if (!$isAdmin): ?>
-                <button class="btn btn-primary" onclick="openModal('planModal')"
-                    style="padding: 14px 28px; border-radius: 16px; font-weight: 700;">
-                    <i data-lucide="plus-circle" style="width: 20px; height: 20px;"></i>
-                    Yeni Arxiv
-                </button>
+                    <button class="btn btn-primary" onclick="openModal('planModal')"
+                        style="padding: 14px 28px; border-radius: 16px; font-weight: 700;">
+                        <i data-lucide="plus-circle" style="width: 20px; height: 20px;"></i>
+                        Yeni Arxiv
+                    </button>
                 <?php endif; ?>
             </div>
 
@@ -835,16 +848,16 @@ require_once 'includes/header.php';
                     </div>
 
                     <?php if (!$isAdmin): ?>
-                    <select id="courseFilter" class="form-input"
-                        style="width: auto; min-width: 180px; height: 55px; border-radius: 15px; max-width: 100%;"
-                        onchange="filterArchives()">
-                        <option value="all">Bütün fənlər</option>
-                        <?php foreach ($courses as $c): ?>
-                            <option value="<?php echo $c['id']; ?>"><?php echo e($c['title']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                        <select id="courseFilter" class="form-input"
+                            style="width: auto; min-width: 180px; height: 55px; border-radius: 15px; max-width: 100%;"
+                            onchange="filterArchives()">
+                            <option value="all">Bütün fənlər</option>
+                            <?php foreach ($courses as $c): ?>
+                                <option value="<?php echo $c['id']; ?>"><?php echo e($c['title']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     <?php else: ?>
-                    <input type="hidden" id="courseFilter" value="all">
+                        <input type="hidden" id="courseFilter" value="all">
                     <?php endif; ?>
                 </div>
             </div>
@@ -944,7 +957,7 @@ require_once 'includes/header.php';
                                     <?php echo date('d.m.Y', strtotime($lesson['date'])); ?></span>
                                 <span class="archive-card-meta-item"><i data-lucide="eye"
                                         style="width: 16px;"></i> <?php echo $lesson['views']; ?> baxış</span>
-                                
+
                                 <!-- Visibility Toggle -->
                                 <div class="visibility-status <?php echo $lesson['is_visible'] ? 'is-visible' : 'is-hidden'; ?>">
                                     <div class="status-badge">
@@ -956,8 +969,8 @@ require_once 'includes/header.php';
                                         </span>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" <?php echo $lesson['is_visible'] ? 'checked' : ''; ?> 
-                                               onchange="toggleVisibility('<?php echo $lesson['is_live'] ? 'live' : 'arch'; ?>', <?php echo $lesson['db_id']; ?>, this)">
+                                        <input type="checkbox" <?php echo $lesson['is_visible'] ? 'checked' : ''; ?>
+                                            onchange="toggleVisibility('<?php echo $lesson['is_live'] ? 'live' : 'arch'; ?>', <?php echo $lesson['db_id']; ?>, this)">
                                         <span class="slider round"></span>
                                     </label>
                                 </div>
@@ -1004,7 +1017,7 @@ require_once 'includes/header.php';
                                 }
 
                                 if ($canDelete):
-                                    ?>
+                                ?>
                                     <?php if ($userRole === 'admin'): ?>
                                         <button
                                             onclick="openEditTitleModal(<?php echo $lesson['db_id']; ?>, '<?php echo addslashes($lesson['title']); ?>', 'live_class')"
@@ -1140,12 +1153,12 @@ require_once 'includes/header.php';
             const cn = c.getAttribute('data-course-name') || '';
             const co = c.getAttribute('data-course'); // This is now a comma-separated list
             const tp = c.getAttribute('data-type');
-            
+
             const matchesSearch = t.includes(q) || cn.includes(q);
             const courseIds = co.split(',');
             const matchesCourse = (cid === 'all' || courseIds.includes(cid));
             const matchesType = (currentTypeFilter === 'all' || tp === currentTypeFilter);
-            
+
             c.style.display = (matchesSearch && matchesCourse && matchesType) ? 'block' : 'none';
         });
     }
@@ -1171,8 +1184,16 @@ require_once 'includes/header.php';
         filterArchives();
     }
 
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; }
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
     function deleteArchive(id, title, isLive) {
         const displayTitle = title && title !== '-' ? title : 'bu materialı';
         if (!confirm(`"${displayTitle}" silinsin?`)) return;
@@ -1187,9 +1208,9 @@ require_once 'includes/header.php';
         }
 
         fetch(api, {
-            method: 'POST',
-            body: fd
-        })
+                method: 'POST',
+                body: fd
+            })
             .then(r => r.json())
             .then(d => {
                 if (d.success) {
@@ -1207,18 +1228,18 @@ require_once 'includes/header.php';
     function updateVisibilityUI(checkbox, isVisible) {
         const container = checkbox.closest('.visibility-status');
         if (!container) return;
-        
+
         const label = container.querySelector('.status-text');
         const iconWrapper = container.querySelector('.status-icon-wrapper');
-        
+
         // Toggle CSS classes instead of inline styles
         container.classList.remove('is-visible', 'is-hidden');
         container.classList.add(isVisible ? 'is-visible' : 'is-hidden');
-        
+
         if (label) {
             label.textContent = isVisible ? 'Tələbə: Açıq' : 'Tələbə: Gizli';
         }
-        
+
         if (iconWrapper) {
             iconWrapper.innerHTML = `<i data-lucide="${isVisible ? 'eye' : 'eye-off'}"></i>`;
             if (window.lucide) window.lucide.createIcons();
@@ -1227,35 +1248,41 @@ require_once 'includes/header.php';
 
     function toggleVisibility(type, id, checkbox) {
         const isVisible = checkbox.checked ? 1 : 0;
-        
+
         // Optimistic UI update
         updateVisibilityUI(checkbox, isVisible);
-        
+
         fetch('api/toggle_lesson_visibility.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: type, id: id, is_visible: isVisible })
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (!d.success) {
-                alert(d.message || 'Xəta baş verdi');
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: type,
+                    id: id,
+                    is_visible: isVisible
+                })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (!d.success) {
+                    alert(d.message || 'Xəta baş verdi');
+                    checkbox.checked = !checkbox.checked;
+                    updateVisibilityUI(checkbox, !isVisible);
+                }
+            })
+            .catch(err => {
+                alert('Serverlə əlaqə kəsildi');
                 checkbox.checked = !checkbox.checked;
                 updateVisibilityUI(checkbox, !isVisible);
-            }
-        })
-        .catch(err => {
-            alert('Serverlə əlaqə kəsildi');
-            checkbox.checked = !checkbox.checked;
-            updateVisibilityUI(checkbox, !isVisible);
-        });
+            });
     }
     // ============================================================
     // Real video müddətini video metadata-dan yüklə
     // WebM 'Infinity' bug-nı da həll edir
     // ============================================================
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('[data-video-url]').forEach(function (el) {
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-video-url]').forEach(function(el) {
             const url = el.getAttribute('data-video-url');
             const lessonId = el.getAttribute('data-lesson-id');
             if (!url || url === '#') return;
@@ -1293,7 +1320,7 @@ require_once 'includes/header.php';
                 if (duration === Infinity) {
                     // WebM Infinity bug workaround
                     video.currentTime = 1e101;
-                    video.onseeked = function () {
+                    video.onseeked = function() {
                         video.onseeked = null;
                         video.currentTime = 0;
                         updateUI(formatDuration(video.duration));
@@ -1332,24 +1359,24 @@ require_once 'includes/header.php';
         submitBtn.textContent = 'Yadda saxlanılır...';
 
         fetch('api/update_archive_title.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Xəta: ' + data.message);
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Xəta: ' + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            })
+            .catch(err => {
+                alert('Şəbəkə xətası baş verdi.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
-            }
-        })
-        .catch(err => {
-            alert('Şəbəkə xətası baş verdi.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        });
+            });
     }
 </script>
 
@@ -1359,23 +1386,23 @@ require_once 'includes/header.php';
         <button onclick="closeEditTitleModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; color: var(--text-muted);">
             <i data-lucide="x"></i>
         </button>
-        
+
         <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text-primary); display: flex; align-items: center; gap: 10px;">
             <i data-lucide="pencil-line" style="color: var(--primary);"></i>
             Mövzu Adını Redaktə Et
         </h3>
-        
+
         <form id="editTitleForm" onsubmit="submitEditTitleForm(event)">
             <input type="hidden" id="edit_theme_id" name="id">
             <input type="hidden" id="edit_theme_type" name="type">
-            
+
             <div style="margin-bottom: 25px;">
                 <label style="display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; margin-left: 5px;">Yeni Mövzu Adı</label>
-                <input type="text" id="edit_theme_title" name="title" required 
-                       style="width: 100%; padding: 15px 20px; border-radius: 12px; border: 2px solid var(--border-color); font-size: 14px; font-weight: 600; outline: none; transition: border-color 0.2s;"
-                       onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-color)'">
+                <input type="text" id="edit_theme_title" name="title" required
+                    style="width: 100%; padding: 15px 20px; border-radius: 12px; border: 2px solid var(--border-color); font-size: 14px; font-weight: 600; outline: none; transition: border-color 0.2s;"
+                    onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
-            
+
             <div style="display: flex; gap: 10px;">
                 <button type="button" onclick="closeEditTitleModal()" class="btn btn-secondary" style="flex: 1; height: 50px; border-radius: 12px; font-weight: 700;">Ləğv Et</button>
                 <button type="submit" class="btn btn-primary" style="flex: 2; height: 50px; border-radius: 12px; font-weight: 800;">Yadda Saxla</button>

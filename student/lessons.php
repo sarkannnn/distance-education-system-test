@@ -351,7 +351,7 @@ require_once 'includes/header.php';
 
                         <!-- Action Button -->
                         <?php if ($course['hasLiveClass']): ?>
-                            <a href="live-view.php?id=<?php echo $course['liveClassId']; ?>" class="btn btn-danger btn-block"
+                            <a href="live-view_livekit.php?id=<?php echo $course['liveClassId']; ?>" class="btn btn-danger btn-block"
                                 style="margin-top: 16px; background: #ef4444;">
                                 <i data-lucide="video"></i>
                                 Canlı Dərsə Qoşul

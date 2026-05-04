@@ -114,8 +114,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         */
 
+        // Handle AJAX/fetch requests vs normal form submission
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            echo json_encode(['success' => true, 'message' => 'Dərs bitirildi']);
+            exit;
+        }
+
         header('Location: ../live-lessons.php?ended=1');
     } catch (Exception $e) {
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            exit;
+        }
         header('Location: ../live-lessons.php?error=' . urlencode($e->getMessage()));
     }
 } else {

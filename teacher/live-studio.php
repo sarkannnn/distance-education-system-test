@@ -205,7 +205,7 @@ require_once 'includes/header.php';
         transition: opacity 0.3s ease, transform 0.3s ease;
         transform: scale(0.98);
     }
-    
+
     #whiteboardOverlay.is-visible {
         opacity: 1;
         transform: scale(1);
@@ -232,6 +232,7 @@ require_once 'includes/header.php';
         overflow-x: auto;
         scrollbar-width: none;
     }
+
     .wb-controls-floating::-webkit-scrollbar {
         display: none;
     }
@@ -590,7 +591,7 @@ require_once 'includes/header.php';
         /* Hide the divider line in controls on mobile to save space */
         .studio-center>div:last-child>div[style*="width: 1px"] {
             height: 30px !important;
-            background: rgba(255,255,255,0.05) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
         }
     }
 
@@ -607,7 +608,7 @@ require_once 'includes/header.php';
             width: min(13vw, 46px) !important;
             height: min(13vw, 46px) !important;
         }
-        
+
         .control-btn i[data-lucide] {
             width: min(6vw, 22px) !important;
             height: min(6vw, 22px) !important;
@@ -627,13 +628,13 @@ require_once 'includes/header.php';
 
         <?php if ($portraitCameraOnPhone): ?>
 
-            /* Portrait (vertical) camera on phones */
-            #mainVideoWrapper {
-                aspect-ratio: 9/16 !important;
-                width: auto !important;
-                height: min(62vh, 400px) !important;
-                max-width: 100% !important;
-            }
+        /* Portrait (vertical) camera on phones */
+        #mainVideoWrapper {
+            aspect-ratio: 9/16 !important;
+            width: auto !important;
+            height: min(62vh, 400px) !important;
+            max-width: 100% !important;
+        }
 
         <?php endif; ?>
 
@@ -657,7 +658,7 @@ require_once 'includes/header.php';
             justify-content: center !important;
         }
 
-        #mainControlsInner > div {
+        #mainControlsInner>div {
             flex: 0 0 auto !important;
             display: flex;
             flex-direction: column;
@@ -688,55 +689,59 @@ require_once 'includes/header.php';
     }
 
     /* === Whiteboard controls: 2-Row Horizontal Scrollable Bottom Panel === */
-    @media (max-width: 900px), (max-height: 700px) {
+    @media (max-width: 900px),
+    (max-height: 700px) {
         .wb-controls-floating {
             top: auto !important;
             bottom: 15px !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
-            
+
             /* Magic flex properties to create a perfect 2-row horizontal scroller */
             display: flex !important;
             flex-direction: column !important;
             flex-wrap: wrap !important;
-            
+
             /* Total height = 2 buttons (38*2) + gap (8) + padding (20) + scrollbar (6) + safety margin = 115px */
             height: 115px !important;
             max-height: 115px !important;
             width: calc(100% - 20px) !important;
             max-width: 600px !important;
-            
+
             padding: 8px 12px !important;
             padding-bottom: 10px !important;
             border-radius: 20px !important;
-            
+
             align-content: flex-start !important;
             gap: 8px !important;
-            
-            overflow-x: auto !important; 
+
+            overflow-x: auto !important;
             overflow-y: hidden !important;
-            
+
             /* Explicitly stylize scrollbar so users know it scrolls! */
             scrollbar-width: thin !important;
-            scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.1) !important;
+            scrollbar-color: rgba(255, 255, 255, 0.4) rgba(0, 0, 0, 0.1) !important;
         }
 
         .wb-controls-floating::-webkit-scrollbar {
             height: 6px !important;
             display: block !important;
         }
+
         .wb-controls-floating::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2) !important;
+            background: rgba(0, 0, 0, 0.2) !important;
             border-radius: 10px !important;
             margin: 0 10px;
         }
+
         .wb-controls-floating::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.5) !important;
+            background: rgba(255, 255, 255, 0.5) !important;
             border-radius: 10px !important;
         }
 
         /* Flatten groupings so elements flow freely into the 2-row layout */
-        .wb-group, .wb-color-grid {
+        .wb-group,
+        .wb-color-grid {
             display: contents !important;
         }
 
@@ -744,7 +749,8 @@ require_once 'includes/header.php';
         .wb-divider {
             display: block !important;
             width: 1px !important;
-            height: 80px !important; /* Will take up a whole column */
+            height: 80px !important;
+            /* Will take up a whole column */
             margin: 5px 6px !important;
             background: rgba(255, 255, 255, 0.15) !important;
         }
@@ -753,13 +759,15 @@ require_once 'includes/header.php';
             width: 38px !important;
             height: 38px !important;
         }
+
         .wb-tool-btn i[data-lucide] {
             width: 18px !important;
             height: 18px !important;
         }
 
         /* Vertically center text like '1/1' or '3px' */
-        #pageIndicator, #sizeDisplay {
+        #pageIndicator,
+        #sizeDisplay {
             display: flex !important;
             align-items: center !important;
             height: 38px !important;
@@ -769,7 +777,8 @@ require_once 'includes/header.php';
         .wb-color {
             width: 22px !important;
             height: 22px !important;
-            margin: 8px 4px !important; /* Vertically align smaller color dots */
+            margin: 8px 4px !important;
+            /* Vertically align smaller color dots */
         }
 
         /* Toggle panel animation */
@@ -879,11 +888,11 @@ require_once 'includes/header.php';
                 💬 Çat
             </button>
             <?php if (($_SESSION['user_role'] ?? '') !== 'admin'): ?>
-            <button
-                onclick="window.open('attendance_report.php?id=<?php echo $lessonId; ?>&minimal=1', 'AttendanceReport', 'width=1000,height=800,scrollbars=yes,resizable=yes')"
-                style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer;">
-                📋 İştirakçı Jurnalı
-            </button>
+                <button
+                    onclick="window.open('attendance_report.php?id=<?php echo $lessonId; ?>&minimal=1', 'AttendanceReport', 'width=1000,height=800,scrollbars=yes,resizable=yes')"
+                    style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer;">
+                    📋 İştirakçı Jurnalı
+                </button>
             <?php endif; ?>
             <button onclick="stopAndUpload()"
                 style="background: #ef4444; color: white; border: none; padding: 8px 22px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
@@ -1353,7 +1362,7 @@ require_once 'includes/header.php';
 
     <!-- Top Bar Overlay (Info & Exit) -->
     <div style="position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 2010; pointer-events: none;">
-        
+
         <!-- Info Badge (Top Left) -->
         <div style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); pointer-events: auto;">
             <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);"></div>
@@ -1362,8 +1371,8 @@ require_once 'includes/header.php';
 
         <!-- Exit Button (Top Right) -->
         <button onclick="toggleWhiteboard()" title="Lövhəni Bağla & Kameraya Qayıt"
-            style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px); cursor: pointer; pointer-events: auto; transition: all 0.2s ease;" 
-            onmouseover="this.style.background='#ef4444'; this.style.borderColor='#ef4444'; this.style.transform='scale(1.05)'" 
+            style="background: rgba(15, 23, 42, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 100px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px); cursor: pointer; pointer-events: auto; transition: all 0.2s ease;"
+            onmouseover="this.style.background='#ef4444'; this.style.borderColor='#ef4444'; this.style.transform='scale(1.05)'"
             onmouseout="this.style.background='rgba(15, 23, 42, 0.65)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)'">
             <i data-lucide="x" style="width:16px;height:16px;"></i> BAĞLA
         </button>
@@ -1448,7 +1457,7 @@ require_once 'includes/header.php';
         d.scrollTop = d.scrollHeight;
     };
 
-    window.onerror = function (msg, url, line) {
+    window.onerror = function(msg, url, line) {
         LOG(`🚨 JS ERROR: ${msg} (Line: ${line})`, "#ef4444");
         console.error(msg, url, line);
         return false;
@@ -1609,7 +1618,9 @@ require_once 'includes/header.php';
             LOG("🎨 Advanced Whiteboard aktivdir.", "#3b82f6");
         } else {
             // Close instantly on student side without waiting video stream teardown.
-            broadcastData({ type: 'whiteboard_force_stop' });
+            broadcastData({
+                type: 'whiteboard_force_stop'
+            });
             overlay.classList.remove('is-visible');
             btn.classList.remove('active-blue');
             document.getElementById('laserCursor').style.display = 'none';
@@ -2266,7 +2277,7 @@ require_once 'includes/header.php';
         // Track if this is the first chunk of a recorder session (to help server strip redundant headers)
         fd.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
         if (isFirstChunkRecorded) {
-            isFirstChunkRecorded = false; 
+            isFirstChunkRecorded = false;
             console.log("🎬 Session Header Chunk sent");
         }
         fd.append('video_blob', blob);
@@ -2276,10 +2287,10 @@ require_once 'includes/header.php';
         const chunkUrl = window.location.pathname.includes('/teacher/') ? '../api/live/upload_chunk.php' : '/api/live/upload_chunk.php';
 
         return fetch(chunkUrl, {
-            method: 'POST',
-            body: fd,
-            credentials: 'include'
-        })
+                method: 'POST',
+                body: fd,
+                credentials: 'include'
+            })
             .then(async r => {
                 const text = await r.text();
                 try {
@@ -2347,7 +2358,7 @@ require_once 'includes/header.php';
         fd.append('video_blob', blob);
         fd.append('session_id', recordingSessionId);
         fd.append('is_first_chunk', isFirstChunkRecorded ? '1' : '0');
-        
+
         const chunkUrl = window.location.pathname.includes('/teacher/') ? '../api/live/upload_chunk.php' : '/api/live/upload_chunk.php';
         navigator.sendBeacon(chunkUrl, fd);
         recordedChunks = [];
@@ -2529,9 +2540,12 @@ require_once 'includes/header.php';
     // ─── Dynamic ICE/TURN Configuration ───
     // Default fallback (STUN only — works on LAN, fails on mobile)
     let iceServers = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
+        iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            },
+            {
+                urls: 'stun:stun1.l.google.com:19302'
+            }
         ],
         sdpSemantics: 'unified-plan',
         iceCandidatePoolSize: 10
@@ -2542,7 +2556,9 @@ require_once 'includes/header.php';
     async function fetchTurnCredentials() {
         try {
             LOG("🔑 TURN server məlumatları yüklənir...", "#3b82f6");
-            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now(), { credentials: 'include' });
+            const resp = await fetch('../api/get_turn_credentials.php?t=' + Date.now(), {
+                credentials: 'include'
+            });
             const data = await resp.json();
 
             if (data.success && data.iceServers && data.iceServers.length > 0) {
@@ -2553,10 +2569,10 @@ require_once 'includes/header.php';
                 };
                 turnCredentialsFetched = true;
 
-                const hasTurn = data.iceServers.some(s =>
-                    (typeof s.urls === 'string' && s.urls.startsWith('turn:')) ||
-                    (typeof s.urls === 'string' && s.urls.startsWith('turns:'))
-                );
+                const hasTurn = data.iceServers.some(s => {
+                    const urlList = typeof s.urls === 'string' ? [s.urls] : s.urls;
+                    return urlList.some(url => url.startsWith('turn:') || url.startsWith('turns:'));
+                });
 
                 if (hasTurn) {
                     LOG("✅ TURN server hazırdır (mobil bağlantı dəstəklənir)", "#10b981");
@@ -2582,7 +2598,9 @@ require_once 'includes/header.php';
 
     const peerConfig = {
         debug: 1,
-        get config() { return iceServers; },
+        get config() {
+            return iceServers;
+        },
         host: window.location.hostname,
         port: 9000,
         secure: false,
@@ -2653,12 +2671,12 @@ require_once 'includes/header.php';
                 dummyCtx.fillRect(0, 0, 640, 480);
                 camStream = dummyCanvas.captureStream();
                 try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
                     const osc = audioCtx.createOscillator();
                     const dst = osc.connect(audioCtx.createMediaStreamDestination());
                     osc.start();
                     camStream.addTrack(dst.stream.getAudioTracks()[0]);
-                } catch (e) { }
+                } catch (e) {}
                 document.getElementById('camSource').srcObject = camStream;
             }
 
@@ -2705,7 +2723,9 @@ require_once 'includes/header.php';
                 peer.on('open', (id) => {
                     LOG(useCloud ? "🚀 Bulud serverinə qoşuldu!" : "🚀 Lokal server hazır!", "#10b981");
                     const serverType = useCloud ? 'cloud' : 'local';
-                    fetch(`api/update_peer_id.php?live_class_id=${lID}&peer_id=${id}&server=${serverType}&t=${Date.now()}`, { credentials: 'include' })
+                    fetch(`api/update_peer_id.php?live_class_id=${lID}&peer_id=${id}&server=${serverType}&t=${Date.now()}`, {
+                            credentials: 'include'
+                        })
                         .then(r => r.json()).catch(e => console.error("DB Update Error"));
                     trackAttendance('join');
                 });
@@ -2909,7 +2929,10 @@ require_once 'includes/header.php';
             });
 
             const lossPercent = packetsSent > 0 ? (packetsLost / packetsSent) * 100 : 0;
-            return { rttMs, lossPercent };
+            return {
+                rttMs,
+                lossPercent
+            };
         } catch (e) {
             return null;
         }
@@ -2954,7 +2977,7 @@ require_once 'includes/header.php';
     function startAdaptiveQualityMonitor() {
         if (adaptiveQualityInterval) clearInterval(adaptiveQualityInterval);
         adaptiveQualityInterval = setInterval(() => {
-            evaluateAdaptiveQuality().catch(() => { });
+            evaluateAdaptiveQuality().catch(() => {});
         }, 8000);
     }
 
@@ -3390,7 +3413,7 @@ require_once 'includes/header.php';
         stream.onaddtrack = (e) => {
             console.log(`Late track arrived for ${name}:`, e.track.kind);
             vid.srcObject = stream; // Refresh
-            vid.play().catch(() => { });
+            vid.play().catch(() => {});
         };
 
         vid.onloadedmetadata = () => {
@@ -3768,10 +3791,10 @@ require_once 'includes/header.php';
             formData.append('user_id', userId);
 
             fetch('api/approve_rejoin.php', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            })
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
@@ -3899,10 +3922,10 @@ require_once 'includes/header.php';
                 LOG("🚀 Serverə göndərilir...", "#3b82f6");
 
                 fetch('api/upload_recording.php', {
-                    method: 'POST',
-                    body: fd,
-                    credentials: 'include'
-                })
+                        method: 'POST',
+                        body: fd,
+                        credentials: 'include'
+                    })
                     .then(r => r.text())
                     .then(text => {
                         LOG("📥 Server cavabı alındı.", "#10b981");
@@ -3964,10 +3987,10 @@ require_once 'includes/header.php';
         fd.append('user_id', uId);
 
         fetch('api/kick_student.php', {
-            method: 'POST',
-            body: fd,
-            credentials: 'include'
-        })
+                method: 'POST',
+                body: fd,
+                credentials: 'include'
+            })
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
                 return r.json();
@@ -4013,7 +4036,9 @@ require_once 'includes/header.php';
     function approveStudentRejoin(uId, name) {
         LOG(`✅ ${name} (ID: ${uId}) üçün yenidən giriş icazəsi təsdiqlənir...`, "#f59e0b");
 
-        fetch(`../student/api/unkick_student.php?live_class_id=${lID}&user_id=${uId}&t=${Date.now()}`, { credentials: 'include' })
+        fetch(`../student/api/unkick_student.php?live_class_id=${lID}&user_id=${uId}&t=${Date.now()}`, {
+                credentials: 'include'
+            })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
@@ -4087,7 +4112,9 @@ require_once 'includes/header.php';
 
     function refreshLiveAttendance() {
         LOG("🔄 Canlı iştirak yenilənir...", "#60a5fa");
-        fetch('api/get_live_attendance.php?id=' + lID + '&subject_id=' + courseId, { credentials: 'include' })
+        fetch('api/get_live_attendance.php?id=' + lID + '&subject_id=' + courseId, {
+                credentials: 'include'
+            })
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -4141,7 +4168,7 @@ require_once 'includes/header.php';
                 } else {
                     LOG(`⚠️ API xətası: ${data.message}`, "#facc15");
                     if (data.message.toLowerCase().includes('unauthorized')) {
-                        document.getElementById('liveAttendanceList').innerHTML = 
+                        document.getElementById('liveAttendanceList').innerHTML =
                             '<div style="padding:20px; text-align:center; color:#ef4444; font-size:12px;">' +
                             'Sessiya itirilib. Lütfən yenidən daxil olun.</div>';
                     }
@@ -4203,19 +4230,19 @@ require_once 'includes/header.php';
         btn.disabled = true;
         btn.innerHTML = 'Göndərilir...';
         fetch('api/send_notification.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                target_type: type,
-                target_id: targetId,
-                title: title,
-                message: message,
-                type: 'info'
-            }),
-            credentials: 'include'
-        })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    target_type: type,
+                    target_id: targetId,
+                    title: title,
+                    message: message,
+                    type: 'info'
+                }),
+                credentials: 'include'
+            })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -4313,7 +4340,7 @@ require_once 'includes/header.php';
     });
 
     // Klaviatura qısayollarını (F5, Ctrl+R) blokla
-    window.addEventListener('keydown', function (e) {
+    window.addEventListener('keydown', function(e) {
         if ((e.which || e.keyCode) == 116 || (e.ctrlKey && (e.which || e.keyCode) == 82)) {
             e.preventDefault();
             LOG("⚠️ Səhifəni yeniləmək qadağandır!", "#ef4444");

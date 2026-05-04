@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     session_write_close();
 }
 
-foreach (['DISTANT_STUDENT_SESSION', 'DISTANT_STUDENT_SESSION'] as $sessionName) {
+foreach (['DISTANT_T_SESSION_V4', 'DISTANT_STUDENT_SESSION'] as $sessionName) {
     session_name($sessionName);
     @session_start();
     if (!empty($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
@@ -125,10 +125,25 @@ if (!empty($apiKey)) {
     error_log("TURN credential fetch failed: HTTP $httpCode, Error: $curlError");
 }
 
-// ─── Fallback: STUN-only config (works on LAN, fails on mobile) ───
+// ─── Fallback: Local TURN + STUN servers ───
+$turnUsername = getenv('TURN_USERNAME') ?: 'livekit';
+$turnPassword = getenv('TURN_PASSWORD') ?: 'yourpassword123';
+$turnServer = getenv('TURN_SERVER') ?: 'distant-l-turn.ndu.edu.az';
+
 echo json_encode([
     'success' => true,
     'iceServers' => [
+        // Local TURN server (TCP + UDP)
+        [
+            'urls' => [
+                "turn:{$turnServer}:3478?transport=udp",
+                "turn:{$turnServer}:3478?transport=tcp",
+                "turns:{$turnServer}:5349?transport=tcp",
+            ],
+            'username' => $turnUsername,
+            'credential' => $turnPassword
+        ],
+        // Google STUN servers for redundancy
         ['urls' => 'stun:stun.l.google.com:19302'],
         ['urls' => 'stun:stun1.l.google.com:19302'],
         ['urls' => 'stun:stun2.l.google.com:19302'],
@@ -136,8 +151,6 @@ echo json_encode([
         ['urls' => 'stun:stun.voipbuster.com'],
         ['urls' => 'stun:stun.voipstunt.com'],
     ],
-    'source' => 'fallback_stun_only',
-    'warning' => 'No TURN server configured. Mobile/LTE connections will fail. Set METERED_API_KEY in .env',
+    'source' => 'local_turn_with_stun',
     'ttl' => 3600
 ]);
-
