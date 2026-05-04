@@ -6,7 +6,8 @@
  * It joins the room as a hidden participant and renders the compositor canvas.
  */
 // Egress Recording View - Secured with HMAC secret
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/helpers.php';
 $db = Database::getInstance();
 
 $lessonId = $_GET['id'] ?? null;

@@ -143,7 +143,7 @@ class LiveKitEgressService
                 $errorMsg .= " (SSL verification disabled)";
             }
         } elseif ($httpCode === 503) {
-            $errorMsg .= "Server unavailable. Is LiveKit deployed? Check LIVEKIT_API_KEY and LIVEKIT_API_SECRET in .env";
+            $errorMsg .= "Egress service unavailable (HTTP 503). The livekit-egress Docker container is likely not running or not connected to the LiveKit server. Run: docker ps --filter name=egress";
         } elseif ($httpCode === 401) {
             $errorMsg .= "Authentication failed. Invalid LIVEKIT_API_KEY or LIVEKIT_API_SECRET";
         } elseif ($httpCode === 0) {
