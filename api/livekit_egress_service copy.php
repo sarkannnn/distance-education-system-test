@@ -18,15 +18,15 @@ class LiveKitEgressService
 
     public function __construct()
     {
-        $this->apiKey    = $_ENV['LIVEKIT_API_KEY']    ?? $_SERVER['LIVEKIT_API_KEY']    ?? getenv('LIVEKIT_API_KEY');
+        $this->apiKey = $_ENV['LIVEKIT_API_KEY'] ?? $_SERVER['LIVEKIT_API_KEY'] ?? getenv('LIVEKIT_API_KEY');
         $this->apiSecret = $_ENV['LIVEKIT_API_SECRET'] ?? $_SERVER['LIVEKIT_API_SECRET'] ?? getenv('LIVEKIT_API_SECRET');
-        $this->apiHost   = $_ENV['LIVEKIT_HOST']       ?? $_SERVER['LIVEKIT_HOST']       ?? getenv('LIVEKIT_HOST') ?? 'http://localhost:7880'; // ✅ Fixed fallback
+        $this->apiHost = $_ENV['LIVEKIT_HOST'] ?? $_SERVER['LIVEKIT_HOST'] ?? getenv('LIVEKIT_HOST') ?? 'https://distant-l.ndu.edu.az';
 
         // Remove wss:// or ws:// for API calls
         $this->apiHost = str_replace(['wss://', 'ws://'], ['https://', 'http://'], $this->apiHost);
 
         // SSL verification (can be disabled for self-signed certs via .env)
-        $verifySslStr    = getenv('LIVEKIT_VERIFY_SSL');
+        $verifySslStr = getenv('LIVEKIT_VERIFY_SSL');
         $this->verifySSL = $verifySslStr === 'false' ? false : true;
 
         // Timeouts (in seconds)
@@ -35,7 +35,7 @@ class LiveKitEgressService
 
         // Validate credentials
         if (
-            empty($this->apiKey)    || $this->apiKey    === 'your_api_key_here' ||
+            empty($this->apiKey) || $this->apiKey === 'your_api_key_here' ||
             empty($this->apiSecret) || $this->apiSecret === 'your_api_secret_here'
         ) {
             error_log("WARNING: LiveKit credentials not properly configured. Check .env file.");
@@ -54,8 +54,12 @@ class LiveKitEgressService
         $db = Database::getInstance();
 
         // Base URL for the recording view
-        $publicHost  = getenv('PUBLIC_BASE_URL') ?: 'https://distant-test.ndu.edu.az'; // ✅ Safe fallback
-        $secret      = $this->generateRecorderSecret($lessonId);
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
+        $host = $_SERVER['HTTP_HOST'];
+        // Use a fixed public host if defined (recommended for Egress)
+        $publicHost = getenv('PUBLIC_BASE_URL') ?: "$protocol://$host/distant-tehsil-test";
+
+        $secret = $this->generateRecorderSecret($lessonId);
         $templateUrl = "$publicHost/teacher/live-record_view.php?id=$lessonId&secret=$secret";
 
         // 1. Generate Admin Token with Egress permissions
@@ -64,7 +68,7 @@ class LiveKitEgressService
             $this->apiSecret,
             'admin_recorder',
             'Admin',
-            (string)$roomName, // ✅ Fixed: pass actual room name
+            (string)$roomName,   // ✅ pass the room
             false,
             false,
             ['roomRecord' => true]
@@ -72,11 +76,11 @@ class LiveKitEgressService
 
         // 2. Prepare Egress Request (RoomComposite)
         $data = [
-            'room_name'       => (string)$roomName,
-            'layout'          => 'custom',
+            'room_name' => (string)$roomName,
+            'layout' => 'custom',
             'custom_base_url' => $templateUrl,
-            'file'            => [
-                'filepath'         => "/recordings/lesson_{$lessonId}_" . time() . ".mp4", // ✅ Fixed: leading /
+            'file' => [
+                'filepath' => "/recordings/lesson_{$lessonId}_" . time() . ".mp4",
                 'disable_manifest' => true
             ]
         ];
@@ -86,59 +90,64 @@ class LiveKitEgressService
 
         error_log("[LiveKit Egress] Starting recording for lesson $lessonId in room '$roomName'");
         error_log("[LiveKit Egress] API URL: $url");
-        error_log("[LiveKit Egress] Template URL: $templateUrl");
         error_log("[LiveKit Egress] SSL Verify: " . ($this->verifySSL ? 'enabled' : 'DISABLED'));
         error_log("[LiveKit Egress] Timeouts - Connect: {$this->connectTimeout}s, Request: {$this->requestTimeout}s");
 
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST,           1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS,     json_encode($data));
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,     [
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $token
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verifySSL);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->verifySSL ? 2 : 0);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT,        $this->requestTimeout);
-        curl_setopt($ch, CURLOPT_FAILONERROR,    false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->requestTimeout);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
 
-        $response     = curl_exec($ch);
-        $httpCode     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError    = curl_error($ch);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         $transferTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
         curl_close($ch);
 
+        // Log the API call for debugging
         error_log("[LiveKit Egress] API Response: HTTP $httpCode (took {$transferTime}s)");
         if ($curlError) {
             error_log("[LiveKit Egress] cURL Error: $curlError");
         }
-        error_log("[LiveKit Egress] Response: " . (strlen($response) > 500 ? substr($response, 0, 500) . '...' : $response));
+        if (strlen($response) > 500) {
+            error_log("[LiveKit Egress] Response: " . substr($response, 0, 500) . "...");
+        } else {
+            error_log("[LiveKit Egress] Response: $response");
+        }
 
         $result = json_decode($response, true);
 
         if ($httpCode === 200 && isset($result['egress_id'])) {
+            // Save Egress ID to database to stop it later
             $db->query("UPDATE live_classes SET egress_id = ? WHERE id = ?", [$result['egress_id'], $lessonId]);
-            error_log("[LiveKit Egress] Recording started successfully. Egress ID: " . $result['egress_id']);
             return ['success' => true, 'egress_id' => $result['egress_id']];
         }
 
         // Return detailed error information
         $errorMsg = "LiveKit API Error (HTTP $httpCode): ";
         if ($curlError) {
-            $errorMsg .= "Connection failed - $curlError.";
+            $errorMsg .= "Connection failed - $curlError. ";
             if (strpos($curlError, 'timeout') !== false) {
-                $errorMsg .= " Increase LIVEKIT_REQUEST_TIMEOUT in .env.";
+                $errorMsg .= "Increase LIVEKIT_REQUEST_TIMEOUT in .env if connection is slow.";
             }
-        } elseif ($httpCode === 502) {
-            $errorMsg .= "Bad Gateway — nginx cannot reach LiveKit. Set LIVEKIT_HOST=http://localhost:7880 in .env";
+            if (!$this->verifySSL) {
+                $errorMsg .= " (SSL verification disabled)";
+            }
         } elseif ($httpCode === 503) {
-            $errorMsg .= "Egress service unavailable. Run: docker ps --filter name=egress";
+            $errorMsg .= "Egress service unavailable (HTTP 503). The livekit-egress Docker container is likely not running or not connected to the LiveKit server. Run: docker ps --filter name=egress";
         } elseif ($httpCode === 401) {
-            $errorMsg .= "Authentication failed — check LIVEKIT_API_KEY / LIVEKIT_API_SECRET in .env";
+            $errorMsg .= "Authentication failed. Invalid LIVEKIT_API_KEY or LIVEKIT_API_SECRET";
         } elseif ($httpCode === 0) {
-            $errorMsg .= "No HTTP response. Check if LiveKit is reachable at: $url";
+            $errorMsg .= "No HTTP response. Check if LiveKit API is reachable at: $url";
         } else {
             $errorMsg .= $response;
         }
@@ -149,49 +158,48 @@ class LiveKitEgressService
 
     public function stopRecording($lessonId)
     {
-        $db     = Database::getInstance();
-        $lesson = $db->fetch("SELECT egress_id, room_name FROM live_classes WHERE id = ?", [$lessonId]); // ✅ Also fetch room_name
+        $db = Database::getInstance();
+        $lesson = $db->fetch("SELECT egress_id FROM live_classes WHERE id = ?", [$lessonId]);
 
         if (!$lesson || empty($lesson['egress_id'])) {
             return ['success' => false, 'message' => 'Egress ID tapılmadı.'];
         }
 
         $egressId = $lesson['egress_id'];
-        $roomName = $lesson['room_name'] ?? ''; // ✅ Use actual room name
 
         $token = LiveKitHelper::generateToken(
             $this->apiKey,
             $this->apiSecret,
             'admin_recorder',
             'Admin',
-            (string)$roomName, // ✅ Fixed: pass actual room name
+            '',
             false,
             false,
             ['roomRecord' => true]
         );
 
         $data = ['egress_id' => $egressId];
-        $url  = rtrim($this->apiHost, '/') . '/twirp/livekit.Egress/StopEgress';
+        $url = rtrim($this->apiHost, '/') . '/twirp/livekit.Egress/StopEgress';
 
         error_log("[LiveKit Egress] Stopping recording for lesson $lessonId (egress_id: $egressId)");
         error_log("[LiveKit Egress] API URL: $url");
 
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST,           1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS,     json_encode($data));
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,     [
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $token
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verifySSL);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->verifySSL ? 2 : 0);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT,        $this->requestTimeout);
-        curl_setopt($ch, CURLOPT_FAILONERROR,    false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->requestTimeout);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
 
-        $response  = curl_exec($ch);
-        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
         curl_close($ch);
 
@@ -218,27 +226,27 @@ class LiveKitEgressService
             $this->apiSecret,
             'admin_recorder',
             'Admin',
-            '', // room not needed for ListEgress
+            '',
             false,
             false,
             ['roomRecord' => true]
         );
 
-        $url     = rtrim($this->apiHost, '/') . '/twirp/livekit.Egress/ListEgress';
+        $url = rtrim($this->apiHost, '/') . '/twirp/livekit.Egress/ListEgress';
         $payload = json_encode(['egress_id' => $egressId]);
 
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST,           1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS,     $payload);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,     [
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $token
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verifySSL);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->verifySSL ? 2 : 0);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT,        $this->requestTimeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->requestTimeout);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -251,12 +259,12 @@ class LiveKitEgressService
         $result = json_decode($response, true);
 
         if (!empty($result['items'])) {
-            $egress        = $result['items'][0];
+            $egress = $result['items'][0];
             $activeStatuses = ['EGRESS_STARTING', 'EGRESS_ACTIVE'];
             return [
                 'active' => in_array($egress['status'] ?? '', $activeStatuses),
                 'status' => $egress['status'] ?? 'unknown',
-                'error'  => $egress['error']  ?? null
+                'error'  => $egress['error'] ?? null
             ];
         }
 
