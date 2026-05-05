@@ -63,7 +63,7 @@ class LiveKitEgressService
         $templateUrl = "$publicHost/teacher/live-record_view.php?id=$lessonId&secret=$secret";
 
         // 1. Generate Admin Token with Egress permissions
-        LiveKitHelper::generateToken(
+        $token = LiveKitHelper::generateToken(
             $this->apiKey,
             $this->apiSecret,
             'admin_recorder',
