@@ -63,12 +63,12 @@ class LiveKitEgressService
         $templateUrl = "$publicHost/teacher/live-record_view.php?id=$lessonId&secret=$secret";
 
         // 1. Generate Admin Token with Egress permissions
-        $token = LiveKitHelper::generateToken(
+        LiveKitHelper::generateToken(
             $this->apiKey,
             $this->apiSecret,
             'admin_recorder',
             'Admin',
-            '',
+            (string)$roomName,   // ✅ pass the room
             false,
             false,
             ['roomRecord' => true]
@@ -80,7 +80,7 @@ class LiveKitEgressService
             'layout' => 'custom',
             'custom_base_url' => $templateUrl,
             'file' => [
-                'filepath' => "recordings/lesson_{$lessonId}_" . time() . ".mp4",
+                'filepath' => "/recordings/lesson_{$lessonId}_" . time() . ".mp4",
                 'disable_manifest' => true
             ]
         ];
